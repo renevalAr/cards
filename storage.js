@@ -5,6 +5,21 @@ const ONBOARD_KEY = "flashcards-onboarded";
 const FONT_KEY = "flashcards-fontsize";
 const VALID_STATUSES = new Set(["new", "known", "unknown"]);
 const MAX_NAME_LENGTH = 80;
+const SCHEMA_VERSION = 1;
+
+function migrateSchema(raw) {
+  if (!isPlainObject(raw)) return raw;
+  const v = Number.isFinite(raw.v) ? raw.v : 1;
+  if (v > SCHEMA_VERSION) {
+    console.warn("Данные из новой версии приложения — загружаю как есть.");
+    return raw;
+  }
+  switch (v) {
+    case 1:
+    default:
+      return raw;
+  }
+}
 
 let state = {
   decks: [],
@@ -181,7 +196,7 @@ function loadState() {
   }
   if (!raw) return;
   try {
-    const saved = JSON.parse(raw);
+    const saved = migrateSchema(JSON.parse(raw));
     const normalized = normalizeState(saved);
     state.decks = normalized.decks;
     state.cards = normalized.cards;
@@ -200,6 +215,7 @@ function saveState() {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
+        v: SCHEMA_VERSION,
         decks: state.decks,
         cards: state.cards,
         selectedDeckId: state.selectedDeckId,

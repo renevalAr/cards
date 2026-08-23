@@ -165,7 +165,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 
 | Файл | Функции |
 |---|---|
-| storage.js | `dateKey`, `todayDateKey`, `resetTodayIfNeeded`, `getTodayStats`, `uid`, `isPlainObject`, `normalizeHistory`, `normalizeSessions`, `normalizeState`, `showStorageAlert`, `loadState`, `saveState`, `selectedDeck`, `cardsInDeck`, `recordStudy`, `recordSession`, `getDeckHistory`, `getAllTimeStats`, `computeStreak` |
+| storage.js | `dateKey`, `todayDateKey`, `resetTodayIfNeeded`, `getTodayStats`, `uid`, `isPlainObject`, `migrateSchema`, `normalizeHistory`, `normalizeSessions`, `normalizeState`, `showStorageAlert`, `loadState`, `saveState`, `selectedDeck`, `cardsInDeck`, `recordStudy`, `recordSession`, `getDeckHistory`, `getAllTimeStats`, `computeStreak` |
 | modal.js | `getFocusable`, `lockScroll`, `trapTabKey`, `showLayer`, `hideLayer`, `openModal` (→ Promise), `canFocus`, `closeModal`, `openSettingsModal`, `closeSettingsModal`, `closeTopModal`, `bindModalEvents` |
 | ui.js | `renderThemeDots`, `makeEl`, `badgeFor`, `cardMatchesFilter`, `filterLabel`, `searchMatches`, `appendHighlighted`, `clearCardSearch`, `clearDropIndicators`, `moveCardWithinDeck`, `bindCardRowsDelegation`, `renderDeckList`, `renderCardFilters`, `renderCardRows`, `updateCardRowStatus`, `renderStats`, `resetCardForm`, `render`, `systemDark`, `modePref`, `effectiveMode`, `palettePref`, `fontSizePref`, `applyFontSize`, `syncFontButtons`, `bindAutoTheme`, `syncAppearanceButtons`, `applyAppearance` |
 | study.js | `bezProgress`, `currentAngle`, `flipHost`, `clearLift`, `killFlipAnims`, `startFlipAnimation`, `shuffle`, `reduceMotion`, `entryId`, `entryRev`, `buildStudyEntries`, `beginRound`, `startStudyShuffle`, `resetStudy`, `setStudyMode`, `syncTwoSidedBtn`, `toggleTwoSided`, `syncStudyView`, `enterQuizFocus`, `exitQuizFocus`, `enterFocusMode`, `exitFocusMode`, `currentStudyCards`, `setTab`, `syncPressState`, `showStudyCard`, `flipCard`, `isRoundComplete`, `moveStudy`, `markStatus`, `pickRuVoice`, `speakText`, `speakFace`, `stopSpeech`, `updateQuizMeta`, `buildOptions`, `renderQuizQuestion`, `answerQuiz` (check-draw), `nextQuiz`, `startQuiz`, `beginQuiz`, `finishQuiz`, `launchConfetti`, `openSummaryOverlay`, `showSummary`, `closeSummary`, `repeatStudy` |
@@ -185,6 +185,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | `VALID_STATUSES` | Set(`new`, `known`, `unknown`) | storage.js |
 | `MAX_NAME_LENGTH` | 80 | storage.js |
 | `BULK_SEPARATOR` | `"="` | app.js |
+| `SCHEMA_VERSION` | `1` — поле `v` в payload базы; `migrateSchema` пропускает legacy и будущие версии без краша | storage.js |
 | `EXPORT_VERSION` / cap sessions | `2` / последние 200 записей (обрезка в `recordSession`) | data.js / storage.js |
 | `SWAP_DURATION` | 500 (ms, JS-страховка; CSS-анимация 420) | study.js |
 | `DEMO_DECKS` | 3 демо-колоды: английский 30 карт, столицы 12, элементы 15 | library.js |
@@ -379,9 +380,10 @@ $c = Get-Content -LiteralPath $f -Raw -Encoding UTF8
 Set-Content -LiteralPath $f -Value $c -Encoding UTF8
 ```
 
+Pre-commit: core.hooksPath=.githooks → smoke перед каждым коммитом (пропуск: git commit --no-verify).
 Браузеры: Chrome — основная платформа всех проверок; Edge (Chromium) — smoke совместим на 100% тем же харнессом (`-Browser edge`); Firefox — только лёгкая проверка работоспособности (headless-рендер), полноценный CDP у него другой протокол.
 
-### 7.2 Suites (29)
+### 7.2 Suites (30)
 
 | Скрипт | Область | Проверок | Критичные шаги |
 |---|---|---|---|
@@ -409,13 +411,13 @@ Set-Content -LiteralPath $f -Value $c -Encoding UTF8
 | `cdp-stats-empty-test.ps1` | Пустая статистика, кнопка «Учить» | 5 | `go-study` |
 | `cdp-fixes-test.ps1` | Надёжность: спам-счёт, одно событие/карта, сброс по раундам, countUp 9999, баннер квоты, Esc-каскад на body (bulk/library/stats/menu), автоочистка поиска + видимость новой карты, кросс-вкладка, guard библиотеки, resize тура | 16 | `F1-no-known-spam`, `E-cross-tab-reload` |
 | `cdp-tts-test.ps1` | Озвучка: две SVG-иконки на гранях, stroke=currentColor, цвет = --ink (canvas-декодинг), длинный многострочный текст не заходит в зону иконки (Range по строкам), клик иконки не флипает, фронт/тыл озвучиваются, stop, пустой guard, иконки едут в фокус | 14 | `ui-theme-color`, `text-clear-of-icon` |
-| `cdp-keys-test.ps1` | Q16/Q18: структура строки пикера (main+more), one-click открытие колоды без actions-pop, подсказки data-key, цифра выбирает верный/неверный вариант, игнор после ответа и вне квиза | 8 | `picker-oneclick-open`, `digit-right-picks` || `cdp-perf-test.ps1` | Перфоманс-бюджеты на колоде из 404 карт (медиана замеров): рендер списка, ввод поиска, старт квиза, рендер статистики; регрессия heavy-mode `.no-anim` | 6 | `budget-render-404-le120`, `heavy-mode-active` || `cdp-images-test.ps1` | Картинки: IDB roundtrip/delete, сжатие 1200×900 → ≤480 WebP, превью в форме, сохранение новой карты с ключом по id, миниатюра в списке, картинка на фронте карты (и скрыта для обычной), редактирование: превью из БД + снятие удаляет ключ, deleteCard чистит IDB | 15 | `compress-max-side-480`, `delete-cleans-idb` || `cdp-reverse-test.ps1` | Двусторонние: buildStudyEntries удваивает с #rev, раунд 4 записи, swap сторон + мета «наоборот», завершение после всех записей, итог по записям, квиз реверса, чип на панели (toggle off/on пересобирает раунд 4↔2), синхронность с меню действий, normalizeState хранит twoSided | 19 | `round-complete-after-4`, `chip-toggles-on` || `cdp-data-test.ps1` | Данные: UI-кнопки настроек, форма payload базы и колоды + имя файла, CSV-экспорт (заголовок, строки, round-trip, кавычки с `;` и `""`), CSV-merge с дедупликацией, диалог импорта колоды (merge по имени, идемпотентность), merge чужой базы (twin-mapping, дедуп в twin, новая колода), честный replace маленьким файлом + selected, битый файл → warn без краха, кап sessions=200, Esc data-слоя на body | 25 | `imp-merge-dedupe-in-twin`, `sessions-cap-200` |
+| `cdp-schema-test.ps1` | Миграции: legacy без v, v:1, будущее v:99 (+постороннее поле) без краша, битый v; saveState пишет v; версионированный reload | 10 | `migrate-future-no-crash`, `reload-versioned-ok` || `cdp-keys-test.ps1` | Q16/Q18: структура строки пикера (main+more), one-click открытие колоды без actions-pop, подсказки data-key, цифра выбирает верный/неверный вариант, игнор после ответа и вне квиза | 8 | `picker-oneclick-open`, `digit-right-picks` || `cdp-perf-test.ps1` | Перфоманс-бюджеты на колоде из 404 карт (медиана замеров): рендер списка, ввод поиска, старт квиза, рендер статистики; регрессия heavy-mode `.no-anim` | 6 | `budget-render-404-le120`, `heavy-mode-active` || `cdp-images-test.ps1` | Картинки: IDB roundtrip/delete, сжатие 1200×900 → ≤480 WebP, превью в форме, сохранение новой карты с ключом по id, миниатюра в списке, картинка на фронте карты (и скрыта для обычной), редактирование: превью из БД + снятие удаляет ключ, deleteCard чистит IDB | 15 | `compress-max-side-480`, `delete-cleans-idb` || `cdp-reverse-test.ps1` | Двусторонние: buildStudyEntries удваивает с #rev, раунд 4 записи, swap сторон + мета «наоборот», завершение после всех записей, итог по записям, квиз реверса, чип на панели (toggle off/on пересобирает раунд 4↔2), синхронность с меню действий, normalizeState хранит twoSided | 19 | `round-complete-after-4`, `chip-toggles-on` || `cdp-data-test.ps1` | Данные: UI-кнопки настроек, форма payload базы и колоды + имя файла, CSV-экспорт (заголовок, строки, round-trip, кавычки с `;` и `""`), CSV-merge с дедупликацией, диалог импорта колоды (merge по имени, идемпотентность), merge чужой базы (twin-mapping, дедуп в twin, новая колода), честный replace маленьким файлом + selected, битый файл → warn без краха, кап sessions=200, Esc data-слоя на body | 25 | `imp-merge-dedupe-in-twin`, `sessions-cap-200` |
 
 ### 7.3 Test Rules
 
 - **Даты в сиде — только динамические** (`new Date()` → `YYYY-MM-DD`): приложение сбрасывает суточные счётчики по дате, хардкод «вчера» ломает тест.
 - Ассерты не зависят от порядка shuffle (случайность перемешивания легитимна).
-- Эталон состояния после прогона: **все 29 наборов зелёные** (эталон ~759 ok / 0 fail; perf-бюджеты: рендер 404 ≤120мс, поиск ≤25мс, квиз ≤5мс, статистика ≤30мс).
+- Эталон состояния после прогона: **все 30 наборов зелёные** (эталон ~769 ok / 0 fail; perf-бюджеты: рендер 404 ≤120мс, поиск ≤25мс, квиз ≤5мс, статистика ≤30мс).
 - Headless CDP `Emulation.setEmulatedMedia` обновляет ЗНАЧЕНИЕ matchMedia живьём, но НЕ диспатчит событие change — системный путь в тестах эмулируется прямым вызовом `applyAppearance({mode:"auto"})`; на реальных ОС событие нативное.
 
 ---
@@ -543,6 +545,7 @@ Set-Content -LiteralPath $f -Value $c -Encoding UTF8
 - CSS: секции с баннерами `/* ==== Имя ==== */`, переменные тем в блоках `html[data-mode]` / `html[data-palette]`.
 - Новые списки рендерить через `DocumentFragment`; точечные обновления предпочитать полному `render()`.
 - Любое изменение стилей сопровождается подъёмом `?v=N` и прогоном затронутых тестов; структурные изменения — прогоном всех 23.
+
 
 
 
