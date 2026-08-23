@@ -1,4 +1,4 @@
-﻿let editImageId = null;
+let editImageId = null;
 
 function startEditCard(cardId) {
   const card = state.cards.find((item) => item.id === cardId);
@@ -604,7 +604,7 @@ render();
 openMenu();
 
 function verifyStylesFresh() {
-  window.__RUNTIME_V = "34";
+  window.__RUNTIME_V = "39";
   const el = document.querySelector(".face-speak");
   if (!el) return;
   window.__stylesStale = getComputedStyle(el).position !== "absolute";

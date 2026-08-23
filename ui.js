@@ -499,15 +499,6 @@ async function applyAppearance({ mode, palette }, event) {
     bloom.classList.remove("is-blooming");
     void bloom.offsetWidth;
     bloom.classList.add("is-blooming");
-
-    try {
-      localStorage.setItem("flashcards-vt-debug", JSON.stringify({
-        xPct: px, yPct: py,
-        dpr: window.devicePixelRatio,
-        iw: window.innerWidth, ih: window.innerHeight,
-        t: Date.now(),
-      }));
-    } catch (e) {}
   }
 
   const transition = document.startViewTransition(apply);

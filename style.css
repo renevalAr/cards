@@ -783,13 +783,6 @@ html[data-palette="slate"] .main {
   transform: translateY(-50%) scale(0.86) rotate(0deg);
 }
 
-mark.search-hit {
-  background: color-mix(in srgb, var(--accent-2) 45%, transparent);
-  color: inherit;
-  border-radius: 2px;
-  padding: 0 1px;
-}
-
 .tabs {
   margin: 20px 0 16px;
 }
@@ -1374,10 +1367,6 @@ html[data-palette="slate"] .face::before {
   height: 100%;
   max-width: none;
   box-shadow: none;
-}
-
-#focus-wrap .quiz-progress {
-  max-width: none;
 }
 
 #focus-wrap .quiz-progress {
@@ -2588,20 +2577,6 @@ mark.search-hit {
   transition: height 0.14s var(--ease), padding 0.14s var(--ease), margin 0.14s var(--ease), border-width 0.14s var(--ease);
 }
 
-.small-count.count-pop {
-  animation: count-pop 0.42s var(--spring);
-}
-
-@keyframes count-pop {
-  45% {
-    transform: scale(1.4);
-  }
-}
-
-.small-count {
-  display: block;
-}
-
 .quiz-progress {
   position: relative;
 }
@@ -2854,12 +2829,6 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
     opacity: 0;
     transform: translateX(10px);
   }
-}
-
-.quiz-option {
-  display: flex;
-  align-items: center;
-  text-align: left;
 }
 
 .quiz-option::before {

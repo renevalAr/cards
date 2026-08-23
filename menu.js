@@ -303,11 +303,6 @@ function nextTourStep() {
 
 function finishTour() {
   hideTour();
-  try {
-    localStorage.setItem(ONBOARD_KEY, "1");
-  } catch (error) {
-    console.warn("Не удалось сохранить флаг обучения", error);
-  }
 }
 
 function hideTour() {
@@ -317,6 +312,9 @@ function hideTour() {
   document.querySelectorAll(".tour-highlight").forEach((el) => el.classList.remove("tour-highlight"));
   tourStep = -1;
   tourSteps = [];
+  try {
+    localStorage.setItem(ONBOARD_KEY, "1");
+  } catch (error) {}
 }
 
 function bindMenuEvents() {

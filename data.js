@@ -185,7 +185,8 @@ function summarizeImport(parsed, fileName) {
 
 function handleImportText(text, fileName) {
   try {
-    const parsed = looksLikeCsv(text, fileName) ? parseImportCsv(text) : parseImportJson(text);
+    const clean = text.replace(/^\uFEFF/, "");
+    const parsed = looksLikeCsv(clean, fileName) ? parseImportCsv(clean) : parseImportJson(clean);
     pendingImport = { parsed, fileName };
     if (parsed.kind === "csv") {
       applyImport(parsed, "merge");
@@ -317,8 +318,6 @@ function applyImport(parsed, mode) {
 }
 
 function bindDataEvents() {
-  const settingsBackdrop = document.getElementById("settings-backdrop");
-
   document.getElementById("export-all-btn").addEventListener("click", () => {
     exportBaseJson();
     closeSettingsModal();
@@ -358,8 +357,6 @@ function bindDataEvents() {
       trapTabKey(backdrop, event);
     }
   });
-
-  void settingsBackdrop;
 }
 
 bindDataEvents();
