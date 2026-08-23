@@ -371,6 +371,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 Единый раннер `tests\run-tests.ps1`: параллельный пул (по умолчанию 5 инстансов → полный прогон ~100с), режимы `-Smoke` (unit+full+quiz+data+tts ≈30с) и полный, `-Browser edge`, `-Filter <имя>`, текстовый лог падений в `tests\results\failures-<дата>.log`, exit code 0/1.
 
 Запуск: `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1 [-Smoke] [-Parallel N] [-Browser chrome|edge]`
+CI: GitHub Actions (`.github/workflows/ci.yml`, windows-latest + setup-chrome): smoke на push в main, полный прогон через Actions → Run workflow (mode=full); лог падений — артефактом job'а.
 Перед правкой файл перечитывают и пересохраняют в UTF8 (проблемы кириллицы в PS 5.1):
 
 ```powershell
