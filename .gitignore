@@ -1,0 +1,11 @@
+# test artifacts
+tests/results/
+*.log
+
+# windows junk
+Thumbs.db
+desktop.ini
+
+# editor
+.vscode/
+*.swp
