@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Test mode"
+        required: true
+        default: "smoke"
+        type: choice
+        options: [smoke, full]
+
+jobs:
+  tests:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Smoke tests (push)
+        if: github.event_name == 'push'
+        shell: pwsh
+        run: ./tests/run-tests.ps1 -Smoke -Parallel 5 -BrowserExe "${{ steps.chrome.outputs.chrome-path }}"
+
+      - name: Full tests (manual)
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: ./tests/run-tests.ps1 -Parallel 5 -BrowserExe "${{ steps.chrome.outputs.chrome-path }}"
+
+      - name: Failure log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-log
+          path: tests/results/
+          if-no-files-found: ignore
