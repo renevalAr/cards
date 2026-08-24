@@ -305,7 +305,11 @@ function applyImport(parsed, mode) {
       const deckId = idMap.get(s.deckId);
       if (deckId) state.sessions.push({ ...s, deckId });
     });
-    state.sessions = state.sessions.slice(-200);
+    state.sessions = state.sessions
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => b.item.date.localeCompare(a.item.date) || a.index - b.index)
+      .slice(0, MAX_SESSIONS)
+      .map(({ item }) => item);
   }
   if (!state.decks.find((d) => d.id === state.selectedDeckId)) {
     state.selectedDeckId = state.decks[0] ? state.decks[0].id : null;

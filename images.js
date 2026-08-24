@@ -43,6 +43,20 @@ function imgDelete(cardId) {
   return imgTx("readwrite").then((store) => imgReq(store, "delete", [cardId]));
 }
 
+function imgGcOrphans(liveIds) {
+  const live = new Set(liveIds);
+  return imgTx("readonly")
+    .then((store) => imgReq(store, "getAllKeys", []))
+    .then((keys) => {
+      const orphans = keys.filter((key) => !live.has(key));
+      if (!orphans.length) return 0;
+      return imgTx("readwrite")
+        .then((store) => Promise.all(orphans.map((key) => imgReq(store, "delete", [key]))))
+        .then(() => orphans.length);
+    })
+    .catch(() => -1);
+}
+
 function loadImageElement(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);

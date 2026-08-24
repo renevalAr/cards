@@ -1,10 +1,12 @@
 const STORAGE_KEY = "flashcards-app-v1";
+const CORRUPT_KEY = "flashcards-app-v1-corrupt";
 const MODE_KEY = "flashcards-mode";
 const PALETTE_KEY = "flashcards-palette";
 const ONBOARD_KEY = "flashcards-onboarded";
 const FONT_KEY = "flashcards-fontsize";
 const VALID_STATUSES = new Set(["new", "known", "unknown"]);
 const MAX_NAME_LENGTH = 80;
+const MAX_SESSIONS = 200;
 const SCHEMA_VERSION = 1;
 
 function migrateSchema(raw) {
@@ -207,6 +209,12 @@ function loadState() {
     resetTodayIfNeeded();
   } catch (error) {
     console.warn("Не удалось разобрать сохранённые данные", error);
+    try {
+      localStorage.setItem(CORRUPT_KEY, raw);
+    } catch (backupError) {
+      console.warn("Не удалось сохранить бэкап повреждённых данных", backupError);
+    }
+    showToast("Сохранённые данные повреждены. Копия сохранена — напиши разработчику, чтобы восстановить.", "warn");
   }
 }
 
@@ -254,7 +262,7 @@ function recordSession(deckId, known, unknown) {
     known: Math.max(0, Math.floor(known)),
     unknown: Math.max(0, Math.floor(unknown)),
   });
-  if (state.sessions.length > 200) state.sessions = state.sessions.slice(-200);
+  if (state.sessions.length > MAX_SESSIONS) state.sessions = state.sessions.slice(-MAX_SESSIONS);
 }
 
 function getDeckHistory(deckId) {

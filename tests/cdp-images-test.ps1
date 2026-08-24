@@ -87,6 +87,14 @@ try {
   await imgDelete("tx1");
   check("db-delete", (await imgGet("tx1")) === undefined);
 
+  // GC of orphaned images
+  await imgPut("orphan-a", "data:image/webp;base64,AAAA");
+  await imgPut("orphan-b", "data:image/webp;base64,BBBB");
+  const gcRemoved = await imgGcOrphans(["live-1", "orphan-a"]);
+  check("gc-removes-orphans", gcRemoved >= 1 && (await imgGet("orphan-b")) === undefined, "removed=" + gcRemoved);
+  check("gc-keeps-live", (await imgGet("orphan-a")) !== undefined);
+  await imgDelete("orphan-a");
+
   // strong compression: max side <=480 and webp preferred
   const file = await makeFile();
   const du = await compressImageFile(file);

@@ -603,6 +603,10 @@ syncAppearanceButtons();
 render();
 openMenu();
 
+imgGcOrphans(state.cards.map((card) => card.id)).then((removed) => {
+  if (removed > 0) console.info(`Освобождено осиротевших картинок: ${removed}`);
+});
+
 function verifyStylesFresh() {
   window.__RUNTIME_V = "39";
   const el = document.querySelector(".face-speak");

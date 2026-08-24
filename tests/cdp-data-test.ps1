@@ -176,6 +176,15 @@ try {
   saveState();
   check("sessions-cap-200", state.sessions.length === 200, "len=" + state.sessions.length);
 
+  // merge with many OLD imported sessions must not evict fresh local ones
+  const oldName = state.decks.find((d) => d.id === state.selectedDeckId).name;
+  const oldBase = { v: 2, kind: "base", decks: [{ id: "oz", name: oldName }], cards: [], today: null, history: {},
+    sessions: Array.from({ length: 150 }, (_, i) => ({ deckId: "oz", date: "2020-01-01 10:" + String(i % 60).padStart(2, "0"), known: 1, unknown: 0 })) };
+  handleImportText(JSON.stringify(oldBase), "old.json"); await sleep(200);
+  q("data-merge").click(); await sleep(400);
+  check("merge-sessions-keep-fresh", state.sessions.length === 200 && !state.sessions.some((s) => s.date.startsWith("2020-01-01")),
+    "len=" + state.sessions.length + " old=" + state.sessions.filter((s) => s.date.startsWith("2020")).length);
+
   // Esc cascade covers data layer when focus on body
   handleImportText(deckFile, "delta.json"); await sleep(150);
   document.activeElement.blur();

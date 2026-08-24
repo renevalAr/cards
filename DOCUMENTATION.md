@@ -1,4 +1,4 @@
-﻿# Flashcards — Project Documentation
+# Flashcards — Project Documentation
 
 > Полный контекст проекта для человека или ИИ. Прочитай этот файл — и можно работать над любой частью без дополнительного изучения кода.
 > Стиль: машинно-ориентированный (таблицы, ID, селекторы). Текст RU, заголовки EN.
@@ -52,7 +52,7 @@
 | `stats.js` | 183 | Окно статистики, дневные бары, сессии колоды |
 | `library.js` | 155 | Демо-колоды (данные) + модалка библиотеки |
 | `data.js` | 250 | Экспорт/импорт базы и колод (JSON+CSV), диалог слияния, toast-подтверждения |
-| `images.js` | 77 | IndexedDB-хранилище картинок, клиентское сжатие 480px WebP q0.6 |
+| `images.js` | 91 | IndexedDB-хранилище картинок, клиентское сжатие 480px WebP q0.6 |
 | `app.js` | 590 | Массовый ввод, CRUD колод/карточек, поиск/квиз-биндинги, маршрутизация фокусов, `bindEvents()`, инициализация |
 
 **Порядок загрузки** (все перед `</body>`, обычные скрипты):
@@ -172,7 +172,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | menu.js | `pluralDays`, `renderMenu`, `openMenu`, `closeMenu`, `closeAllMenus`, `openMenuPop`, `closeMenuPop`, `renderDeckPicker`, `openDeckPicker`, `closeDeckPicker`, `openDeckActions`, `menuStudy`, `menuOpenCards`, `bigStudy`, `openFirstDeck`, `showTour`, `renderTourStep`, `positionTourTip`, `nextTourStep`, `finishTour`, `hideTour`, `bindMenuEvents` |
 | stats.js | `lastDays`, `countUp`, `openStats`, `closeStats`, `renderDayBars` (каскад), `renderStatsWindow` (count-up), `openDeckStats`, `closeDeckStats`, `bindStatsEvents` |
 | library.js | `addedDemoIds`, `markDemoAdded`, `renderLibrary`, `openLibrary`, `closeLibrary`, `addDemoDeck` |
-| images.js | imgOpen, imgTx, imgReq, imgGet, imgPut, imgDelete, loadImageElement, compressImageFile (IndexedDB + сжатие) |
+| images.js | imgOpen, imgTx, imgReq, imgGet, imgPut, imgDelete, imgGcOrphans, loadImageElement, compressImageFile (IndexedDB + сжатие) |
 | data.js | `todayStamp`, `slugifyName`, `downloadBlob`, `buildBackupPayload`, `exportBaseJson`, `exportDeckJson`, `csvField`, `csvSplitLine`, `exportBaseCsv`, `looksLikeCsv`, `parseImportJson`, `parseImportCsv`, `openDataDialog`, `closeDataDialog`, `summarizeImport`, `handleImportText`, `applyCsvImport`, `applyImport`, `bindDataEvents` |
 | app.js | `startEditCard`, `splitBulkPair`, `parseBulkLines`, `openBulkInput`, `closeBulkInput`, `applyBulkInput`, `createDeck`, `renameDeck`, `deleteDeck`, `resetDeckProgress`, `deleteCard`, `saveCard`, `finishDeleteCard`, `bindEvents`, `bindMotionExtras`, `bindMotionExtras` |
 
@@ -184,6 +184,8 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | `DEMO_KEY` | `flashcards-demos` (массив id добавленных демо-колод) | library.js |
 | `VALID_STATUSES` | Set(`new`, `known`, `unknown`) | storage.js |
 | `MAX_NAME_LENGTH` | 80 | storage.js |
+| `MAX_SESSIONS` | 200 | storage.js + data.js: кап сессий, при merge сортировка по дате перед усечением |
+| `CORRUPT_KEY` | `flashcards-app-v1-corrupt` — бэкап непарсящегося payload; пишется в `loadState` при ошибке разбора + warn-toast | storage.js |
 | `BULK_SEPARATOR` | `"="` | app.js |
 | `SCHEMA_VERSION` | `1` — поле `v` в payload базы; `migrateSchema` пропускает legacy и будущие версии без краша | storage.js |
 | `EXPORT_VERSION` / cap sessions | `2` / последние 200 записей (обрезка в `recordSession`) | data.js / storage.js |
@@ -470,6 +472,7 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 
 ---
 
+| Батч B «данные» (аудит-2026-08) | Битый JSON в localStorage бэкапится в -corrupt ключ + warn-toast; merge сессий сортирует по дате перед капом (свежие локальные не вытесняются старыми импортными); при загрузке GC осиротевших картинок IndexedDB (imgGcOrphans) |
 ## 9. Pitfalls
 
 - `el.style.background = ...` (шорткат) затирает `background-image` → юзать `backgroundColor`.

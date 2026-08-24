@@ -252,6 +252,21 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("constants", STORAGE_KEY === "flashcards-app-v1" && MODE_KEY === "flashcards-mode" && PALETTE_KEY === "flashcards-palette" && ONBOARD_KEY === "flashcards-onboarded");
   check("valid-statuses", VALID_STATUSES.has("new") && VALID_STATUSES.has("known") && VALID_STATUSES.has("unknown") && VALID_STATUSES.size === 3);
   check("max-name", MAX_NAME_LENGTH === 80);
+
+  // --- corrupt payload backup ---
+  const corruptRaw = '{"v":1,"decks":[{"broken';
+  state.decks = [];
+  state.cards = [];
+  localStorage.setItem(STORAGE_KEY, corruptRaw);
+  localStorage.removeItem(CORRUPT_KEY);
+  loadState();
+  check("corrupt-backup", localStorage.getItem(CORRUPT_KEY) === corruptRaw, String(localStorage.getItem(CORRUPT_KEY)));
+  check("corrupt-state-empty", state.decks.length === 0 && state.cards.length === 0);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: 1, decks: [{ id: "ok", name: "OK" }], cards: [], selectedDeckId: null, today: { date: todayDateKey(), known: 0, unknown: 0 }, history: {}, sessions: [] }));
+  loadState();
+  check("recover-after-corrupt", state.decks.length === 1 && state.decks[0].id === "ok");
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(CORRUPT_KEY);
   check("demo-decks", DEMO_DECKS.length === 3 && DEMO_DECKS[0].cards.length === 30 && DEMO_DECKS[1].cards.length === 12 && DEMO_DECKS[2].cards.length === 15);
 
   check("no-errors", Array.isArray(window.__errors) && window.__errors.length === 0, JSON.stringify(window.__errors || []));
