@@ -608,7 +608,7 @@ imgGcOrphans(state.cards.map((card) => card.id)).then((removed) => {
 });
 
 function verifyStylesFresh() {
-  window.__RUNTIME_V = "39";
+  window.__RUNTIME_V = "40";
   const el = document.querySelector(".face-speak");
   if (!el) return;
   window.__stylesStale = getComputedStyle(el).position !== "absolute";
