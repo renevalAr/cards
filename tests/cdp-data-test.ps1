@@ -1,4 +1,4 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -54,10 +54,10 @@ try {
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null
   Recv-Ws | Out-Null
-  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'РђР»СЊС„Р°'},{id:'d2',name:'Р‘РµС‚Р°'}], cards:[{id:'c1',deckId:'d1',question:'alpha',answer:'one',status:'new'},{id:'c2',deckId:'d1',question:'beta',answer:'two',status:'known'},{id:'c3',deckId:'d2',question:'gamma',answer:'three',status:'unknown'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
+  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'Альфа'},{id:'d2',name:'Бета'}], cards:[{id:'c1',deckId:'d1',question:'alpha',answer:'one',status:'new'},{id:'c2',deckId:'d1',question:'beta',answer:'two',status:'known'},{id:'c3',deckId:'d2',question:'gamma',answer:'three',status:'unknown'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null
   Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null
   Recv-Ws | Out-Null
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {
@@ -96,8 +96,8 @@ try {
   exportDeckJson("d1");
   window.downloadBlob = origDl;
   const deckPayload = JSON.parse(captured.text);
-  check("exp-deck-payload", deckPayload.kind === "deck" && deckPayload.deck.name === "РђР»СЊС„Р°" && deckPayload.cards.length === 2, captured.name);
-  check("exp-deck-filename", /^РєРѕР»РѕРґР°-Р°Р»СЊС„Р°-\d{4}-\d{2}-\d{2}\.json$/.test(captured.name), captured.name);
+  check("exp-deck-payload", deckPayload.kind === "deck" && deckPayload.deck.name === "Альфа" && deckPayload.cards.length === 2, captured.name);
+  check("exp-deck-filename", /^колода-альфа-\d{4}-\d{2}-\d{2}\.json$/.test(captured.name), captured.name);
 
   // CSV round-trip
   window.downloadBlob = (name, text) => { captured = { name, text }; };
@@ -111,10 +111,10 @@ try {
   check("csv-roundtrip", parsedCsv.kind === "csv" && csvTotal === 3, "total=" + csvTotal);
 
   // CSV quoted field with ; inside
-  const tricky = 'deck;question;answer;status\r\nРђР»СЊС„Р°;"РІРѕРїСЂРѕСЃ; СЃ С‚РѕС‡РєРѕР№";"РѕС‚РІРµС‚ ""РІ РєР°РІС‹С‡РєР°С…""";new';
+  const tricky = 'deck;question;answer;status\r\nАльфа;"вопрос; с точкой";"ответ ""в кавычках""";new';
   const pTricky = parseImportCsv(tricky);
-  const tCard = pTricky.cardsByDeck.get("РђР»СЊС„Р°")[0];
-  check("csv-quoting", tCard.question === "РІРѕРїСЂРѕСЃ; СЃ С‚РѕС‡РєРѕР№" && tCard.answer === 'РѕС‚РІРµС‚ "РІ РєР°РІС‹С‡РєР°С…"', JSON.stringify(tCard));
+  const tCard = pTricky.cardsByDeck.get("Альфа")[0];
+  check("csv-quoting", tCard.question === "вопрос; с точкой" && tCard.answer === 'ответ "в кавычках"', JSON.stringify(tCard));
 
   // CSV merge into existing decks by name + dedupe identical row
   applyImport(parsedCsv, "merge"); await sleep(300);
@@ -123,18 +123,18 @@ try {
   check("csv-toast-ok", !q("storage-alert").hidden && q("storage-alert").classList.contains("is-ok"), q("storage-alert").textContent);
 
   // JSON deck-file import: dialog opens with summary, then merge by name (idempotent second time)
-  const deckFile = JSON.stringify({ v: 2, kind: "deck", deck: { id: "x9", name: "Р”РµР»СЊС‚Р°" }, cards: [{ question: "dq1", answer: "da1", status: "new" }, { question: "alpha", answer: "one", status: "new" }] });
+  const deckFile = JSON.stringify({ v: 2, kind: "deck", deck: { id: "x9", name: "Дельта" }, cards: [{ question: "dq1", answer: "da1", status: "new" }, { question: "alpha", answer: "one", status: "new" }] });
   handleImportText(deckFile, "delta.json"); await sleep(300);
-  check("imp-dialog-open", q("data-backdrop").classList.contains("is-open") && q("data-text").textContent.includes("Р”РµР»СЊС‚Р°"), q("data-text").textContent);
+  check("imp-dialog-open", q("data-backdrop").classList.contains("is-open") && q("data-text").textContent.includes("Дельта"), q("data-text").textContent);
   q("data-merge").click(); await sleep(350);
-  const delta = state.decks.find((d) => d.name === "Р”РµР»СЊС‚Р°");
+  const delta = state.decks.find((d) => d.name === "Дельта");
   check("imp-deck-merged", !!delta && delta.id !== "x9", delta ? delta.id : "none");
   const deltaCards = cardsInDeck(delta.id);
   check("imp-deck-dedupe-vs-other-deck", deltaCards.length === 2, "cards=" + deltaCards.length);
   // re-import same file -> same deck, no new cards
   handleImportText(deckFile, "delta.json"); await sleep(200);
   q("data-merge").click(); await sleep(350);
-  check("imp-deck-idempotent", state.decks.filter((d) => d.name === "Р”РµР»СЊС‚Р°").length === 1 && cardsInDeck(delta.id).length === 2,
+  check("imp-deck-idempotent", state.decks.filter((d) => d.name === "Дельта").length === 1 && cardsInDeck(delta.id).length === 2,
     "decks=" + state.decks.length + " cards=" + cardsInDeck(delta.id).length);
 
   // Base JSON import dialog opens; replace is tested later with a tiny file (real overwrite)
@@ -144,25 +144,25 @@ try {
   q("data-cancel").click(); await sleep(250);
 
   // Base merge from a foreign snapshot: new deck + overlapping card deduped per target deck
-  const foreign = { v: 2, kind: "base", decks: [{ id: "f1", name: "РђР»СЊС„Р°" }, { id: "f2", name: "РРЅРѕСЃС‚СЂР°РЅРЅР°СЏ" }], cards: [
+  const foreign = { v: 2, kind: "base", decks: [{ id: "f1", name: "Альфа" }, { id: "f2", name: "Иностранная" }], cards: [
     { id: "fc1", deckId: "f1", question: "alpha", answer: "one", status: "new" },
-    { id: "fc2", deckId: "f1", question: "РЅРѕРІС‹Р№ РІРѕРїСЂРѕСЃ", answer: "РЅРѕРІС‹Р№ РѕС‚РІРµС‚", status: "known" },
+    { id: "fc2", deckId: "f1", question: "новый вопрос", answer: "новый ответ", status: "known" },
     { id: "fc3", deckId: "f2", question: "fq", answer: "fa", status: "unknown" } ], today: null, history: {}, sessions: [] };
   handleImportText(JSON.stringify(foreign), "foreign.json"); await sleep(200);
   q("data-merge").click(); await sleep(400);
   check("imp-merge-twin-mapped", state.decks.length === 4, "decks=" + state.decks.length);
-  const alphaDeck = state.decks.find((d) => d.name === "РђР»СЊС„Р°");
+  const alphaDeck = state.decks.find((d) => d.name === "Альфа");
   check("imp-merge-dedupe-in-twin", cardsInDeck(alphaDeck.id).length === 3, "alpha cards=" + cardsInDeck(alphaDeck.id).length);
-  check("imp-merge-new-deck-cards", cardsInDeck(state.decks.find((d) => d.name === "РРЅРѕСЃС‚СЂР°РЅРЅР°СЏ").id).length === 1,
-    "ino cards=" + cardsInDeck(state.decks.find((d) => d.name === "РРЅРѕСЃС‚СЂР°РЅРЅР°СЏ").id).length);
+  check("imp-merge-new-deck-cards", cardsInDeck(state.decks.find((d) => d.name === "Иностранная").id).length === 1,
+    "ino cards=" + cardsInDeck(state.decks.find((d) => d.name === "Иностранная").id).length);
 
   // Real REPLACE with a tiny foreign base
-  const tiny = { v: 2, kind: "base", decks: [{ id: "z1", name: "РћРґРёРЅ" }], cards: [
+  const tiny = { v: 2, kind: "base", decks: [{ id: "z1", name: "Один" }], cards: [
     { id: "zc1", deckId: "z1", question: "tq1", answer: "ta1", status: "new" },
     { id: "zc2", deckId: "z1", question: "tq2", answer: "ta2", status: "known" } ], today: null, history: {}, sessions: [] };
   handleImportText(JSON.stringify(tiny), "tiny.json"); await sleep(200);
   q("data-replace").click(); await sleep(350);
-  check("imp-base-replace-real", state.decks.length === 1 && state.decks[0].name === "РћРґРёРЅ" && state.cards.length === 2,
+  check("imp-base-replace-real", state.decks.length === 1 && state.decks[0].name === "Один" && state.cards.length === 2,
     "decks=" + state.decks.length + " cards=" + state.cards.length);
   check("imp-base-replace-selected", state.selectedDeckId === state.decks[0].id);
 

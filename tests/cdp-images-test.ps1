@@ -1,4 +1,4 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -44,9 +44,9 @@ try {
   }
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null; Recv-Ws | Out-Null
-  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); indexedDB.deleteDatabase('flashcards-images'); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'РђР»СЊС„Р°'}], cards:[{id:'c1',deckId:'d1',question:'РїСЂРёРІРµС‚',answer:'РѕРґРёРЅ',status:'new'},{id:'c2',deckId:'d1',question:'РјРёСЂ',answer:'РґРІР°',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
+  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); indexedDB.deleteDatabase('flashcards-images'); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'Альфа'}], cards:[{id:'c1',deckId:'d1',question:'привет',answer:'один',status:'new'},{id:'c2',deckId:'d1',question:'мир',answer:'два',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null; Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null; Recv-Ws | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null; Recv-Ws | Out-Null
 
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {
@@ -114,11 +114,11 @@ try {
   check("form-pending", pendingImage === du);
 
   // save new card with image -> stored under its id
-  q("card-question").value = "СЃ РєР°СЂС‚РёРЅРєРѕР№";
-  q("card-answer").value = "РґР°";
+  q("card-question").value = "с картинкой";
+  q("card-answer").value = "да";
   q("card-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
   await sleep(400);
-  const imgCard = state.cards.find((c) => c.question === "СЃ РєР°СЂС‚РёРЅРєРѕР№");
+  const imgCard = state.cards.find((c) => c.question === "с картинкой");
   check("save-new-card", !!imgCard);
   const storedDu = imgCard ? await imgGet(imgCard.id) : null;
   check("image-stored-by-id", storedDu === du, storedDu ? storedDu.slice(0, 22) : "none");
@@ -154,11 +154,11 @@ try {
   check("remove-persists", afterRemove === undefined, String(afterRemove));
 
   // deleting a card cleans IDB too
-  q("card-question").value = "РІСЂРµРјРµРЅРЅР°СЏ"; q("card-answer").value = "x";
+  q("card-question").value = "временная"; q("card-answer").value = "x";
   await handleImageFile(file); await sleep(60);
   q("card-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
   await sleep(350);
-  const tempCard = state.cards.find((c) => c.question === "РІСЂРµРјРµРЅРЅР°СЏ");
+  const tempCard = state.cards.find((c) => c.question === "временная");
   finishDeleteCard(tempCard.id); await sleep(350);
   check("delete-cleans-idb", (await imgGet(tempCard.id)) === undefined);
 

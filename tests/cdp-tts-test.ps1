@@ -1,4 +1,4 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -46,9 +46,9 @@ try {
   }
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null; Recv-Ws | Out-Null
-  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'РђР»СЊС„Р°'}], cards:[{id:'c1',deckId:'d1',question:'РїСЂРёРІРµС‚',answer:'РѕРґРёРЅ',status:'new'},{id:'c2',deckId:'d1',question:'РјРёСЂ',answer:'РґРІР°',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
+  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'Альфа'}], cards:[{id:'c1',deckId:'d1',question:'привет',answer:'один',status:'new'},{id:'c2',deckId:'d1',question:'мир',answer:'два',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null; Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null; Recv-Ws | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null; Recv-Ws | Out-Null
 
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {
@@ -86,7 +86,7 @@ try {
 
   check("api-exists", typeof speechSynthesis !== "undefined" && typeof SpeechSynthesisUtterance === "function");
 
-  const longText = Array.from({length: 12}, (_, i) => "СЃС‚СЂРѕРєР° РЅРѕРјРµСЂ " + (i+1) + " СЃ РґРѕСЃС‚Р°С‚РѕС‡РЅС‹Рј РєРѕР»РёС‡РµСЃС‚РІРѕРј СЃР»РѕРІ РґР»СЏ РїРµСЂРµРЅРѕСЃР°").join("\n");
+  const longText = Array.from({length: 12}, (_, i) => "строка номер " + (i+1) + " с достаточным количеством слов для переноса").join("\n");
   state.cards[0].question = longText;
   showStudyCard(); await sleep(250);
   const face = document.querySelector("#flashcard .face.front");

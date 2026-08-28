@@ -1,4 +1,4 @@
-Ôªøparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -49,7 +49,7 @@ try {
   }
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null; Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null; Recv-Ws | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null; Recv-Ws | Out-Null
   Start-Sleep -Milliseconds 2000
 
   Write-Output ("APP ERRORS: " + (Eval "JSON.stringify(window.__errs||'none')"))
@@ -59,7 +59,7 @@ try {
   const res = [];
   const check = (s, ok, d) => res.push({ step: s, ok: !!ok, detail: String(d == null ? "" : d) });
 
-  const legacy = { decks: [{ id: "d1", name: "–ê–ª—å—Ñ–∞" }], cards: [{ id: "c1", deckId: "d1", question: "q", answer: "a", status: "new" }], selectedDeckId: "d1", today: null, history: {}, sessions: [] };
+  const legacy = { decks: [{ id: "d1", name: "¿Î¸Ù‡" }], cards: [{ id: "c1", deckId: "d1", question: "q", answer: "a", status: "new" }], selectedDeckId: "d1", today: null, history: {}, sessions: [] };
   const m1 = migrateSchema(JSON.parse(JSON.stringify(legacy)));
   check("migrate-legacy-passthrough", m1 && m1.decks.length === 1);
   const norm1 = normalizeState(m1);
@@ -109,7 +109,7 @@ try {
   } else { Write-Output "[FAIL] scenario returned no value" }
 
   # versioned reload verified from harness side (reload breaks the ws if done in-page)
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null
   Recv-Ws | Out-Null
   Start-Sleep -Milliseconds 1800
   $ok = Eval "(function(){try{return state.decks.length===1 && state.decks[0].name==='Zed'}catch(e){return false}})()"

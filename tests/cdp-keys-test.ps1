@@ -1,4 +1,4 @@
-Ôªøparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -49,9 +49,9 @@ try {
   }
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null; Recv-Ws | Out-Null
-  $seedJs = '(function(){window.addEventListener("error",function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")} localStorage.clear(); localStorage.setItem("flashcards-onboarded","1"); var decks=[{id:"d1",name:"–ê–ª—å—Ñ–∞"},{id:"d2",name:"–ë–µ—Ç–∞"}]; var cards=[]; ["w1","w2","w3","w4"].forEach(function(w,i){cards.push({id:"a"+i,deckId:"d1",question:w,answer:"A"+i,status:"new"})}); cards.push({id:"b0",deckId:"d2",question:"x1",answer:"y1",status:"new"}); localStorage.setItem("flashcards-app-v1", JSON.stringify({decks:decks,cards:cards,selectedDeckId:"d1",today:{date:k(t),known:0,unknown:0},history:{},sessions:[]})); })()'
+  $seedJs = '(function(){window.addEventListener("error",function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")} localStorage.clear(); localStorage.setItem("flashcards-onboarded","1"); var decks=[{id:"d1",name:"¿Î¸Ù‡"},{id:"d2",name:"¡ÂÚ‡"}]; var cards=[]; ["w1","w2","w3","w4"].forEach(function(w,i){cards.push({id:"a"+i,deckId:"d1",question:w,answer:"A"+i,status:"new"})}); cards.push({id:"b0",deckId:"d2",question:"x1",answer:"y1",status:"new"}); localStorage.setItem("flashcards-app-v1", JSON.stringify({decks:decks,cards:cards,selectedDeckId:"d1",today:{date:k(t),known:0,unknown:0},history:{},sessions:[]})); })()'
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null; Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null; Recv-Ws | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null; Recv-Ws | Out-Null
 
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {
@@ -78,7 +78,7 @@ try {
   const rows = [...document.querySelectorAll("#deck-pick-list .deck-pick-item")];
   check("picker-structure", rows.length === 2 && !!rows[0].querySelector(".deck-pick-main") && !!rows[0].querySelector(".deck-pick-more"));
   const beforeDeck = state.selectedDeckId;
-  rows.find((r) => r.textContent.includes("–ë–µ—Ç–∞")).querySelector(".deck-pick-main").click(); await sleep(450);
+  rows.find((r) => r.textContent.includes("¡ÂÚ‡")).querySelector(".deck-pick-main").click(); await sleep(450);
   check("picker-oneclick-open", state.selectedDeckId !== beforeDeck && state.selectedDeckId === "d2" && !q("deck-pick-backdrop").classList.contains("is-open"),
     "sel=" + state.selectedDeckId);
   q("menu-close").click(); await sleep(200);

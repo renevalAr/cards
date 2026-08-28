@@ -46,7 +46,7 @@ try {
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null; Recv-Ws | Out-Null
   $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} var cards=[];for(var i=0;i<404;i++){cards.push({id:'k'+i,deckId:'big',question:'Вопрос производительности номер '+i+' с достаточным количеством слов',answer:'Ответ '+i,status:i%3===0?'known':(i%3===1?'unknown':'new')});} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'big',name:'Нагрузка'}], cards:cards, selectedDeckId:'big', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null; Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null; Recv-Ws | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null; Recv-Ws | Out-Null
 
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {

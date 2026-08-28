@@ -1,4 +1,4 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -44,9 +44,9 @@ try {
   }
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null; Recv-Ws | Out-Null
-  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'РђР»СЊС„Р°',twoSided:true}], cards:[{id:'c1',deckId:'d1',question:'dog',answer:'СЃРѕР±Р°РєР°',status:'new'},{id:'c2',deckId:'d1',question:'cat',answer:'РєРѕС€РєР°',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
+  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'Альфа',twoSided:true}], cards:[{id:'c1',deckId:'d1',question:'dog',answer:'собака',status:'new'},{id:'c2',deckId:'d1',question:'cat',answer:'кошка',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null; Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null; Recv-Ws | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null; Recv-Ws | Out-Null
 
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {
@@ -84,9 +84,9 @@ try {
   const frontTxt = q("flashcard-question").textContent;
   const backTxt = q("flashcard-answer").textContent;
   const metaTxt = q("study-meta").textContent;
-  check("rev-front-is-answer", frontTxt === "СЃРѕР±Р°РєР°" || frontTxt === "РєРѕС€РєР°", frontTxt);
+  check("rev-front-is-answer", frontTxt === "собака" || frontTxt === "кошка", frontTxt);
   check("rev-back-is-question", backTxt === "dog" || backTxt === "cat", backTxt);
-  check("meta-rev-suffix", metaTxt.includes("РЅР°РѕР±РѕСЂРѕС‚"), metaTxt);
+  check("meta-rev-suffix", metaTxt.includes("наоборот"), metaTxt);
 
   // round completes only after marking ALL 4 entries
   state.studyIndex = 0; state.flipped = false; showStudyCard();
@@ -96,7 +96,7 @@ try {
   }
   check("round-complete-after-4", q("summary-backdrop").classList.contains("is-open"));
   const line = q("summary-line").textContent;
-  check("summary-math", line.includes("Р’СЃРµРіРѕ 4") && line.includes("Р·РЅР°СЋ 4") && line.includes("РЅРµ Р·РЅР°СЋ 0"), line);
+  check("summary-math", line.includes("Всего 4") && line.includes("знаю 4") && line.includes("не знаю 0"), line);
   check("today-events-4", getTodayStats().known + getTodayStats().unknown <= 4,
     "k=" + getTodayStats().known + " u=" + getTodayStats().unknown);
 
@@ -111,16 +111,16 @@ try {
   beginQuiz(buildStudyEntries("d1")); await sleep(300);
   const qText = q("quiz-question").textContent;
   const opts = [...document.querySelectorAll("#quiz-options .quiz-option")].map(b => b.textContent);
-  const isRevQuestion = (qText === "СЃРѕР±Р°РєР°" || qText === "РєРѕС€РєР°");
+  const isRevQuestion = (qText === "собака" || qText === "кошка");
   const optionsAreQuestions = opts.every(t => t === "dog" || t === "cat");
   check("quiz-entry-valid", qText.length > 0 && opts.length >= 2, JSON.stringify({q:qText,opts}));
   if (isRevQuestion) check("quiz-rev-options", optionsAreQuestions, JSON.stringify(opts));
-  else check("quiz-fwd-options", opts.every(t => t === "СЃРѕР±Р°РєР°" || t === "РєРѕС€РєР°" || !["dog","cat"].includes(t)), JSON.stringify(opts));
+  else check("quiz-fwd-options", opts.every(t => t === "собака" || t === "кошка" || !["dog","cat"].includes(t)), JSON.stringify(opts));
 
   // fast toggle on study panel (primary path)
   resetStudy(); setTab("study"); await sleep(300);
   const chip = q("two-sided-btn");
-  check("chip-present", !!chip && chip.textContent.includes("РѕР±Рµ СЃС‚РѕСЂРѕРЅС‹"));
+  check("chip-present", !!chip && chip.textContent.includes("обе стороны"));
   check("chip-active-initial", chip.classList.contains("is-active") && chip.getAttribute("aria-pressed") === "true",
     "pressed=" + chip.getAttribute("aria-pressed"));
   const orderBefore = state.studyOrder.length;
@@ -135,11 +135,11 @@ try {
   openMenu(); await sleep(250);
   q("menu-cards-btn").click(); await sleep(300);
   [...document.querySelectorAll("#deck-pick-list .deck-pick-item")][0].querySelector(".deck-pick-more").click(); await sleep(250);
-  const toggleBtn = [...document.querySelectorAll("#menu-pop-actions button")].find(b => b.textContent.includes("Р”РІСѓСЃС‚РѕСЂРѕРЅРЅРёРµ РєР°СЂС‚С‹"));
-  check("toggle-present", !!toggleBtn && toggleBtn.textContent.includes("РІРєР»"), toggleBtn ? toggleBtn.textContent : "none");
+  const toggleBtn = [...document.querySelectorAll("#menu-pop-actions button")].find(b => b.textContent.includes("Двусторонние карты"));
+  check("toggle-present", !!toggleBtn && toggleBtn.textContent.includes("вкл"), toggleBtn ? toggleBtn.textContent : "none");
   toggleBtn.click(); await sleep(350);
-  check("toggle-off", state.decks[0].twoSided === false && [...document.querySelectorAll("#menu-pop-actions button")].some(b => b.textContent.includes("РІС‹РєР»")));
-  [...document.querySelectorAll("#menu-pop-actions button")].find(b => b.textContent.includes("Р”РІСѓСЃС‚РѕСЂРѕРЅРЅРёРµ")).click(); await sleep(350);
+  check("toggle-off", state.decks[0].twoSided === false && [...document.querySelectorAll("#menu-pop-actions button")].some(b => b.textContent.includes("выкл")));
+  [...document.querySelectorAll("#menu-pop-actions button")].find(b => b.textContent.includes("Двусторонние")).click(); await sleep(350);
   check("toggle-back-on", state.decks[0].twoSided === true);
   closeMenuPop(); closeAllMenus(); await sleep(250);
 

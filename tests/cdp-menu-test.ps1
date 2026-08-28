@@ -7,7 +7,7 @@ $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrom
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9223 })
 $udir = "$env:TEMP\opencode\cdp-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
+$url = "file:///" + ($rootDir -replace "\\","/") + "/frontend/index.html"
 
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
 

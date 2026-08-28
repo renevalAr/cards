@@ -1,4 +1,4 @@
-ï»¿param(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
@@ -55,10 +55,10 @@ try {
 
   Send-Ws @{ method = "Page.enable"; params = @{} } | Out-Null
   Recv-Ws | Out-Null
-  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'ÐÐ»ÑŒÑ„Ð°'},{id:'d2',name:'Ð‘ÐµÑ‚Ð°'}], cards:[{id:'c1',deckId:'d1',question:'alpha',answer:'one',status:'new'},{id:'c2',deckId:'d1',question:'beta',answer:'two',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
+  $seedJs = "(function(){window.addEventListener('error',function(e){(window.__errs=window.__errs||[]).push(String(e.message));});var t=new Date();function k(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')} localStorage.clear(); localStorage.setItem('flashcards-onboarded','1'); localStorage.setItem('flashcards-app-v1', JSON.stringify({decks:[{id:'d1',name:'Àëüôà'},{id:'d2',name:'Áåòà'}], cards:[{id:'c1',deckId:'d1',question:'alpha',answer:'one',status:'new'},{id:'c2',deckId:'d1',question:'beta',answer:'two',status:'new'}], selectedDeckId:'d1', today:{date:k(t),known:0,unknown:0}, history:{}, sessions:[]})); })()"
   Send-Ws @{ method = "Page.addScriptToEvaluateOnNewDocument"; params = @{ source = $seedJs } } | Out-Null
   Recv-Ws | Out-Null
-  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/index.html" } } | Out-Null
+  Send-Ws @{ method = "Page.navigate"; params = @{ url = "file:///$($proj -replace '\\','/')/frontend/index.html" } } | Out-Null
   Recv-Ws | Out-Null
   $ready = $false
   for ($i = 0; $i -lt 30; $i++) {
@@ -80,7 +80,7 @@ try {
   await sleep(600);
   q("menu-close").click(); await sleep(400);
 
-  check("F7-bulk-hint", q("bulk-hint").textContent.includes("Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð·Ð½Ð°Ðº"), q("bulk-hint").textContent);
+  check("F7-bulk-hint", q("bulk-hint").textContent.includes("ïåðâûé çíàê"), q("bulk-hint").textContent);
 
   setTab("study"); await sleep(300);
   startStudyShuffle();
@@ -136,7 +136,7 @@ try {
   q("card-search").value = "zzz";
   q("card-search").dispatchEvent(new Event("input", { bubbles: true }));
   await sleep(150);
-  const emptyMsg = q("card-rows").textContent.includes("Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾");
+  const emptyMsg = q("card-rows").textContent.includes("íè÷åãî íå íàéäåíî");
   finishDeleteCard("c1"); finishDeleteCard("c2"); await sleep(250);
   const clearedInput = q("card-search").value === "";
   q("card-question").value = "gamma"; q("card-answer").value = "three";
@@ -147,21 +147,21 @@ try {
   check("A-new-card-visible", rowsNow.length === 1 && rowsNow[0].textContent.includes("gamma"), "rows=" + rowsNow.length);
 
   const ext = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  ext.decks.find((d) => d.id === "d1").name = "Ð“Ð°Ð¼Ð¼Ð°";
+  ext.decks.find((d) => d.id === "d1").name = "Ãàììà";
   localStorage.setItem(STORAGE_KEY, JSON.stringify(ext));
   window.dispatchEvent(new StorageEvent("storage", { key: STORAGE_KEY }));
   await sleep(400);
-  check("E-cross-tab-reload", q("deck-title").textContent === "Ð“Ð°Ð¼Ð¼Ð°", q("deck-title").textContent);
+  check("E-cross-tab-reload", q("deck-title").textContent === "Ãàììà", q("deck-title").textContent);
 
   openLibrary(); await sleep(300);
   const addBtns = Array.from(document.querySelectorAll("#library-list button"));
-  const freeBtn = addBtns.find((b) => b.textContent.trim() === "Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ");
+  const freeBtn = addBtns.find((b) => b.textContent.trim() === "Äîáàâèòü");
   freeBtn.click(); await sleep(500);
   const decksAfterOne = state.decks.length;
   closeLibrary(); openLibrary(); await sleep(300);
   const btnsAgain = Array.from(document.querySelectorAll("#library-list button"));
-  const marked = btnsAgain.filter((b) => b.disabled || b.textContent.includes("Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¾"));
-  const freeLeft = btnsAgain.filter((b) => !b.disabled && b.textContent.trim() === "Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ").length;
+  const marked = btnsAgain.filter((b) => b.disabled || b.textContent.includes("Äîáàâëåíî"));
+  const freeLeft = btnsAgain.filter((b) => !b.disabled && b.textContent.trim() === "Äîáàâèòü").length;
   check("F6-library-guard", decksAfterOne === state.decks.length && marked.length >= 1 && freeLeft >= 1,
     "decks=" + state.decks.length + " marked=" + marked.length + " free=" + freeLeft);
   closeLibrary(); await sleep(200);
