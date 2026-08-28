@@ -1,7 +1,10 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.config import get_settings
 from app.routers import auth, decks, share, cards, study, migrate
@@ -10,6 +13,8 @@ from app.logging_config import setup_logging, get_logger
 
 settings = get_settings()
 setup_logging()
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -100,3 +105,20 @@ def metrics():
         lines.append(f"flashcards_{key} {value}")
 
     return "\n".join(lines)
+
+
+if FRONTEND_DIR.exists():
+    app.mount("/css", StaticFiles(directory=str(FRONTEND_DIR / "css")), name="css")
+    app.mount("/js", StaticFiles(directory=str(FRONTEND_DIR / "js")), name="js")
+
+    @app.get("/sw.js")
+    def service_worker():
+        return FileResponse(str(FRONTEND_DIR / "sw.js"), media_type="application/javascript")
+
+    @app.get("/")
+    def index():
+        return FileResponse(str(FRONTEND_DIR / "index.html"))
+
+    @app.get("/d/{slug}")
+    def shared_deck(slug: str):
+        return FileResponse(str(FRONTEND_DIR / "index.html"))

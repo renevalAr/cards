@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     MEDIA_ROOT: str = "/var/www/media"
     MEDIA_URL: str = "/media"
 
-    CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000"]
-    ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "flashcards.app", "testserver"]
+    CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000", "https://flashcards.fly.dev"]
+    ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "flashcards.fly.dev", "*.fly.dev", "testserver"]
     SECURE_COOKIES: bool = False
 
 
