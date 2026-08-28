@@ -185,7 +185,7 @@ function showToast(message, kind) {
 }
 
 function showStorageAlert() {
-  showToast("Не удалось сохранить данные. Хранилище переполнено или недоступно.");
+  showToast("Не удалось сохранить данные. Хранилище переполнено или недоступно.", "warn");
 }
 
 function loadState() {
@@ -218,23 +218,45 @@ function loadState() {
   }
 }
 
+function isQuotaError(error) {
+  return (
+    error instanceof DOMException &&
+    (error.name === "QuotaExceededError" ||
+      error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error.code === 22 ||
+      error.code === 1014)
+  );
+}
+
 function saveState() {
+  const payload = () => ({
+    v: SCHEMA_VERSION,
+    decks: state.decks,
+    cards: state.cards,
+    selectedDeckId: state.selectedDeckId,
+    today: state.today,
+    history: state.history,
+    sessions: state.sessions,
+  });
   try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        v: SCHEMA_VERSION,
-        decks: state.decks,
-        cards: state.cards,
-        selectedDeckId: state.selectedDeckId,
-        today: state.today,
-        history: state.history,
-        sessions: state.sessions,
-      })
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload()));
   } catch (error) {
+    if (isQuotaError(error) && state.sessions.length > 50) {
+      try {
+        state.sessions = state.sessions.slice(-50);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload()));
+        showToast("Хранилище переполнено — старые сессии удалены, прогресс сохранён.", "warn");
+        return;
+      } catch (retryError) {
+        console.warn("Не удалось сохранить данные после очистки", retryError);
+      }
+    }
     console.warn("Не удалось сохранить данные", error);
-    showStorageAlert();
+    if (isQuotaError(error)) {
+      showToast("Хранилище переполнено — удалите неиспользуемые колоды или экспортируйте базу.", "warn");
+    } else {
+      showStorageAlert();
+    }
   }
 }
 

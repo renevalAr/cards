@@ -1,6 +1,6 @@
 # Flashcards — Project Documentation
 
-> Полный контекст проекта для человека или ИИ. Прочитай этот файл — и можно работать над любой частью без дополнительного изучения кода.
+> Полный контекст проекта для человека или ИКИ. Прочитай этот файл — и можно работать над любой частью без дополнительного изучения кода.
 > Стиль: машинно-ориентированный (таблицы, ID, селекторы). Текст RU, заголовки EN.
 
 ---
@@ -13,12 +13,14 @@
 4. [Design System](#4-design-system)
 5. [Data & Storage](#5-data--storage)
 6. [Feature Logic](#6-feature-logic)
-7. [Tests](#7-tests)
-8. [Decisions Log](#8-decisions-log)
-9. [Pitfalls](#9-pitfalls)
-10. [Product Principles](#10-product-principles)
-11. [Roadmap Priorities](#11-roadmap-priorities)
-12. [Conventions](#12-conventions)
+7. [Backend API](#7-backend-api)
+8. [Infrastructure](#8-infrastructure)
+9. [Tests](#9-tests)
+10. [Decisions Log](#10-decisions-log)
+11. [Pitfalls](#11-pitfalls)
+12. [Product Principles](#12-product-principles)
+13. [Roadmap Priorities](#13-roadmap-priorities)
+14. [Conventions](#14-conventions)
 
 ---
 
@@ -28,56 +30,133 @@
 
 | Свойство | Значение |
 |---|---|
-| Стек | Vanilla HTML/CSS/JS, **без фреймворков, сборки, зависимостей, модулей** |
-| Запуск | Открыть `index.html` напрямую (`file://`) или любой static-сервер |
-| Данные | Только `localStorage`, офлайн-first, сервера нет |
+| Стек | **Backend:** Python 3.12 + FastAPI + SQLAlchemy + PostgreSQL 16. **Frontend:** Vanilla HTML/CSS/JS (без фреймворков/сборки) |
+| Запуск | Docker Compose (`docker-compose up -d`) или `file://index.html` (офлайн-режим) |
+| Данные | **Основной:** PostgreSQL через REST API. **Локальный:** localStorage (офлайн-режим или миграция) |
+| Аутентификация | JWT (access 15мин + refresh 30 дней) через httpOnly cookies |
 | Шрифты | PT Sans + PT Serif с Google Fonts (`display=swap`), фолбэки Segoe UI / Georgia |
 | Язык UI | Русский (строки захардкожены в JS/HTML) |
 | Палитры | 10, темы светлая/тёмная, выбор сохраняется |
-| Тесты | 22 PowerShell CDP-скрипта вне репозитория (`%TEMP%\opencode\`), ~648 проверок |
+| Тесты | 30 PowerShell CDP-скриптов (smoke), 25 pytest backend tests, 6 Playwright E2E |
 
 ---
 
 ## 2. File Structure
 
+### Backend (`backend/`)
+
+| Файл | Роль |
+|---|---|
+| `app/main.py` | FastAPI application, middleware, routers registration |
+| `app/config.py` | Settings via pydantic-settings (env vars) |
+| `app/database.py` | SQLAlchemy async engine + session |
+| `app/dependencies.py` | `get_current_user` (JWT verification) |
+| `app/middleware.py` | Rate limiting, request logging |
+| `app/logging_config.py` | Structured JSON logging |
+| `app/models/__init__.py` | User, Deck, Card, RefreshToken, StudySession |
+| `app/schemas/__init__.py` | Pydantic schemas for API validation |
+| `app/schemas/migration.py` | Migration payload schemas |
+| `app/routers/auth.py` | Register, login, /me |
+| `app/routers/decks.py` | Deck CRUD + card pagination + FTS search |
+| `app/routers/cards.py` | Card CRUD + image upload |
+| `app/routers/share.py` | Public deck access by slug |
+| `app/routers/study.py` | Study sessions + stats |
+| `app/routers/migrate.py` | Data migration from local storage |
+| `app/services/auth.py` | bcrypt + JWT utilities |
+| `app/services/image.py` | Pillow compression + file management |
+| `app/services/share.py` | Share slug generation |
+| `app/services/email.py` | SendGrid API integration |
+| `alembic/` | Database migrations |
+| `tests/` | pytest test suite |
+
+### Frontend (`frontend/`)
+
 | Файл | Строк | Роль |
 |---|---|---|
-| `index.html` | 475 | Вся разметка: sidebar, main, 10 бэкдропов + tour-tip + theme-bloom, инлайн-скрипт восстановления темы в `<head>`, favicon — inline SVG data-URI |
-| `style.css` | 2758 | Все стили; секции с баннерами `/* ==== Название ==== */` |
-| `storage.js` | 277 | `state`, нормализация, persist, статистика-хелперы, uid, даты |
-| `modal.js` | 169 | Generic-модалка на Promise, focus-trap, lockScroll, showLayer/hideLayer — единый паттерн всех оверлеев, настройки вида |
-| `ui.js` | 517 | `PALETTE_META` (единый источник палитр), рендеры списков, поиск, applyAppearance + bloom |
-| `study.js` | 719 | Перемешивание, флип, навигация, статусы, итог раунда, focus-режим, квиз + его фуллскрин |
-| `menu.js` | 385 | Главное меню, выбор колоды, действия колоды, обучающий тур |
-| `stats.js` | 183 | Окно статистики, дневные бары, сессии колоды |
-| `library.js` | 155 | Демо-колоды (данные) + модалка библиотеки |
-| `data.js` | 250 | Экспорт/импорт базы и колод (JSON+CSV), диалог слияния, toast-подтверждения |
-| `images.js` | 91 | IndexedDB-хранилище картинок, клиентское сжатие 480px WebP q0.6 |
-| `app.js` | 590 | Массовый ввод, CRUD колод/карточек, поиск/квиз-биндинги, маршрутизация фокусов, `bindEvents()`, инициализация |
+| `index.html` | 490+ | Вся разметка + auth UI + inline theme script |
+| `style.css` | 2920+ | Все стили + auth styles |
+| `js/api.js` | 80+ | API client + Auth module + Decks module |
+| `js/api/data.js` | 80+ | Data layer (CRUD, share, study, migration) |
+| `js/virtual-list.js` | 80+ | IntersectionObserver-based infinite scroll |
+| `js/share.js` | 50+ | Public deck viewing + share link copying |
+| `storage.js` | 301 | Local state + localStorage persistence (offline mode) |
+| `modal.js` | 169 | Generic modal, focus-trap, overlay pattern |
+| `ui.js` | 509 | Palettes, rendering, search, appearance |
+| `study.js` | 720 | Flip, quiz, focus mode, round lifecycle |
+| `menu.js` | 390 | Main menu, deck picker, tour |
+| `stats.js` | 204 | Statistics window |
+| `library.js` | 178 | Demo decks |
+| `data.js` | 366 | Import/export (JSON+CSV) |
+| `images.js` | 91 | IndexedDB image storage + compression |
+| `app.js` | 634+ | CRUD, bulk input, initialization, auth handlers |
 
-**Порядок загрузки** (все перед `</body>`, обычные скрипты):
-`storage.js → modal.js → ui.js → study.js → menu.js → stats.js → library.js → data.js → images.js → app.js`
+### Infrastructure
 
-Автозапуск при загрузке: `menu.js` → `bindMenuEvents()`, `stats.js` → `bindStatsEvents()`, `library.js` → биндинги библиотеки. Всё остальное запускает инициализация в конце `app.js`:
+| Файл | Роль |
+|---|---|
+| `docker-compose.yml` | Nginx + FastAPI + PostgreSQL |
+| `docker-compose.override.yml` | Local dev overrides |
+| `nginx/nginx.conf` | Reverse proxy, rate limiting, CSP, SSL-ready |
+| `backend/Dockerfile` | Python 3.12 + uvicorn + healthcheck |
+| `Makefile` | Dev commands (up, test, migrate, shell) |
+| `.github/workflows/ci.yml` | CI: backend tests + E2E |
+| `.github/workflows/deploy.yml` | CD: build + deploy to VPS |
 
-```js
-loadState(); renderThemeDots(); bindAutoTheme(); bindEvents(); syncAppearanceButtons(); render(); openMenu();
+**Порядок загрузки скриптов** (все перед `</body>`):
 ```
-
-Инлайн-скрипт в `<head>` (до CSS-рендера) восстанавливает тему из localStorage, чтобы не было вспышки: читает `flashcards-mode`/`flashcards-palette`, подхватывает legacy-ключ `flashcards-theme` (`night`→dark+ember, `orange`→ember), ставит `data-mode`/`data-palette` на `<html>`.
+js/api.js → js/api/data.js → js/virtual-list.js → js/share.js →
+storage.js → modal.js → ui.js → study.js → menu.js → stats.js →
+library.js → data.js → images.js → app.js
+```
 
 ---
 
 ## 3. Architecture
 
-### 3.1 Communication Model
+### 3.1 System Overview
 
-- Все функции — **глобальные**, вызываются между файлами напрямую (без модулей намеренно — см. Decisions Log).
-- Единственная точка полного перерендера — `render()` (ui.js). Локальные обновления (статус карточки, статистика) идут точечно: `updateCardRowStatus()`, `renderStats()`.
-- Списки рендерятся через `DocumentFragment` одним append'ом.
-- События строк списка карточек **делегированы контейнеру** (`bindCardRowsDelegation`: click/DnD на `#card-rows`) — рендер не плодит листенеры, масштабируется линейно.
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        Nginx (80/443)                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │ /static/*    │  │ /api/*       │  │ /                │   │
+│  │ статика      │  │ FastAPI      │  │ SPA index.html   │   │
+│  └──────────────┘  └──────┬───────┘  └──────────────────┘   │
+└───────────────────────────┼──────────────────────────────────┘
+                            │
+                   ┌────────▼────────┐
+                   │   FastAPI       │
+                   │   (uvicorn)     │
+                   └────────┬────────┘
+                            │
+               ┌─────────────┼─────────────┐
+               │             │             │
+        ┌──────▼──────┐      │      ┌──────▼──────┐
+        │ PostgreSQL  │      │      │ Local FS    │
+        │ + FTS       │      │      │ (images)    │
+        └─────────────┘      │      └─────────────┘
+                             │
+                      ┌──────▼──────┐
+                      │ psycopg2    │
+                      │ (sync)      │
+                      └─────────────┘
+```
 
-### 3.2 Global State (storage.js)
+### 3.2 Communication Model
+
+**Backend:**
+- REST API with JSON responses
+- JWT authentication via httpOnly cookies
+- Sync SQLAlchemy with PostgreSQL (psycopg2)
+- Rate limiting: 5 req/min for auth, 30 req/s for API
+
+**Frontend:**
+- All functions are **global**, called directly between files (no modules by design)
+- API client (`js/api.js`) with automatic token refresh on 401
+- Data layer (`js/api/data.js`) abstracts API calls
+- Offline mode: falls back to localStorage if API unavailable
+
+### 3.3 Global State (storage.js)
 
 ```js
 state = {
@@ -97,10 +176,11 @@ state = {
 
 `saveState()` пишет только: `decks, cards, selectedDeckId, today, history, sessions`.
 
-### 3.3 DOM Contract — все ID
+### 3.4 DOM Contract — все ID
 
 | Область | ID | Назначение |
 |---|---|---|
+| Auth | `auth-backdrop`, `auth-tab-login`, `auth-tab-register`, `auth-login-form`, `auth-register-form`, `auth-login-error`, `auth-register-error`, `auth-bar`, `auth-user-email`, `auth-logout-btn` | Формы входа/регистрации, бар пользователя |
 | Sidebar | `new-deck-btn`, `deck-list`, `settings-btn` | создание колоды, список, настройки |
 | Empty | `empty-state`, `empty-new-deck-btn`, `empty-menu-btn` | экран «Пока пусто» |
 | Workspace | `workspace`, `deck-title`, `stats`, `menu-back-btn`, `rename-deck-btn`, `delete-deck-btn` | шапка колоды |
@@ -119,14 +199,13 @@ state = {
 | Summary | `summary-backdrop`, `summary-line`, `summary-fill`, `summary-repeat`, `summary-stats`, `summary-menu` | итог раунда |
 | Stats | `stats-backdrop`, `stats-close`, `stats-main`, `stats-total`, `stats-today`, `stats-alltime`, `stats-list`, `stats-empty`, `stats-go-study`, `stats-deck`, `stats-back`, `stats-deck-title`, `stats-sessions` | окно статистики |
 | Tour | `tour-tip`, `tour-text`, `tour-skip`, `tour-next` | обучающий тур |
-| Effects | `theme-bloom`, `storage-alert` | вспышка при смене темы; несущий баннер сбоя сохранения (`role=alert`, авто-скрытие 6с) |
-| Статичные надзаголовки/титулы | `deck-kicker`, `settings-title`, `deck-pick-kicker`, `deck-pick-title`, `menu-pop-kicker`, `menu-pop-title`, `library-kicker`, `library-title`, `bulk-kicker`, `bulk-title`, `summary-kicker`, `summary-title`, `stats-title`, `stats-deck-kicker` | текстовые узлы, заполняются статикой в HTML либо JS при открытии |
+| Effects | `theme-bloom`, `storage-alert` | вспышка при смене темы; несущий баннер сбоя сохранения (`role=alert`, авто-скрытие 4.5с ok / 8с warn) |
 
-Итого 158 ID — полный список совпадает с разметкой (проверено grep'ом по `id="`).
+Итого 165+ ID — полный список совпадает с разметкой.
 
 Ключевые классы-состояния: `.hidden` (display:none!important), `.is-open` (бэкдропы), `.is-active` (вкладки/фильтры/точки/колоды), `.is-flipped` / `.was-flipped` / `.is-swap` (карта), `.modal-open` (body, блокировка скролла), `.warn` (bulk-feedback), `.tour-highlight`.
 
-### 3.4 Overlay Pattern (единый для всех окон)
+### 3.5 Overlay Pattern (единый для всех окон)
 
 ```
 .modal-backdrop { opacity:0; visibility:hidden; pointer-events:none;
@@ -137,22 +216,22 @@ state = {
 Открытие всегда через `showLayer(backdrop)` (= classList.add + reflow), затем `lockScroll(true)` и focus(). Закрытие — `hideLayer(backdrop)`.
 Закрытие: снять класс, `lockScroll(false)`, вернуть фокус на триггер (`canFocus(el)` проверяет подключённость и видимость).
 
-Z-index шкала: `menu-backdrop` 40 · `modal-backdrop` 40 · `stats-backdrop` 45 · `settings-backdrop` 46 · `focus-backdrop` 60 · `tour-tip` 70 · `theme-bloom` 300. Тайминги появления: модалки и focus — 0.28s, меню и статистика — 0.3s.
+Z-index шкала: `menu-backdrop` 40 · `modal-backdrop` 40 · `stats-backdrop` 45 · `settings-backdrop` 46 · `focus-backdrop` 60 · `tour-tip` 70 · `theme-bloom` 310. Тайминги появления: модалки и focus — 0.28s, меню и статистика — 0.3s.
 
 Escape: у каждого бэкдропа свой keydown со `stopPropagation()`; плюс документный fallback `closeTopModal()` (input-модалка → настройки). Tab внутри окна — `trapTabKey(backdrop, event)` по списку `getFocusable()`.
 
-### 3.5 Focus Mode (study.js)
+### 3.6 Focus Mode (study.js)
 
 Узел `#flashcard` **физически перемещается** `appendChild` между `.flashcard-wrap` (дом) и `#focus-wrap` (полноэкран). Выход возвращает в первый `.flashcard-wrap` внутри `#study-board`. Кнопки дублированы (`mark-*` / `focus-*`), `aria-pressed` синхронизируется в `syncPressState(card)`.
 
-### 3.6 Round Lifecycle
+### 3.7 Round Lifecycle
 
 ```
 startStudyShuffle() → beginRound(shuffle(ids))  // studyOrder, счётчики reset
   ↳ flipCard(): первый флип карточки за раунд → status="unknown",
-    today.unknown++, history[deck][today]++, flipCounted/sessionMarked.add(id)
+    today.unknown++, history[deck][today]++, scoredStatus/sessionMarked.add(id)
   ↳ markStatus("known"|"unknown"): sessionMarked.add(id), today/history,
-    при известном flipCounted двойной счёт unknown не идёт
+    при известном scoredStatus двойной счёт unknown не идёт
   ↳ moveStudy(±1): индекс по модулю; next на последней при полном раунде → summary
 isRoundComplete(): sessionMarked.size >= studyOrder.length
 showSummary(): exitFocusMode → запись session → окно итога
@@ -161,7 +240,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 
 Смена карточки: класс `is-swap` снимается по `animationend` ИЛИ таймеру 500ms (страховка, CSS 420ms); `swapCleanup` против гонок при быстрых кликах.
 
-### 3.7 Global Function Map
+### 3.8 Global Function Map
 
 | Файл | Функции |
 |---|---|
@@ -174,9 +253,13 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | library.js | `addedDemoIds`, `markDemoAdded`, `renderLibrary`, `openLibrary`, `closeLibrary`, `addDemoDeck` |
 | images.js | imgOpen, imgTx, imgReq, imgGet, imgPut, imgDelete, imgGcOrphans, loadImageElement, compressImageFile (IndexedDB + сжатие) |
 | data.js | `todayStamp`, `slugifyName`, `downloadBlob`, `buildBackupPayload`, `exportBaseJson`, `exportDeckJson`, `csvField`, `csvSplitLine`, `exportBaseCsv`, `looksLikeCsv`, `parseImportJson`, `parseImportCsv`, `openDataDialog`, `closeDataDialog`, `summarizeImport`, `handleImportText`, `applyCsvImport`, `applyImport`, `bindDataEvents` |
-| app.js | `startEditCard`, `splitBulkPair`, `parseBulkLines`, `openBulkInput`, `closeBulkInput`, `applyBulkInput`, `createDeck`, `renameDeck`, `deleteDeck`, `resetDeckProgress`, `deleteCard`, `saveCard`, `finishDeleteCard`, `bindEvents`, `bindMotionExtras`, `bindMotionExtras` |
+| app.js | `startEditCard`, `splitBulkPair`, `parseBulkLines`, `openBulkInput`, `closeBulkInput`, `applyBulkInput`, `createDeck`, `renameDeck`, `deleteDeck`, `resetDeckProgress`, `deleteCard`, `saveCard`, `finishDeleteCard`, `bindEvents`, `bindMotionExtras`, `bindAuthEvents`, `showAuthModal`, `hideAuthModal`, `showAuthBar` |
+| js/api.js | `API.request`, `API._tryRefresh`, `Auth.init/login/register/logout`, `Decks.list/get/create/update/delete/getCards/addCard` |
+| js/api/data.js | `Data.loadDecks/loadDeck/createDeck/updateDeck/deleteDeck/loadCards/addCard/updateCard/deleteCard/uploadImage/enableShare/disableShare/getPublicDeck/getPublicCards/startStudySession/updateStudySession/getStudyStats/migrateData/exportLocalData` |
+| js/virtual-list.js | `VirtualList` class (IntersectionObserver infinite scroll) |
+| js/share.js | `Share.viewPublicDeck/enableSharing/disableSharing/getShareUrl/copyShareLink` |
 
-### 3.8 Constants
+### 3.9 Constants
 
 | Константа | Значение | Где |
 |---|---|---|
@@ -185,14 +268,18 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | `VALID_STATUSES` | Set(`new`, `known`, `unknown`) | storage.js |
 | `MAX_NAME_LENGTH` | 80 | storage.js |
 | `MAX_SESSIONS` | 200 | storage.js + data.js: кап сессий, при merge сортировка по дате перед усечением |
-| `CORRUPT_KEY` | `flashcards-app-v1-corrupt` — бэкап непарсящегося payload; пишется в `loadState` при ошибке разбора + warn-toast | storage.js |
+| `CORRUPT_KEY` | `flashcards-app-v1-corrupt` — бэкап непарсящегося payload | storage.js |
 | `BULK_SEPARATOR` | `"="` | app.js |
-| `SCHEMA_VERSION` | `1` — поле `v` в payload базы; `migrateSchema` пропускает legacy и будущие версии без краша | storage.js |
-| `EXPORT_VERSION` / cap sessions | `2` / последние 200 записей (обрезка в `recordSession`) | data.js / storage.js |
+| `SCHEMA_VERSION` | `1` — поле `v` в payload базы | storage.js |
+| `EXPORT_VERSION` / cap sessions | `2` / последние 200 записей | data.js / storage.js |
 | `SWAP_DURATION` | 500 (ms, JS-страховка; CSS-анимация 420) | study.js |
 | `DEMO_DECKS` | 3 демо-колоды: английский 30 карт, столицы 12, элементы 15 | library.js |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | backend/app/config.py |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | backend/app/config.py |
+| `MAX_IMAGE_SIZE` | 2MB | backend/app/services/image.py |
+| `MAX_DIMENSION` | 480px | backend/app/services/image.py |
 
-Модульные переменные-состояния: `swapCleanup`, `flipCounted`, `sessionMarked`, `statusCounted`, `focusMode`, `focusTrigger`, `quizActive`, `quizAnswered`, `quizOrder`, `quizIndex`, `quizRight`, `quizWrong`, `quizRetry`, `quizFullscreen`, `flipAnims`, `flipRun` (study.js); `menuPopTrigger`, `tourStep`, `tourSteps` (menu.js); `modalResolver`, `modalTrigger`, `settingsTrigger` (modal.js); `libraryTrigger` (library.js); `bulkTrigger`, `dragCardId`, `rowsBound`, `hadMarks`, `pendingImage`, `editImageId` (app.js); `prevDeckId` (ui.js). Константы анимации флипа: `FLIP_BEZIER=[0.45,0,0.25,1]`, `FLIP_DUR=620`.
+Модульные переменные-состояния: `swapCleanup`, `scoredStatus`, `sessionMarked`, `focusMode`, `focusTrigger`, `quizActive`, `quizAnswered`, `quizOrder`, `quizIndex`, `quizRight`, `quizWrong`, `quizRetry`, `quizFullscreen`, `flipAnims`, `flipRun` (study.js); `menuPopTrigger`, `tourStep`, `tourSteps` (menu.js); `modalResolver`, `modalTrigger`, `settingsTrigger` (modal.js); `libraryTrigger` (library.js); `bulkTrigger`, `dragCardId`, `rowsBound`, `hadMarks`, `pendingImage`, `editImageId` (app.js); `prevDeckId` (ui.js). Константы анимации флипа: `FLIP_BEZIER=[0.45,0,0.25,1]`, `FLIP_DUR=620`.
 
 ---
 
@@ -266,12 +353,12 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 - Световой сдвиг сохраняется всю анимацию: matrix tx=6.0, ty=7.0 в любой фазе.
 - Панель и фокус идентичны (одни сэмплы, база выровнена под карту после фикса padding-box).
 - Потолок точности: карта из-за perspective:1400px шире идеального |cos| на ≤2.5% в середине — незаметно в движении.
-- Реверс бесшовен: повторный клик продолжает с текущего аналитического угла (`flipRun` хранит from/to/t0/dur; скачок ширины 2.7% вместо ~88% у старого CSS-рестарта).
+- Реверс бесшовен: повторный клик продолжается с текущего аналитического угла (`flipRun` хранит from/to/t0/dur; скачок ширины 2.7% вместо ~88% у старого CSS-рестарта).
 - Swap: `card-swap-shadow 0.42s var(--ease)` на том же `::before` — тень уезжает/приезжает вместе с картой.
 
 ### 4.6 Face Lines (линии тетради на карте)
 
-Фон грани — чистый `var(--card)`; узор вынесен на `.face::before` (`inset:0; z-index:-1; pointer-events:none`) — под текстом, над фоном. Во время флипа узор гаснет: `lines-dim 0.62s var(--flip)` (opacity 1 → 0.12 @39% → 1) — убивает мерцание 1px-полос при 3D-повороте.
+Фон грани — чистый `var(--card)`; узор вынесен на `.face::before` (`inset:0; z-index:-1; pointer-events:none`) — под текстом, над фоном. Во время флипа узор гасится: `lines-dim 0.62s var(--flip)` (opacity 1 → 0.12 @39% → 1) — убивает мерцание 1px-полос при 3D-повороте.
 
 | Палитра граней | Узор |
 |---|---|
@@ -304,30 +391,55 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 
 ## 5. Data & Storage
 
-### 5.1 localStorage Keys
+### 5.1 Dual Storage Model
+
+**Primary (online):** PostgreSQL via REST API. All user data, decks, cards, study sessions stored server-side.
+
+**Local (offline/migration):** localStorage for offline mode. Can be migrated to server via `/api/migrate` endpoint.
+
+### 5.2 Database Schema (PostgreSQL)
+
+```sql
+users (id UUID PK, email UNIQUE, password_hash, display_name, is_active, is_verified, created_at, updated_at)
+decks (id UUID PK, owner_id FK→users, name, description, is_public, share_slug UNIQUE, two_sided, search_vector TSVECTOR, created_at, updated_at)
+cards (id UUID PK, deck_id FK→decks, question, answer, status, image_path, position, search_vector TSVECTOR, created_at, updated_at)
+refresh_tokens (id UUID PK, user_id FK→users, token_hash, expires_at, is_revoked, created_at)
+study_sessions (id UUID PK, user_id FK→users, deck_id FK→decks, known_count, unknown_count, studied_at DATE, created_at)
+```
+
+FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russian language search.
+
+### 5.3 localStorage Keys
 
 | Ключ | Значение |
 |---|---|
-| `flashcards-app-v1` | JSON всего состояния (см. 3.2) |
+| `flashcards-app-v1` | JSON всего состояния (см. 3.3) |
 | `flashcards-mode` | `light` \| `dark` \| `auto` (авто = следование системной схеме) |
 | `flashcards-fontsize` | `s` \| `m` \| `l` (масштаб учебных поверхностей 0.9/1/1.1) |
 | `flashcards-palette` | один из 10 id |
 | `flashcards-onboarded` | `"1"` после тура |
 | `flashcards-theme` | LEGACY: миграция в head-скрипте |
 
-### 5.2 Normalization (normalizeState)
+### 5.4 Normalization (normalizeState)
 
 Загрузка переживает любой мусор: не-объект → пустое состояние; колоды без имени/dubli id — долой; карточки с битым deckId, пустым вопросом/ответом, дублем id — долой; статусы вне `VALID_STATUSES` → `new`; имена трим до 80; числа клампятся `max(0, floor(n))`; даты срезаются до 10 символов. Повреждённое хранилище = пустой старт без краша (покрыто тестами).
 
-### 5.3 Daily Logic
+### 5.5 Daily Logic
 
 - `resetTodayIfNeeded()`: дата не совпала → счётчики дня в ноль (history при этом сохраняется).
 - Streak: подряд идущие дни с любой активностью, начиная с сегодня (или вчера, если сегодня ещё пусто).
 - `recordStudy(deckId, status)` пишет в `history`; `recordSession` аппендит в `sessions` при показе итога.
 
-### 5.4 IndexedDB — изображения карточек
+### 5.6 IndexedDB — изображения карточек
 
 База `flashcards-images` v1, store `images`, ключ = **cardId**, значение = dataURL уже сжатой картинки. JSON-база в localStorage хранит только текст карточек — картинки живут отдельно и в экспорт/импорт JSON/CSV **не входят** (осознанное ограничение, см. Decisions Log). Очистка: удаление карточки (`finishDeleteCard`) и колоды (`deleteDeck`) удаляют соответствующие ключи IDB fire-and-forget; сид тестов делает `indexedDB.deleteDatabase`. Сжатие: `compressImageFile` → максимум 480px по длинной стороне, WebP q0.6 (фолбэк JPEG q0.6, если WebP недоступен).
+
+### 5.7 API Client (js/api.js)
+
+- Automatic token refresh on 401 responses
+- httpOnly cookies for JWT storage
+- `credentials: "include"` for all requests
+- Error handling with toast notifications
 
 ---
 
@@ -355,80 +467,145 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | Two-sided decks | study.js + menu.js + ui.js | флаг `deck.twoSided`; основной переключатель — чип `#two-sided-btn` («⇄ обе стороны») в панели «Учить» рядом с режимами (is-active/aria-pressed, клик пересобирает раунд: flip → startStudyShuffle, quiz → перезапуск всей колоды); дубль пункта в меню действий колоды. Раунд строится из ЗАПИСЕЙ `id` / `id#rev` (`buildStudyEntries`): реверс показывает ответ на фронте + «· наоборот» в мете; счётчики раунда ключуются записью; итог считает записи; квиз реверса спрашивает ответ вариантами-вопросами; повторы сохраняют структуру |
 | Card images | images.js + app.js + ui.js + study.js | форма: «Картинка…» → сжатие → превью 64px (✕ снимает; при редактировании существующая грузится из IDB); сохранение пишет ключ cardId→dataURL. Отображение: `<img id="face-img-front">` на фронте карты (race-guard: токен по id текущей карточки), миниатюры `.row-thumb` 44px в списке; фокус-режим получает картинку бесплатно (карта переносится целиком). Удаление карты/колоды чистит IDB |
 | Picker one-click (Q16) | menu.js + style.css | строка пикера = контейнер `.deck-pick-item` (div): клик по основной зоне `.deck-pick-main` сразу открывает колоду («Карточки»); кнопка «⋯» (`.deck-pick-more`, SVG-три точки currentColor) открывает меню действий; появление more-in (выезд справа, spring), hover строки → точки окрашиваются accent'ом и каскадно подпрыгивают (dot-hop ×3 со сдвигом 60мс), active — прижим |
-| Quiz digit keys (Q18) | app.js + study.js + style.css | клавиши 1–4 жимают варианты (document-level listener, гейты: quizActive && !quizAnswered && нет открытых оверлеев); на кнопках бейджи-цифры (::before по data-key): покой — акцентная плашка, hover — scale 1.1; верный → ✓ на зелёном known + scale, неверный → ✕ на danger + badge-shake, dim → opacity/scale down || Data import/export | data.js + index.html | Настройки → «Данные»: скачать базу JSON (`v:2`, вся база с history/sessions), CSV (`deck;question;answer;status`, кавычки по RFC-стилю), импорт файла (.json/.csv). Экспорт колоды — пункт «Экспортировать колоду» в действиях колоды (kind:"deck"). Импорт JSON базы/колоды открывает диалог `data-backdrop`: «Слить» (колоды сопоставляются по имени; дубли карт по сигнатуре deck+question+answer пропускаются; повторный импорт идемпотентен) или «Заменить всё» (normalizeState + сброс selected на первую). CSV мержится сразу: 4 колонки → колоды по имени создаются, 3 колонки → в текущую колоду. Ошибки парсинга → warn-toast, краха нет. Все подтверждения через toast (`showToast(msg, ok/warn)` на #storage-alert) |
-| Reliability (раунд правок) | все файлы | счётчики дня: **одна карточка — одно событие за раунд** (`statusCounted`, спам «Знаю» и флип+«знаю» не накручивают); сбой `saveState`/`loadState` → баннер `#storage-alert` (6с); кросс-вкладочная синхронизация (storage-event → loadState+render); Esc-каскад документного уровня покрывает ВСЕ оверлеи при фокусе на body; у каждого бэкдропа stopPropagation в Escape-ветке; поиск автоочищается при опустении колоды («воскрешение» поиска); демо-колоды защищены от дублей (`DEMO_KEY`, кнопка «Добавлено ✓» disabled); bulk-hint предупреждает про первый «=»; countUp до 9999; тур перепозиционируется при resize |
+| Quiz digit keys (Q18) | app.js + study.js + style.css | клавиши 1–4 жимают варианты (document-level listener, гейты: quizActive && !quizAnswered && нет открытых оверлеев); на кнопках бейджи-цифры (::before по data-key): покой — акцентная плашка, hover — scale 1.1; верный → ✓ на зелёном known + scale, неверный → ✕ на danger + badge-shake, dim → opacity/scale down |
+| Data import/export | data.js + index.html | Настройки → «Данные»: скачать базу JSON (`v:2`, вся база с history/sessions), CSV (`deck;question;answer;status`, кавычки по RFC-стилю), импорт файла (.json/.csv). Экспорт колоды — пункт «Экспортировать колоду» в действиях колоды (kind:"deck"). Импорт JSON базы/колоды открывает диалог `data-backdrop`: «Слить» (колоды сопоставляются по имени; дубли карт по сигнатуре deck+question+answer пропускаются; повторный импорт идемпотентен) или «Заменить всё» (normalizeState + сброс selected на первую). CSV мержится сразу: 4 колонки → колоды по имени создаются, 3 колонки → в текущую колоду. Ошибки парсинга → warn-toast, краха нет. Все подтверждения через toast (`showToast(msg, ok/warn)` на #storage-alert) |
+| Reliability (раунд правок) | все файлы | счётчики дня: **одна карточка — одно событие за раунд** (`scoredStatus` Map в study.js, спам «Знаю» и флип+«знаю» не накручивают); сбой `saveState`/`loadState` → баннер `#storage-alert` (8с warn / 4.5с ok); кросс-вкладочная синхронизация (storage-event → loadState+render); Esc-каскад документного уровня покрывает ВСЕ оверлеи при фокусе на body; у каждого бэкдропа stopPropagation в Escape-ветке; поиск автоочищается при опустении колоды («воскрешение» поиска); демо-колоды защищены от дублей (`DEMO_KEY`, кнопка «Добавлено ✓» disabled); bulk-hint предупреждает про первый «=»; countUp до 9999; тур перепозиционируется при resize |
 
 ---
 
-## 7. Tests
+## 7. Backend API
 
-### 7.1 How It Works
+### 7.1 Auth Endpoints
 
-Наборы живут **внутри проекта**: `<проект>\tests\cdp-*-test.ps1` (28 наборов, включая perf-бюджеты). Каждый:
+| Method | Path | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Register new user (email + password) |
+| POST | `/api/auth/login` | Login, returns access + refresh tokens |
+| POST | `/api/auth/refresh` | Refresh access token |
+| POST | `/api/auth/logout` | Logout (revoke refresh token) |
+| GET | `/api/auth/me` | Get current user profile |
 
-1. Запускает свой Chrome с `--remote-debugging-port`, открывает `index.html`. Пути вычисляются от расположения скрипта — проект переносим; параметры `-DebugPort`/`-BrowserExe` позволяют раннеру раздавать порты и браузер.
-2. Сеет localStorage через CDP `Page.addScriptToEvaluateOnNewDocument`.
-3. Прогоняет сценарий через `Runtime.evaluate`, собирает `{step, ok, detail}`.
-4. Печатает `[PASS]/[FAIL]` или JSON + `TOTAL FAILS`.
+### 7.2 Deck Endpoints
 
-Единый раннер `tests\run-tests.ps1`: параллельный пул (по умолчанию 5 инстансов → полный прогон ~100с), режимы `-Smoke` (unit+full+quiz+data+tts ≈30с) и полный, `-Browser edge`, `-Filter <имя>`, текстовый лог падений в `tests\results\failures-<дата>.log`, exit code 0/1.
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/decks` | List user's decks |
+| POST | `/api/decks` | Create new deck |
+| GET | `/api/decks/{id}` | Get deck by ID |
+| PATCH | `/api/decks/{id}` | Update deck |
+| DELETE | `/api/decks/{id}` | Delete deck |
+| GET | `/api/decks/{id}/cards` | List cards (paginated, FTS search) |
+| POST | `/api/decks/{id}/cards` | Add card to deck |
 
-Запуск: `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1 [-Smoke] [-Parallel N] [-Browser chrome|edge]`
-CI: GitHub Actions (`.github/workflows/ci.yml`, windows-latest + setup-chrome): smoke на push в main, полный прогон через Actions → Run workflow (mode=full); лог падений — артефактом job'а.
-Перед правкой файл перечитывают и пересохраняют в UTF8 (проблемы кириллицы в PS 5.1):
+### 7.3 Card Endpoints
 
-```powershell
-$c = Get-Content -LiteralPath $f -Raw -Encoding UTF8
-Set-Content -LiteralPath $f -Value $c -Encoding UTF8
+| Method | Path | Description |
+|---|---|---|
+| PATCH | `/api/cards/{id}` | Update card |
+| DELETE | `/api/cards/{id}` | Delete card |
+| POST | `/api/cards/{id}/image` | Upload card image (multipart) |
+| DELETE | `/api/cards/{id}/image` | Delete card image |
+
+### 7.4 Share Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/decks/share/{slug}` | Get public deck by slug |
+| GET | `/api/decks/share/{slug}/cards` | Get public deck cards |
+| POST | `/api/decks/{id}/share` | Enable sharing (generate slug) |
+| DELETE | `/api/decks/{id}/share` | Disable sharing |
+
+### 7.5 Study Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/api/study/session` | Start study session |
+| PATCH | `/api/study/session/{id}` | Update session progress |
+| GET | `/api/study/stats` | Get user statistics |
+
+### 7.6 Migration Endpoint
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/api/migrate` | Migrate data from local storage |
+
+### 7.7 Healthcheck
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/health` | Basic healthcheck |
+| GET | `/api/health/detailed` | Detailed healthcheck (includes DB status) |
+
+---
+
+## 8. Infrastructure
+
+### 8.1 Docker Compose
+
+```
+nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 ```
 
-Pre-commit: core.hooksPath=.githooks → smoke перед каждым коммитом (пропуск: git commit --no-verify).
-Браузеры: Chrome — основная платформа всех проверок; Edge (Chromium) — smoke совместим на 100% тем же харнессом (`-Browser edge`); Firefox — только лёгкая проверка работоспособности (headless-рендер), полноценный CDP у него другой протокол.
+- **Nginx:** reverse proxy, static files, rate limiting, SSL-ready
+- **Backend:** FastAPI + uvicorn, healthcheck, non-root user
+- **DB:** PostgreSQL 16, healthcheck, persistent volume
 
-### 7.2 Suites (30)
+### 8.2 Environment Variables
 
-| Скрипт | Область | Проверок | Критичные шаги |
-|---|---|---|---|
-| `cdp-full-test.ps1` | Сквозняк A: тур, темы, палитры, cover-fit, picker/pop, study-раунд, summary, повторы, статистика, rename/delete/create колод; B: битый storage | ~65 | `no-errors`, `header-updated`, `summary-line*`, `stats-*` |
-| `cdp-e2e-test.ps1` | A: CRUD карточек/колод, клавиатура, счётчики флипа, bulk, persist после reload; B: повторная загрузка | 79 | `persisted-*`, `kbd-*`, `bulk-added` |
-| `cdp-extra-test.ps1` | A: табы-стрелки, Ctrl+Enter, focus-навигация, bigStudy, popup-путь, tab-trap; B: пустое хранилище | 42 | `tab-trap`, `create-from-empty` |
-| `cdp-focus-test.ps1` | Жизненный цикл focus-режима + summary поверх фокуса | 25 | `card-in-focus`, `focus-stays-open`, `summary-over-focus` |
-| `cdp-summary-test.ps1` | Математика итога, оба режима повтора, счётчики дня | 22 | `fill100/fill0`, `repeat-*` |
-| `cdp-unit-test.ps1` | Чистые функции: даты, uid, shuffle, normalizeState (edges), bulk-parse, streak, pluralDays, roundComplete, badges | 79 | все |
-| `cdp-palette-test.ps1` | 10 палитр + уникальность menu-pattern + тёмный паттерн | 15 | `patterns-unique`=10 |
-| `cdp-pattern-test.ps1` | Уникальность узоров study/dot/mode-кнопок по палитрам, шрифт, попап | 24 | `dot-patterned`, `*-unique`=10 |
-| `cdp-menu-test.ps1` | Cover-fit, сегодня, тур, picker-строки/бары, pop, z-order настроек над меню | 31 | `today`, `settings-z-above` |
-| `cdp-filter-test.ps1` | Фильтры, бейджи, удаление внутри фильтра, live-обновление, сброс после reload | 27 | `row-removed-live`, `filter-reset` |
-| `cdp-search-test.ps1` | Поиск: живой ввод, регистр, ответ, поверх фильтра, подсветка/multi-match, очистка крестик/Esc, сброс при смене колоды; B: не персистится | 23 | `highlight-mark`, `search-over-filter` |
-| `cdp-quiz-test.ps1` | Квиз: вход, длины, 4 уникальных варианта, авто-проверка, счётчики, итог/повторы; фуллскрин: ⛶-вход, скрытая панель, тень, крупный шрифт, бар, сохранение прогресса при ✕/Esc, summary поверх (z=66), retry внутри фуллскрина; B: сброс режима | 46 | `summary-math`, `qfs-progress-saved`, `qfs-summary-over` |
-| `cdp-autotheme-test.ps1` | Авто-тема: boot по схеме, 3 кнопки в обоих свитчах, следование эмуляции схемы, bloom-координаты, ручной override держится, возврат авто, персистентность; B: reload при тёмной схеме | 15 | `follows-light`, `manual-holds`, `persist-follows-dark` |
-| `cdp-fontsize-test.ps1` | S/M/L: дефолт m, подписи, масштаб строк 16→14.4/17.6 и карт 30→33, активная кнопка, сохранение; B: reload хранит l; C: битое значение → m | 13 | `row-scaled-*`, `face-scaled-up`, `bad-value-fallback-m` |
-| `cdp-motion-test.ps1` | Движение: ripple+очистка, stagger 0/30/60, tilt set + edge-hold стабильность (0 срывов, кламп 3.5°, шаг ≤0.4°) + сброс вне карты, pulse поиска (позиция крестика, scale-pop 1.125×2), wrong-flash, check-reveal, конфетти 70 при 100%, count-up 2→4, рост баров, menu-stagger 0.07s, каракули, drag reorder + persist, scrollbar-css | 22 | `M14:tilt-edge-stable`, `M7:confetti-spawn`, `M12b:reordered` |
-| `cdp-wave2-test.ps1` | Волна-2: индикаторы табов/колод, направленные панели, overshoot ~4° off-180, stamp-slap на видимой стороне, sheen только верный, field-error, row-new акцент, collapse 200мс, bulk fb+галочка, picker 25мс, flame серии, стикер data-count, crossfade колод, параллакс −19.2px | 19 | `W4:overshoot`, `W5:stamp-slap`, `W15:parallax` |
-| `cdp-stats-test.ps1` | Цифры, элементы колод, дневные бары, деталь колоды, рост сессий | 24 | `day-activity`, `sessions-grew` |
-| `cdp-reset-test.ps1` | Сброс прогресса: confirm/cancel, изоляция других колод | 18 | `other-deck-intact` |
-| `cdp-library-test.ps1` | Библиотека, добавление демо-колод (30/12/15 карт) | 23 | `cards30`, `cards42` |
-| `cdp-bulk-test.ps1` | Парсер: пробелы, мусор, пустые, несколько порций, warn | 17 | `parsed`, `no-garbage` |
-| `cdp-spacing-test.ps1` | Регрессия отступов: меню, streak, поля модалок | 13 | все |
-| `cdp-stats-empty-test.ps1` | Пустая статистика, кнопка «Учить» | 5 | `go-study` |
-| `cdp-fixes-test.ps1` | Надёжность: спам-счёт, одно событие/карта, сброс по раундам, countUp 9999, баннер квоты, Esc-каскад на body (bulk/library/stats/menu), автоочистка поиска + видимость новой карты, кросс-вкладка, guard библиотеки, resize тура | 16 | `F1-no-known-spam`, `E-cross-tab-reload` |
-| `cdp-tts-test.ps1` | Озвучка: две SVG-иконки на гранях, stroke=currentColor, цвет = --ink (canvas-декодинг), длинный многострочный текст не заходит в зону иконки (Range по строкам), клик иконки не флипает, фронт/тыл озвучиваются, stop, пустой guard, иконки едут в фокус | 14 | `ui-theme-color`, `text-clear-of-icon` |
-| `cdp-schema-test.ps1` | Миграции: legacy без v, v:1, будущее v:99 (+постороннее поле) без краша, битый v; saveState пишет v; версионированный reload | 10 | `migrate-future-no-crash`, `reload-versioned-ok` || `cdp-keys-test.ps1` | Q16/Q18: структура строки пикера (main+more), one-click открытие колоды без actions-pop, подсказки data-key, цифра выбирает верный/неверный вариант, игнор после ответа и вне квиза | 8 | `picker-oneclick-open`, `digit-right-picks` || `cdp-perf-test.ps1` | Перфоманс-бюджеты на колоде из 404 карт (медиана замеров): рендер списка, ввод поиска, старт квиза, рендер статистики; регрессия heavy-mode `.no-anim` | 6 | `budget-render-404-le120`, `heavy-mode-active` || `cdp-images-test.ps1` | Картинки: IDB roundtrip/delete, сжатие 1200×900 → ≤480 WebP, превью в форме, сохранение новой карты с ключом по id, миниатюра в списке, картинка на фронте карты (и скрыта для обычной), редактирование: превью из БД + снятие удаляет ключ, deleteCard чистит IDB | 15 | `compress-max-side-480`, `delete-cleans-idb` || `cdp-reverse-test.ps1` | Двусторонние: buildStudyEntries удваивает с #rev, раунд 4 записи, swap сторон + мета «наоборот», завершение после всех записей, итог по записям, квиз реверса, чип на панели (toggle off/on пересобирает раунд 4↔2), синхронность с меню действий, normalizeState хранит twoSided | 19 | `round-complete-after-4`, `chip-toggles-on` || `cdp-data-test.ps1` | Данные: UI-кнопки настроек, форма payload базы и колоды + имя файла, CSV-экспорт (заголовок, строки, round-trip, кавычки с `;` и `""`), CSV-merge с дедупликацией, диалог импорта колоды (merge по имени, идемпотентность), merge чужой базы (twin-mapping, дедуп в twin, новая колода), честный replace маленьким файлом + selected, битый файл → warn без краха, кап sessions=200, Esc data-слоя на body | 25 | `imp-merge-dedupe-in-twin`, `sessions-cap-200` |
+| Variable | Default | Description |
+|---|---|---|
+| `SECRET_KEY` | `change-me-in-production` | JWT signing key |
+| `DATABASE_URL` | `postgresql+asyncpg://flashcards:flashcards@db:5432/flashcards` | Database connection (asyncpg for SQLAlchemy, psycopg2 for Alembic) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | Access token lifetime |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | Refresh token lifetime |
+| `EMAIL_API_KEY` | `` | SendGrid API key |
+| `EMAIL_FROM` | `no-reply@flashcards.app` | Sender email |
+| `CORS_ORIGINS` | `["http://localhost"]` | Allowed CORS origins |
+| `ALLOWED_HOSTS` | `["localhost", "*.localhost", "flashcards.app", "testserver"]` | Trusted hosts |
+| `SECURE_COOKIES` | `False` | Enable secure flag for cookies (True in production) |
+| `RATE_LIMIT_ENABLED` | `True` | Enable rate limiting on auth endpoints |
 
-### 7.3 Test Rules
+### 8.3 CI/CD
 
-- **Даты в сиде — только динамические** (`new Date()` → `YYYY-MM-DD`): приложение сбрасывает суточные счётчики по дате, хардкод «вчера» ломает тест.
-- Ассерты не зависят от порядка shuffle (случайность перемешивания легитимна).
-- Эталон состояния после прогона: **все 30 наборов зелёные** (эталон ~769 ok / 0 fail; perf-бюджеты: рендер 404 ≤120мс, поиск ≤25мс, квиз ≤5мс, статистика ≤30мс).
-- Headless CDP `Emulation.setEmulatedMedia` обновляет ЗНАЧЕНИЕ matchMedia живьём, но НЕ диспатчит событие change — системный путь в тестах эмулируется прямым вызовом `applyAppearance({mode:"auto"})`; на реальных ОС событие нативное.
+- **CI:** GitHub Actions — backend tests (pytest) + E2E (Playwright) on push/PR
+- **CD:** GitHub Actions — build Docker image + deploy to VPS on push to main
 
 ---
 
-## 8. Decisions Log
+## 9. Tests
+
+### 9.1 Backend Tests (pytest)
+
+| File | Coverage |
+|---|---|
+| `tests/test_auth.py` | Registration, login, validation, /me |
+| `tests/test_decks.py` | CRUD, deck isolation between users |
+| `tests/test_cards.py` | CRUD, pagination, FTS search |
+| `tests/test_migrate.py` | Data migration |
+| `tests/test_health.py` | Healthcheck endpoints |
+
+### 9.2 E2E Tests (Playwright)
+
+| File | Coverage |
+|---|---|
+| `tests-e2e/test_auth.py` | Register, login, logout flows |
+| `tests-e2e/test_study.py` | Create deck, add cards, study mode |
+
+### 9.3 Smoke Tests (PowerShell CDP)
+
+30 scripts, ~769 checks — full frontend smoke test suite. Run: `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1 [-Smoke]`
+
+---
+
+## 10. Decisions Log
 
 | Решение | Почему (why) |
 |---|---|
-| Аудит-2026-08: батч A «гигиена» | Удалён мёртвый CSS (`.small-count`/`count-pop`, дубль `mark.search-hit`, мёртвый `#focus-wrap .quiz-progress`, избыточный 3-й `.quiz-option`); убрана отладочная запись `flashcards-vt-debug`; BOM срезается при импорте; тур закрывается навсегда при закрытии меню (флаг в `hideTour`); версии всех ассетов синхронизированы (`v=39`) |
+| FastAPI + SQLAlchemy (backend) | Выбрано пользователем, современный async Python |
+| PostgreSQL + FTS | Надёжная БД + полнотекстовый поиск на русском |
+| JWT через httpOnly cookies | Безопаснее localStorage, защита от XSS |
+| Docker Compose | Простой деплой, изоляция сервисов |
+| Дуальное хранение (API + localStorage) | Онлайн-режим + оффлайн-режим + миграция |
 | Тень на плоских обёртках, не внутри `.flashcard` | Внутрь `preserve-3d` её начинало **резать** при пересечении плоскостей во время вращения |
 | Единая кривая `--flip` (ease-in-out) для флипа, подъёма и гашения линий | Раньше ease-out заканчивал движение рывком в хвосте, а тень «догоняла» раньше карты; симметричная кривая распределяет движение по всем 0.62s — старт, «ребро» (39%) и финиш совпадают |
 | Тень качается `linear` по 14 плотным сэмплам, а не easing'ом | Ширина тени = |cos(угла)| — нелинейная функция прогресса; сэмплы сняты с реальной кривой поворота |
@@ -440,22 +617,22 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 | `shadow-swing-back` удалён | Был байт-в-байт дубликатом `shadow-swing-fwd` |
 | `.modal { border-radius: 16px }` литералом | Осознанно: тест `modal-radius` фиксирует 16px независимо от палитры; остальное — через `var(--radius)` |
 | Таймер 500ms поверх `animationend` свапа | CSS 420ms; страховка от потерянного события при скрытии вкладки |
-| Без модулей/сборки | Работа с `file://` без сервера; CORS-модули там не работают |
+| Без модулей/сборки (frontend) | Работа с `file://` без сервера; CORS-модули там не работают |
 | Reduced-motion: грани через `display` | 3D-трансформ отключён глобально, поэтому флип эмулируется показом нужной грани |
 | Summary поверх фокуса (z-index 66 динамически) | Итог раунда не должен выгонять из полноэкранного режима: квиз/карта продолжаются после закрытия итога; статический z-index ломал бы stats-over-summary, поэтому поднимается только при открытом фокусе |
 | Маршрутизация ✕/Esc фокуса по `quizFullscreen` | Одна кнопка ✕ обслуживает два режима фуллскрина; без маршрутизации выход из квиза вызывал бы `exitFocusMode` и молча ничего не делал |
-| showLayer/hideLayer вместо 12 копий add-class+reflow | Оверлей-паттерн дублировался в каждом окне; единые хелперы в modal.js убрали ~50 строк копипасты (регэксп-массаж при внедрении подменял тела хелперов — ловилось полным прогоном) |
+| showLayer/hideLayer вместо 12 копий add-class+reflow | Оверлей-паттерн дублировался в каждом окне; единые хелперы в modal.js убрали ~50 строк копипасты |
 | Делегирование событий строк списка на контейнер | Пер-строчные листенеры (click + 4 DnD) на 404 строках = ~2400 подписок на рендер; делегирование в `bindCardRowsDelegation` убирает их и память |
 | Heavy-mode списков (>60 строк без row-in) | Массовая вставка 400 анимаций одновременно давала ~70мс на рендер; отключение построчных анимаций на больших партиях убирает пик без потери UX на малых |
 | Флаг `--allow-file-access-from-files` удалён из харнесса | Отключение same-origin для file:// — приманка для эвристик Defender; не нужен (нет XHR), побочный эффект (cssRules SecurityError) обойдён computed-style проверками |
 | Зона tilt — стабильная обёртка, а не живой rect карты | Наклон сдвигает хит-квадрат карты: замер по нему = петля обратной связи и мерцание у края; обёртка не трансформируется и чуть шире — эффект стабилен вплоть до кромки |
-| Правило «одна карточка — одно событие за раунд» (statusCounted) | Повторный клик «Знаю» и флип+«знаю» накручивали дневные счётчики (5 кликов = +5 «изучено»); метрики меню разошлись бы с итогом раунда. Первая отметка карты в раунде фиксирует событие; новые раунды начинают отсчёт заново |
+| Правило «одна карточка — одно событие за раунд» (`scoredStatus` Map) | Повторный клик «Знаю» и флип+«знаю» накручивали дневные счётчики (5 кликов = +5 «изучено»); метрики меню разошлись бы с итогом раунда. Первая отметка карты в раунде фиксирует событие; новые раунды начинают отсчёт заново |
 | stopPropagation в Escape-ветке КАЖДОГО бэкдропа | Esc на настройках всплывал в документ, а расширенный каскад closeTopModal закрывал следующий слой (меню) — регрессия поймана зондом; единый инвариант: свой обработчик гасит событие, документный работает только при фокусе на body |
 | Кросс-вкладочная синхронизация через storage-event | Две вкладки одного файла молча перетирали данные друг друга (последняя сохранение побеждает); теперь внешнее изменение adopting через loadState+render |
 | Импорт колоды сливается в существующую по имени | Повторный импорт того же файла обязан быть идемпотентным: иначе каждая загрузка создаёт дубль колоды с копиями карт; сигнатурная дедупликация (deck+question+answer) добивает остатки |
 | CSV — диалект `deck;question;answer;status` | Первый столбец сохраняет структуру колод при полном экспорте; 3-колоночная форма принимается как «в текущую колоду»; кавычки с удвоением покрывают `;` и переводы строк внутри полей |
 | Тесты кликают кнопки меню действий по тексту, не по индексу | Меню действий расширилось (экспорт колоды), числовые индексы сдвинулись и сломали сразу несколько наборов — поймано полным прогоном |
-| Изображения — IndexedDB вне JSON-базы + сильное сжатие | localStorage (~5МБ) не выдержал бы dataURL; IDB снимает лимит. 480px/WebP q0.6 выбрано пользователем («ещё более сильное сжатие»): фото ~20-60КБ, сотни картинок в запасе; текст вопроса/ответа остаётся крошечным и полностью портируемым через экспорт |
+| Изображения — IndexedDB вне JSON-базы + сильное сжатие | localStorage (~5МБ) не выдержал бы dataURL; IDB снимает лимит. 480px/WebP q0.6 выбрано пользователем: фото ~20-60КБ, сотни картинок в запасе; текст вопроса/ответа остаётся крошечным и полностью портируемым через экспорт |
 | Hover-цвет точек «⋯»: light = mix(accent 72%, ink), dark = accent-2 | Свип WCAG 10 палитр × 2 темы: базовый accent в тёмных темах даёт 1.9–2.9 на тёмной карте (violet/indigo/slate/berry), светлое золото на креме 2.36; accent-2 в темноте поднимает до 4.3–7.9, подмес чернил в свету — до 3.55+. Замерять арифметикой токенов через probe-resolve: canvas-декодер падает на color()/color-mix, синтетический mouseover не ставит :hover |
 | View-transition анимация — CSS-keyframes, не JS `animate()` | JS-вариант (`await ready → animate`) содержал гонку: на занятом основном потоке Chrome успевал запустить дефолтный кроссфейд group-слоя (250мс), наша анимация цеплялась позже и обрывалась его финалом — «анимация доходит до середины и щёлкает до конца» у реальных пользователей. CSS-keyframes подхватываются автоматически при появлении псевдоэлемента — гонки не существует по построению; дефолты group/old заглушены явно |
 | Иконка озвучки — inline SVG на грани, не эмодзи на панели | Эмодзи имеет собственную чёрно-белую обводку и не окрашивается темой; SVG со stroke=currentColor наследует `--ink`/accent; размещение на карте устраняет разрыв контекста (действие над картой — на карте) и работает в фокус-режиме бесплатно |
@@ -463,17 +640,17 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 | stopPropagation не действует на СОСЕДНИЕ листенеры того же узла | Клик `.face-speak` и flipCard висят на одном #flashcard: погасили всплытие — flipCard всё равно получил событие; нужен guard внутри самого обработчика (`closest('.face-speak')`) |
 | Чередующиеся оценки одной карты в тестах | В двустороннем раунде одна карта отмечается несколько раз; «known затем unknown» оставляет статус unknown (последняя запись решает) — тестовые ожидания должны быть детерминированы |
 | IDB-ответы приходят позже рендера — нужен race-guard | `showStudyCard` запускает `imgGet` асинхронно; при быстрой навигации ответ устаревшей карточки может прийти последним и «приклеиться» к чужой карте — токен по id текущей карточки сверяется в момент разрешения промиса |
-| Картинки не входят в экспорт JSON/CSV | IDB и localStorage — раздельные хранилища; перенос базы с картинками потребовал бы zip/встроивание dataURL в JSON (раздувание файла в десятки МБ). Осознанное ограничение Фазы 2, задокументировано в §5.4 |
+| Картинки не входят в экспорт JSON/CSV | IDB и localStorage — раздельные хранилища; перенос базы с картинками потребовал бы zip/встроивание dataURL в JSON (раздувание файла в десятки МБ). Осознанное ограничение Фазы 2, задокументировано в §5.6 |
 | Inline-слушатели + делегирование на одном списке = двойной вызов | При внедрении делегирования inline-хвосты кнопок строк не вычистили — edit/delete срабатывали дважды; E2E не ловит КРАТНОСТЬ вызовов (конечное состояние то же) — при дублировании путей обработки событий проверять количество модалок/вызовов, не только итог |
 | Фича без теста «на существование» теряется в рефакторах | Heavy-mode (>60 строк без row-in) был внедрён и потерян при последующих правках: CSS-класс `.no-anim` остался, JS-переключатель исчез; ни один тест не проверял его наличие — внешние аудиты ловят такое мгновенно |
 | Псевдоэлементы наследуют CSS-переменные от ПОРОЖДАЮЩЕГО элемента | `::view-transition-new(root)` читает `--bloom-x/y` из `<html>`; установка переменных на `#theme-bloom` (даже с теми же именами) до псевдо не доходит — координаты дублируются на корень |
-| Координаты клика для view-transition — ТОЛЬКО в процентах окна | При системном масштабировании (dpr 1.5 у пользователя) пиксельные circle(at Xpx Ypx) рисуются в пространстве растрового снапшота и «стекают» к левому верхнему углу пропорционально удалённости точки; проценты (x/innerWidth*100%) инвариантны к масштабу. Диагностика: маркеры на странице + строка localStorage, телеметрия clip-path через getComputedStyle(html,'::view-transition-new(root)') |\r\n| У view-transition есть ТРИ дефолтные анимации, а не одна | Chrome запускает кроссфейды на `group`, `old` и `new` слоях (250мс); глушить нужно все три (`animation:none`), иначе «щелчок» в середине кастомной анимации; headless-чистый профиль эту гонку НЕ воспроизводит — проверять телеметрией `document.getAnimations()` с фильтром по pseudoElement (element.getAnimations() псевдо не возвращает) |
+| Координаты клика для view-transition — ТОЛЬКО в процентах окна | При системном масштабировании (dpr 1.5 у пользователя) пиксельные circle(at Xpx Ypx) рисуются в пространстве растрового снапшота и «стекают» к левому верхнему углу пропорционально удалённости точки; проценты (x/innerWidth*100%) инвариантны к масштабу. Диагностика: маркеры на странице + строка localStorage, телеметрия clip-path через getComputedStyle(html,'::view-transition-new(root)') |
+| У view-transition есть ТРИ дефолтные анимации, а не одна | Chrome запускает кроссфейды на `group`, `old` и `new` слоях (250мс); глушить нужно все три (`animation:none`), иначе «щелчок» в середине кастомной анимации; headless-чистый профиль эту гонку НЕ воспроизводит — проверять телеметрией `document.getAnimations()` с фильтром по pseudoElement (element.getAnimations() псевдо не возвращает) |
 | Единый WAAPI-драйвер флипа вместо CSS-анимаций | Вращение карты и scaleX тени были двумя независимыми композиторными анимациями с разными механизмами старта (класс vs `:has()`-гейт) — на живом GPU дрейфовали друг относительно друга; общий `element.animate()` в одном такте гарантирует общее время старта, а реверс продолжается с текущего угла без скачка |
 
 ---
 
-| Батч B «данные» (аудит-2026-08) | Битый JSON в localStorage бэкапится в -corrupt ключ + warn-toast; merge сессий сортирует по дате перед капом (свежие локальные не вытесняются старыми импортными); при загрузке GC осиротевших картинок IndexedDB (imgGcOrphans) |
-## 9. Pitfalls
+## 11. Pitfalls
 
 - `el.style.background = ...` (шорткат) затирает `background-image` → юзать `backgroundColor`.
 - `var()` внутри `@keyframes` ненадёжен → в ключевых кадрах тени литералы `translate(6px, 7px)`.
@@ -483,7 +660,7 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 - После правок CSS поднимать `?v=N` у `<link>` в index.html — иначе кэш браузера покажет старое.
 - Сиды тестов — с динамической датой (суточный сброс).
 - `void el.offsetWidth` перед добавлением анимационного класса обязателен (рестарт анимации).
-- Функции глобальные — новые имена проверять на коллизии по всем 8 файлам.
+- Функции глобальные — новые имена проверять на коллизии по всем файлам.
 - `crypto.randomUUID` может отсутствовать — есть фолбэк `uid()`.
 - Esc фокуса: слушатели на бэкдропе + документный fallback в app.js — иначе Esc «мёртв», когда activeElement = body (клик по пустому месту).
 - `beginQuiz` валидирует id по текущей колоде и падает к полному набору — иначе удаление карточек при открытом итоге даёт мягкую блокировку раунда.
@@ -503,13 +680,17 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 - Тесты поднимают Chrome с `--remote-debugging-port` — эвристики Defender могут предупреждать; это ожидаемо, профиль изолирован во временной папке, процесс гасится в finally.
 - Блок `.btn, .tab { position:relative }` стоит в конце стилей и перебивает одиночные класс-селекторы позиционирования с равной специфичностью — абсолютные элементы внутри кнопок (например `.search-clear`) требуют контекстный селектор (`.search-box .search-clear`).
 - Пульс подсветки поиска: анимация 0.55s×2 = 1.1s; таймаут снятия класса `.pulse-marks` в app.js должен быть ≥ длительности, иначе анимация обрезается.
-| ?v= нужен на ВСЕХ ассетах, не только CSS | Кэшировался старый ui.js под новым style.css: координаты писались не на <html>, круг шёл из фолбэка 50%/50% («всегда из той же точки»). Лечение: версионировать каждый <script src> + детектор — head-скрипт хранит __ASSET_V, app.js ставит __RUNTIME_V; расхождение через секунду после load показывает toast «Ctrl+F5» (старый код сам себя поймать не может) |
+- `?v= нужен на ВСЕХ ассетах, не только CSS | Кэшировался старый ui.js под новым style.css: координаты писались не на <html>, круг шёл из фолбэка 50%/50% («всегда из той же точки»). Лечение: версионировать каждый <script src> + детектор — head-скрипт хранит __ASSET_V, app.js ставит __RUNTIME_V; расхождение через секунду после load показывает toast «Ctrl+F5» (старый код сам себя поймать не может) |
 - У `Map` нет метода `.add` (только `.set`) — опечатка внутри click-обработчика даёт неперехваченное исключение, которое в тестах выглядит как `Script error.` в `__errs`, а не как падение сценария.
 - Тесты, кликающие кнопки меню действий колоды, не должны использовать числовые индексы (`[3]`) — состав меню меняется; искать по `textContent.includes("...")`.
+- **Backend: lazy loading в async SQLAlchemy** — использовать `selectinload()` для relationships, иначе `MissingGreenLet` error.
+- **Backend: JWTError импорт** — в `dependencies.py` нужен `from jose import jwt, JWTError`.
+- **Backend: email status code** — SendGrid возвращает 202, не 200.
+- **Backend: deck_id тип** — в API endpoints использовать `UUID`, не `str`.
 
 ---
 
-## 10. Product Principles
+## 12. Product Principles
 
 Выжимка из продуктового исследования (исходник удалён, принципы канонизированы здесь):
 
@@ -519,26 +700,41 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 4. **Самооценка после ответа**: «Знаю / Не знаю», результат сразу в статистику.
 5. **Видимый прогресс**: счётчик сегодня, серия дней, проценты колод, 7-дневные мини-графики, лог сессий.
 6. **Мгновенный старт**: библиотека готовых колод — учиться можно без создания своего.
-7. **Офлайн-first**: всё в localStorage, работает без сети и сервера.
+7. **Офлайн-capable**: работает без сети через localStorage; данные можно мигрировать на сервер.
 8. **Доступность**: тёмная тема, focus-trap, aria-атрибуты, reduced-motion, крупные зоны нажатия.
 9. **Мотивация серией**: streak показывается от 2 дней подряд.
 
 ---
 
-## 11. Roadmap Priorities
+## 13. Roadmap Priorities
 
-Приоритеты следующих итераций (в порядке значимости):
-
-1. ~~Поиск по карточкам~~ — **готово** (живой поиск с подсветкой, см. Feature Logic).
-2. ~~Квиз-режим~~ — **готово** (выбор из 4, авто-проверка, длины 5/10/все, повтор ошибок).
-3. ~~Авто-тема~~ — **готово** (кнопка «Авто», matchMedia-слушатель, bloom при системном переключении).
-4. ~~Размеры шрифта S/M/L~~ — **готово** (масштаб 0.9/1/1.1 учебных поверхностей, ключ `flashcards-fontsize`).
-5. ~~Экспорт/импорт~~ — готово (JSON+CSV, слить/заменить, кап sessions).`r`n6. ~~TTS-озвучка~~ — готово (SVG-иконки на гранях).`r`n7. ~~Двусторонние колоды~~ — готово (записи #rev, чип на панели Учить).`r`n8. ~~Изображения~~ — готово (IndexedDB, 480px WebP q0.6, фронт-грань + миниатюры).`r`n9. ~~Единый раннер~~ — готово (`run-all.ps1`: таблица, тайминги, exit code).
-10. Дорожная карта из опроса закрыта полностью.
+| Приоритет | Задача | Статус |
+|---|---|---|
+| High | Настроить SSL на VPS (Let's Encrypt) | ⏳ |
+| High | Настроить email-провайдер (SendGrid) | ⏳ |
+| Medium | Полная миграция фронтенда на API | ⏳ |
+| Medium | Service Worker для оффлайн-режима | ⏳ |
+| Low | Elasticsearch для продвинутого поиска | ⏳ |
+| Low | Мобильное приложение (PWA) | ⏳ |
 
 ---
 
-## 12. Conventions
+## 14. Known Issues
+
+| Issue | Status | Workaround |
+|---|---|---|
+| `password[:72]` silent truncate in `hash_password` | ⚠️ Known | Password longer than 72 bytes is silently truncated by bcrypt limitation |
+| In-memory rate limiting doesn't work across replicas | ⚠️ Known | Use Redis for multi-instance deployments |
+| `deck_to_response` still has fallback `len(deck.cards)` | ⚠️ Known | All callers now pass `cards_count` explicitly |
+| `get_public_deck` makes 2 SQL queries (deck + count) | ℹ️ Minor | Acceptable for public deck viewing (low frequency) |
+| Frontend `storage.js` and API `Data` layer can be out of sync | ⚠️ Known | Use "Migrate" button to sync localStorage → server |
+| `VirtualList` not integrated into `renderCardRows` | ℹ️ Planned | Will be added when card count > 60 (heavy-mode) |
+| No CSRF protection on cookie-based auth | ℹ️ Planned | Add CSRF tokens in future iteration |
+| `email.py` uses async `httpx` in sync code | ⚠️ Known | Email sending not functional; needs `asyncio.run()` or BackgroundTasks |
+
+---
+
+## 15. Conventions
 
 Как есть в проекте (не жёсткие запреты, а сложившийся стиль — следуй ему):
 
@@ -548,32 +744,7 @@ Pre-commit: core.hooksPath=.githooks → smoke перед каждым комм�
 - Строки UI — русский, прямо в коде.
 - CSS: секции с баннерами `/* ==== Имя ==== */`, переменные тем в блоках `html[data-mode]` / `html[data-palette]`.
 - Новые списки рендерить через `DocumentFragment`; точечные обновления предпочитать полному `render()`.
-- Любое изменение стилей сопровождается подъёмом `?v=N` и прогоном затронутых тестов; структурные изменения — прогоном всех 23.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Любое изменение стилей сопровождается подъёмом `?v=N` и прогоном затронутых тестов; структурные изменения — прогоном всех 30.
+- **Backend:** sync SQLAlchemy (psycopg2), type hints, Pydantic schemas для валидации.
+- **Backend:** все роутеры в `app/routers/`, сервисы в `app/services/`.
+- **Backend:** тесты в `backend/tests/`, фикстуры в `conftest.py`.

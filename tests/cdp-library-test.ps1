@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9232 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-library-profile"
+$udir = "$env:TEMP\opencode\cdp-library-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -92,15 +92,15 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   await sleep(800);
   check("menu-open", $("#menu-backdrop").classList.contains("is-open"));
   check("menu-fits", coverFits(), "sh=" + $(".menu-cover").scrollHeight + " vh=" + window.innerHeight);
-  check("library-btn", !!$("#menu-library-btn") && $("#menu-library-btn").textContent === "Р‘РёР±Р»РёРѕС‚РµРєР°");
+  check("library-btn", !!$("#menu-library-btn") && $("#menu-library-btn").textContent === "Библиотека");
 
   // Open library
   $("#menu-library-btn").click(); await sleep(400);
   check("lib-open", $("#library-backdrop").classList.contains("is-open"));
   const items = $$("#library-list .library-item");
   check("lib-items", items.length === 3, String(items.length));
-  check("lib-names", items[0].textContent.includes("РђРЅРіР»РёР№СЃРєРёР№") && items[1].textContent.includes("РЎС‚РѕР»РёС†С‹") && items[2].textContent.includes("СЌР»РµРјРµРЅС‚РѕРІ"), items.map((i) => i.querySelector(".library-name").textContent).join("|"));
-  check("lib-counts", items[0].textContent.includes("30 РєР°СЂС‚РѕС‡РµРє") && items[1].textContent.includes("12 РєР°СЂС‚РѕС‡РµРє") && items[2].textContent.includes("15 РєР°СЂС‚РѕС‡РµРє"));
+  check("lib-names", items[0].textContent.includes("Английский") && items[1].textContent.includes("Столицы") && items[2].textContent.includes("элементов"), items.map((i) => i.querySelector(".library-name").textContent).join("|"));
+  check("lib-counts", items[0].textContent.includes("30 карточек") && items[1].textContent.includes("12 карточек") && items[2].textContent.includes("15 карточек"));
   check("lib-hint", $("#library-hint") === null || $("#library-hint").textContent.length > 0);
   check("lib-focus-modal", $("#library-backdrop").querySelector(".modal") === document.activeElement);
 
@@ -114,12 +114,12 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#menu-library-btn").click(); await sleep(400);
   $$("#library-list .library-item")[0].querySelector("button").click(); await sleep(500);
   check("lib-closed", !$("#library-backdrop").classList.contains("is-open"));
-  check("deck-added", state.decks.length === 1 && state.decks[0].name === "РђРЅРіР»РёР№СЃРєРёР№ В· СЃС‚Р°СЂС‚", JSON.stringify(state.decks.map((d) => d.name)));
+  check("deck-added", state.decks.length === 1 && state.decks[0].name === "Английский · старт", JSON.stringify(state.decks.map((d) => d.name)));
   const d1 = state.decks[0];
   check("cards30", state.cards.filter((c) => c.deckId === d1.id).length === 30, String(state.cards.filter((c) => c.deckId === d1.id).length));
   check("all-new", state.cards.every((c) => c.deckId === d1.id && c.status === "new"));
   check("selected", state.selectedDeckId === d1.id && state.tab === "edit");
-  check("workspace", !$("#workspace").classList.contains("hidden") && $("#deck-title").textContent === "РђРЅРіР»РёР№СЃРєРёР№ В· СЃС‚Р°СЂС‚", $("#deck-title").textContent);
+  check("workspace", !$("#workspace").classList.contains("hidden") && $("#deck-title").textContent === "Английский · старт", $("#deck-title").textContent);
 
   // Add second demo deck from menu
   $("#menu-back-btn").click(); await sleep(400);

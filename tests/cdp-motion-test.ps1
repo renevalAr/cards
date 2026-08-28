@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9350 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-motion-profile"
+$udir = "$env:TEMP\opencode\cdp-motion-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -53,14 +53,14 @@ try {
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
     decks: [
-      { id: "d1", name: "РћСЃРЅРѕРІС‹" },
-      { id: "d2", name: "Р’С‚РѕСЂР°СЏ" }
+      { id: "d1", name: "Основы" },
+      { id: "d2", name: "Вторая" }
     ],
     cards: [
-      { id: "c1", deckId: "d1", question: "Р°Р»СЊС„Р°", answer: "СЂР°Р·", status: "known" },
-      { id: "c2", deckId: "d1", question: "Р±РµС‚Р°", answer: "РґРІР°", status: "new" },
-      { id: "c3", deckId: "d1", question: "РіР°РјРјР°", answer: "С‚СЂРё", status: "new" },
-      { id: "c4", deckId: "d1", question: "РґРµР»СЊС‚Р°", answer: "С‡РµС‚С‹СЂРµ", status: "new" }
+      { id: "c1", deckId: "d1", question: "альфа", answer: "раз", status: "known" },
+      { id: "c2", deckId: "d1", question: "бета", answer: "два", status: "new" },
+      { id: "c3", deckId: "d1", question: "гамма", answer: "три", status: "new" },
+      { id: "c4", deckId: "d1", question: "дельта", answer: "четыре", status: "new" }
     ],
     selectedDeckId: "d1",
     tab: "edit",
@@ -108,7 +108,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
 
   const rr = rect(fc);
   const fireTilt = (x, y) => { fc.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerType: "mouse", clientX: x, clientY: y })); void document.body.offsetWidth; };
-  // СѓРґРµСЂР¶Р°РЅРёРµ Сѓ РїСЂР°РІРѕРіРѕ РєСЂР°СЏ
+  // удержание у правого края
   const series = [];
   for (let i = 0; i <= 16; i += 1) {
     fireTilt(rr.right - 1 - i * 0.8, rr.top + rr.height / 2);
@@ -120,7 +120,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   let stepMax = 0;
   for (let i = 1; i < series.length; i += 1) if (series[i] !== null && series[i-1] !== null) stepMax = Math.max(stepMax, Math.abs(series[i] - series[i-1]));
   check("M14:tilt-edge-stable", dropN === 0 && maxAbs <= 3.51 && stepMax <= 0.4, "drop=" + dropN + " max=" + maxAbs.toFixed(2) + " step=" + stepMax.toFixed(2));
-  // РѕСЃС†РёР»Р»СЏС†РёСЏ РїРѕРїРµСЂС‘Рє РєСЂРѕРјРєРё РєР°СЂС‚С‹ (РІРЅСѓС‚СЂРё Р·РѕРЅС‹ РѕР±С‘СЂС‚РєРё) вЂ” СЌС„С„РµРєС‚ РЅРµ РґРѕР»Р¶РµРЅ РіР°СЃРЅСѓС‚СЊ
+  // осцилляция поперёк кромки карты (внутри зоны обёртки) — эффект не должен гаснуть
   let flicker = 0;
   for (let i = 0; i < 12; i += 1) {
     const x = rr.right + (i % 2 === 0 ? 3 : -3);
@@ -128,7 +128,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
     if (!fc.style.transform) flicker += 1;
   }
   check("M14c:no-flicker-at-border", flicker === 0 && !!fc.style.transform, "flicker=" + flicker);
-  // РІС‹С…РѕРґ Р·Р° РїСЂРµРґРµР»С‹ РѕР±С‘СЂС‚РєРё вЂ” СЃР±СЂРѕСЃ
+  // выход за пределы обёртки — сброс
   fireTilt(rr.right + 40, rr.top + rr.height / 2);
   const outEv = new PointerEvent("pointermove", { bubbles: true, pointerType: "mouse", clientX: rr.right + 60, clientY: rr.top + rr.height / 2 });
   document.body.dispatchEvent(outEv);
@@ -136,7 +136,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   check("M14b:tilt-clear-outside", fc.style.transform === "");
   $("#tab-edit").click(); await sleep(300);
   const inp = $("#card-search");
-  inp.value = "Р°Р»СЊС„Р°"; inp.dispatchEvent(new Event("input", { bubbles: true })); await sleep(90);
+  inp.value = "альфа"; inp.dispatchEvent(new Event("input", { bubbles: true })); await sleep(90);
   check("M4:pulse-on", $("#card-rows").classList.contains("pulse-marks"));
   const cb = $(".search-clear"); const cs = getComputedStyle(cb); const ir = rect(inp); const cr = rect(cb);
   check("M4b:clear-inside", cs.position === "absolute" && cr.left >= ir.left && cr.right <= ir.right + 1, cs.position);
@@ -173,7 +173,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   }
   const layer = $(".confetti-layer");
   check("M7:confetti-spawn", !!layer && layer.children.length >= 40, layer ? String(layer.children.length) : "none");
-  check("M7b:hundred", /РЅРµ Р·РЅР°СЋ 0/.test($("#summary-line").textContent), $("#summary-line").textContent);
+  check("M7b:hundred", /не знаю 0/.test($("#summary-line").textContent), $("#summary-line").textContent);
   document.getAnimations({ subtree: true }).forEach((a) => { try { a.finish(); } catch (e) {} });
   $("#summary-menu").click(); await sleep(500);
 

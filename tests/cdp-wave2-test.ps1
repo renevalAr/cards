@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9360 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-wave2-profile"
+$udir = "$env:TEMP\opencode\cdp-wave2-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -53,14 +53,14 @@ try {
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
     decks: [
-      { id: "d1", name: "РћСЃРЅРѕРІС‹" },
-      { id: "d2", name: "Р’С‚РѕСЂР°СЏ" }
+      { id: "d1", name: "Основы" },
+      { id: "d2", name: "Вторая" }
     ],
     cards: [
-      { id: "c1", deckId: "d1", question: "Р°Р»СЊС„Р°", answer: "СЂР°Р·", status: "known" },
-      { id: "c2", deckId: "d1", question: "Р±РµС‚Р°", answer: "РґРІР°", status: "new" },
-      { id: "c3", deckId: "d1", question: "РіР°РјРјР°", answer: "С‚СЂРё", status: "new" },
-      { id: "c4", deckId: "d1", question: "РґРµР»СЊС‚Р°", answer: "С‡РµС‚С‹СЂРµ", status: "new" }
+      { id: "c1", deckId: "d1", question: "альфа", answer: "раз", status: "known" },
+      { id: "c2", deckId: "d1", question: "бета", answer: "два", status: "new" },
+      { id: "c3", deckId: "d1", question: "гамма", answer: "три", status: "new" },
+      { id: "c4", deckId: "d1", question: "дельта", answer: "четыре", status: "new" }
     ],
     selectedDeckId: "d1",
     tab: "edit",
@@ -150,8 +150,8 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   check("W7:field-error", !!$("#card-question.field-error") && !!$("#card-answer.field-error"));
   await sleep(650);
 
-  $("#card-question").value = "РЅРѕРІР°СЏ";
-  $("#card-answer").value = "РєР°СЂС‚РѕС‡РєР°";
+  $("#card-question").value = "новая";
+  $("#card-answer").value = "карточка";
   $("#save-card-btn").click(); await sleep(120);
   const freshLi = $('li[data-card-id]:not([data-card-id="c1"]):not([data-card-id="c2"]):not([data-card-id="c3"]):not([data-card-id="c4"])');
   check("W8:row-new", !!freshLi && freshLi.classList.contains("row-new"), freshLi ? "yes" : "none");
@@ -168,7 +168,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   check("W9b:removed", !document.querySelector(`li[data-card-id="${delId}"]`));
 
   $("#bulk-btn").click(); await sleep(300);
-  $("#bulk-input").value = "РІРѕРїСЂРѕСЃ = РѕС‚РІРµС‚";
+  $("#bulk-input").value = "вопрос = ответ";
   $("#bulk-ok").click(); await sleep(150);
   const fb = $("#bulk-feedback");
   check("W10:fb-show", fb.classList.contains("show") && !!fb.querySelector(".fb-check"), fb.className);

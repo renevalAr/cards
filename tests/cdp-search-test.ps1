@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9260 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-search-profile"
+$udir = "$env:TEMP\opencode\cdp-search-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -53,14 +53,14 @@ try {
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
     decks: [
-      { id: "d1", name: "РћСЃРЅРѕРІС‹" },
-      { id: "d2", name: "Р“РµРѕРіСЂР°С„РёСЏ" }
+      { id: "d1", name: "Основы" },
+      { id: "d2", name: "География" }
     ],
     cards: [
-      { id: "c1", deckId: "d1", question: "РЎРѕР±Р°РєР°", answer: "dog", status: "new" },
-      { id: "c2", deckId: "d1", question: "РљРѕС‚", answer: "РєРѕС€РєР°", status: "known" },
-      { id: "c3", deckId: "d1", question: "РџР°СЂРёР¶", answer: "СЃС‚РѕР»РёС†Р° Р¤СЂР°РЅС†РёРё", status: "unknown" },
-      { id: "c4", deckId: "d1", question: "РєРѕС‚Р°РЅРіРµРЅСЃ", answer: "РєР°С‚РµС‚ Рё РіРёРїРѕС‚РµРЅСѓР·Р°", status: "new" }
+      { id: "c1", deckId: "d1", question: "Собака", answer: "dog", status: "new" },
+      { id: "c2", deckId: "d1", question: "Кот", answer: "кошка", status: "known" },
+      { id: "c3", deckId: "d1", question: "Париж", answer: "столица Франции", status: "unknown" },
+      { id: "c4", deckId: "d1", question: "котангенс", answer: "катет и гипотенуза", status: "new" }
     ],
     selectedDeckId: "d1",
     tab: "edit",
@@ -95,42 +95,42 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("search-visible", !$("#card-search-row").classList.contains("hidden"));
   check("search-empty-start", inp.value === "" && !$("#card-search-clear").classList.contains("is-visible"));
 
-  await type("РєРѕС‚");
+  await type("кот");
   check("query-basic", rows().length === 2 && rows().some((li) => li.dataset.cardId === "c2") && rows().some((li) => li.dataset.cardId === "c4"), rows().map((li) => li.dataset.cardId).join(","));
   check("clear-btn-shown", $("#card-search-clear").classList.contains("is-visible"));
 
   const q2p = rows().find((li) => li.dataset.cardId === "c2").querySelector("p");
-  check("highlight-mark", q2p.querySelector("mark.search-hit") !== null && q2p.querySelector("mark.search-hit").textContent === "РљРѕС‚", q2p.textContent);
-  check("highlight-full-text", q2p.textContent === "РљРѕС‚", q2p.textContent);
+  check("highlight-mark", q2p.querySelector("mark.search-hit") !== null && q2p.querySelector("mark.search-hit").textContent === "Кот", q2p.textContent);
+  check("highlight-full-text", q2p.textContent === "Кот", q2p.textContent);
 
-  await type("РљРћРў");
+  await type("КОТ");
   check("case-insensitive", rows().length === 2, String(rows().length));
 
-  await type("С„СЂР°РЅС†");
+  await type("франц");
   check("answer-match", rows().length === 1 && rows()[0].dataset.cardId === "c3", rows().map((li) => li.dataset.cardId).join(","));
 
-  await type("РєРѕС‚");
+  await type("кот");
   await setFilter("known");
   check("search-over-filter", rows().length === 1 && rows()[0].dataset.cardId === "c2", rows().map((li) => li.dataset.cardId).join(","));
   await setFilter("all");
 
   await type("zzz");
   const msg = $("#card-rows .empty-row").textContent;
-  check("no-match-msg", msg.includes("РЅРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ") && msg.includes("zzz"), msg);
+  check("no-match-msg", msg.includes("ничего не найдено") && msg.includes("zzz"), msg);
 
   $("#card-search-clear").click(); await sleep(300);
   check("clear-click", rows().length === 4 && inp.value === "" && !$("#card-search-clear").classList.contains("is-visible"), String(rows().length));
 
-  await type("РїР°СЂРёР¶");
+  await type("париж");
   inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); await sleep(300);
   check("esc-clears", rows().length === 4 && inp.value === "" && state.searchQuery === "" && !$("#card-search-clear").classList.contains("is-visible"), String(rows().length));
 
-  await type("РЅ");
+  await type("н");
   const c4q = rows().find((li) => li.dataset.cardId === "c4").querySelector("p");
   check("multi-match-marks", c4q.querySelectorAll("mark.search-hit").length === 2, String(c4q.querySelectorAll("mark.search-hit").length));
   $("#card-search-clear").click(); await sleep(200);
 
-  await type("РєРѕС‚");
+  await type("кот");
   $$("#deck-list .deck-item")[1].click(); await sleep(500);
   check("deck-switch-hides", $("#card-search-row").classList.contains("hidden") && inp.value === "");
   $$("#deck-list .deck-item")[0].click(); await sleep(500);

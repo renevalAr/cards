@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9225 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-profile3"
+$udir = "$env:TEMP\opencode\cdp-profile3"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -71,10 +71,10 @@ try {
   $seed = @'
 try {
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
-    decks: [ { id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" } ],
+    decks: [ { id: "d1", name: "Английский" } ],
     cards: [
-      { id: "c1", deckId: "d1", question: "cat", answer: "РєРѕС‚", status: "new" },
-      { id: "c2", deckId: "d1", question: "dog", answer: "СЃРѕР±Р°РєР°", status: "new" }
+      { id: "c1", deckId: "d1", question: "cat", answer: "кот", status: "new" },
+      { id: "c2", deckId: "d1", question: "dog", answer: "собака", status: "new" }
     ],
     selectedDeckId: "d1",
     tab: "edit",
@@ -101,40 +101,40 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
 
   $("#menu-study-btn").click(); await sleep(600);
   check("study-on", !$("#menu-backdrop").classList.contains("is-open") && !$("#study-board").classList.contains("hidden"));
-  check("meta1", meta().includes("1 РёР· 2"), meta());
+  check("meta1", meta().includes("1 из 2"), meta());
 
   $("#mark-known-btn").click(); await sleep(500);
-  check("meta2", meta().includes("2 РёР· 2"), meta());
+  check("meta2", meta().includes("2 из 2"), meta());
   $("#mark-known-btn").click(); await sleep(500);
   check("summary-open", $("#summary-backdrop").classList.contains("is-open"));
   const line = $("#summary-line").textContent;
-  check("line-known", line.includes("Р’СЃРµРіРѕ 2") && line.includes("Р·РЅР°СЋ 2") && line.includes("РЅРµ Р·РЅР°СЋ 0"), line);
+  check("line-known", line.includes("Всего 2") && line.includes("знаю 2") && line.includes("не знаю 0"), line);
   check("fill100", $("#summary-fill").style.width === "100%", $("#summary-fill").style.width);
-  check("repeat-all", $("#summary-repeat").textContent === "РџСЂРѕР№С‚Рё РµС‰С‘ СЂР°Р·", $("#summary-repeat").textContent);
+  check("repeat-all", $("#summary-repeat").textContent === "Пройти ещё раз", $("#summary-repeat").textContent);
 
   $("#summary-repeat").click(); await sleep(500);
   check("repeat-closed", !$("#summary-backdrop").classList.contains("is-open"));
-  check("repeat-meta", meta().includes("1 РёР· 2"), meta());
+  check("repeat-meta", meta().includes("1 из 2"), meta());
 
   $("#mark-unknown-btn").click(); await sleep(500);
-  check("u2", meta().includes("2 РёР· 2"), meta());
+  check("u2", meta().includes("2 из 2"), meta());
   $("#mark-unknown-btn").click(); await sleep(500);
   const line2 = $("#summary-line").textContent;
-  check("line-unknown", line2.includes("Р·РЅР°СЋ 0") && line2.includes("РЅРµ Р·РЅР°СЋ 2"), line2);
+  check("line-unknown", line2.includes("знаю 0") && line2.includes("не знаю 2"), line2);
   check("fill0", $("#summary-fill").style.width === "0%", $("#summary-fill").style.width);
-  check("repeat-unknown", $("#summary-repeat").textContent === "РџРѕРІС‚РѕСЂРёС‚СЊ РЅРµРёР·СѓС‡РµРЅРЅРѕРµ", $("#summary-repeat").textContent);
+  check("repeat-unknown", $("#summary-repeat").textContent === "Повторить неизученное", $("#summary-repeat").textContent);
 
   $("#summary-repeat").click(); await sleep(500);
-  check("repeat2-meta", meta().includes("1 РёР· 2"), meta());
+  check("repeat2-meta", meta().includes("1 из 2"), meta());
   $("#mark-known-btn").click(); await sleep(500);
   $("#mark-known-btn").click(); await sleep(500);
   const line3 = $("#summary-line").textContent;
-  check("line3", line3.includes("Р·РЅР°СЋ 2") && line3.includes("РЅРµ Р·РЅР°СЋ 0"), line3);
+  check("line3", line3.includes("знаю 2") && line3.includes("не знаю 0"), line3);
 
   $("#summary-menu").click(); await sleep(600);
   check("to-menu", $("#menu-backdrop").classList.contains("is-open") && !$("#summary-backdrop").classList.contains("is-open"));
   const today = $("#menu-today-stats").textContent;
-  check("today6", today.includes("РёР·СѓС‡РµРЅРѕ 6"), today);
+  check("today6", today.includes("изучено 6"), today);
 
   $("#menu-study-btn").click(); await sleep(600);
   $("#flashcard").click(); await sleep(400);
@@ -143,7 +143,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   $("#next-card-btn").click(); await sleep(500);
   check("flip-summary", $("#summary-backdrop").classList.contains("is-open"));
   const line4 = $("#summary-line").textContent;
-  check("flip-line", line4.includes("Р·РЅР°СЋ 0") && line4.includes("РЅРµ Р·РЅР°СЋ 2"), line4);
+  check("flip-line", line4.includes("знаю 0") && line4.includes("не знаю 2"), line4);
 
   $("#summary-backdrop").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
   await sleep(500);

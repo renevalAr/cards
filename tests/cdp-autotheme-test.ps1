@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9320 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-autotheme-profile"
+$udir = "$env:TEMP\opencode\cdp-autotheme-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -55,8 +55,8 @@ try {
   var pad = function (n) { return String(n).padStart(2, "0"); };
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
-    decks: [{ id: "d1", name: "РћСЃРЅРѕРІС‹" }],
-    cards: [{ id: "c1", deckId: "d1", question: "РІ", answer: "Рѕ", status: "new" }],
+    decks: [{ id: "d1", name: "Основы" }],
+    cards: [{ id: "c1", deckId: "d1", question: "в", answer: "о", status: "new" }],
     selectedDeckId: "d1",
     tab: "edit",
     today: { date: today, known: 0, unknown: 0 },
@@ -90,8 +90,8 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   const root = document.documentElement;
   await sleep(700);
   check("boot-dark-auto", root.dataset.mode === "dark" && root.dataset.modePref === "auto", root.dataset.mode + "/" + root.dataset.modePref);
-  check("switch3-settings", $$("#mode-switch .btn").map((b) => b.textContent).join("|") === "РЎРІРµС‚Р»Р°СЏ|РўС‘РјРЅР°СЏ|РђРІС‚Рѕ");
-  check("switch3-menu", $$("#menu-mode-switch .btn").map((b) => b.textContent).join("|") === "РЎРІРµС‚Р»Р°СЏ|РўС‘РјРЅР°СЏ|РђРІС‚Рѕ");
+  check("switch3-settings", $$("#mode-switch .btn").map((b) => b.textContent).join("|") === "Светлая|Тёмная|Авто");
+  check("switch3-menu", $$("#menu-mode-switch .btn").map((b) => b.textContent).join("|") === "Светлая|Тёмная|Авто");
   check("auto-active", $('#mode-switch [data-mode="auto"]').classList.contains("is-active") && $('#menu-mode-switch [data-mode="auto"]').classList.contains("is-active"));
   $("#menu-close").click(); await sleep(300);
   return JSON.stringify(res);

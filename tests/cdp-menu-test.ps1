@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9223 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-profile"
+$udir = "$env:TEMP\opencode\cdp-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -74,13 +74,13 @@ try {
   var __dk = __d.getFullYear() + "-" + String(__d.getMonth() + 1).padStart(2, "0") + "-" + String(__d.getDate()).padStart(2, "0");
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
     decks: [
-      { id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" },
-      { id: "d2", name: "Р“РµРѕРіСЂР°С„РёСЏ" }
+      { id: "d1", name: "Английский" },
+      { id: "d2", name: "География" }
     ],
     cards: [
-      { id: "c1", deckId: "d1", question: "cat", answer: "РєРѕС‚", status: "known" },
-      { id: "c2", deckId: "d1", question: "dog", answer: "СЃРѕР±Р°РєР°", status: "unknown" },
-      { id: "c3", deckId: "d2", question: "СЃС‚РѕР»РёС†Р° Р РѕСЃСЃРёРё", answer: "РњРѕСЃРєРІР°", status: "known" }
+      { id: "c1", deckId: "d1", question: "cat", answer: "кот", status: "known" },
+      { id: "c2", deckId: "d1", question: "dog", answer: "собака", status: "unknown" },
+      { id: "c3", deckId: "d2", question: "столица России", answer: "Москва", status: "known" }
     ],
     selectedDeckId: "d1",
     tab: "menu",
@@ -108,7 +108,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   const cover = $(".menu-cover");
   check("cover-fits", cover.scrollHeight <= cover.clientHeight + 1, "sh=" + cover.scrollHeight + " ch=" + cover.clientHeight);
   const today = $("#menu-today-stats").textContent;
-  check("today", today.includes("РёР·СѓС‡РµРЅРѕ 3") && today.includes("Р·РЅР°СЋ 2"), today);
+  check("today", today.includes("изучено 3") && today.includes("знаю 2"), today);
   const bg = getComputedStyle($("#menu-backdrop")).backgroundImage;
   check("pattern-bg", bg.includes("radial-gradient") && bg.includes("linear-gradient"), bg.slice(0, 90));
   check("tour-visible", $("#tour-tip").hidden === false);
@@ -120,20 +120,20 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
 
   $("#menu-cards-btn").click(); await sleep(500);
   check("picker-open", $("#deck-pick-backdrop").classList.contains("is-open"));
-  check("picker-title", $("#deck-pick-title").textContent === "РљРѕР»РѕРґС‹", $("#deck-pick-title").textContent);
+  check("picker-title", $("#deck-pick-title").textContent === "Колоды", $("#deck-pick-title").textContent);
   const items = $$("#deck-pick-list .deck-pick-item");
   check("picker-count", items.length === 2, String(items.length));
   check("picker-active", !!$("#deck-pick-list .deck-pick-item.is-active"));
-  check("picker-c1", items[0].textContent.includes("РђРЅРіР»РёР№СЃРєРёР№") && items[0].textContent.includes("2 РєР°СЂС‚"), items[0].textContent);
-  check("picker-c2", items[1].textContent.includes("Р“РµРѕРіСЂР°С„РёСЏ") && items[1].textContent.includes("1 РєР°СЂС‚"), items[1].textContent);
+  check("picker-c1", items[0].textContent.includes("Английский") && items[0].textContent.includes("2 карт"), items[0].textContent);
+  check("picker-c2", items[1].textContent.includes("География") && items[1].textContent.includes("1 карт"), items[1].textContent);
   const bar = items[0].querySelector(".deck-pick-bar i");
   check("picker-bar", !!bar && bar.style.width === "50%", bar ? bar.style.width : "no bar");
 
   items[0].querySelector(".deck-pick-more").click(); await sleep(400);
   check("pop-open", $("#menu-pop-backdrop").classList.contains("is-open"));
-  check("pop-title", $("#menu-pop-title").textContent === "РђРЅРіР»РёР№СЃРєРёР№", $("#menu-pop-title").textContent);
+  check("pop-title", $("#menu-pop-title").textContent === "Английский", $("#menu-pop-title").textContent);
   const popBtns = $$("#menu-pop-actions button");
-  check("pop-btns", popBtns.length === 7 && popBtns[0].textContent.includes("РЈС‡РёС‚СЊ РєРѕР»РѕРґСѓ") && popBtns[5].textContent.includes("РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ") && popBtns[6].textContent.includes("РЈРґР°Р»РёС‚СЊ"), popBtns.map((b) => b.textContent).join("|"));;
+  check("pop-btns", popBtns.length === 7 && popBtns[0].textContent.includes("Учить колоду") && popBtns[5].textContent.includes("Начать заново") && popBtns[6].textContent.includes("Удалить"), popBtns.map((b) => b.textContent).join("|"));;
 
   $("#menu-pop-cancel").click(); await sleep(400);
   check("pop-closed", !$("#menu-pop-backdrop").classList.contains("is-open"));

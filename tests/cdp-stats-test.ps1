@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9226 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-profile4"
+$udir = "$env:TEMP\opencode\cdp-profile4"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -86,13 +86,13 @@ try {
 
     localStorage.setItem("flashcards-app-v1", JSON.stringify({
       decks: [
-        { id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" },
-        { id: "d2", name: "Р“РµРѕРіСЂР°С„РёСЏ" }
+        { id: "d1", name: "Английский" },
+        { id: "d2", name: "География" }
       ],
       cards: [
-        { id: "c1", deckId: "d1", question: "cat", answer: "РєРѕС‚", status: "known" },
-        { id: "c2", deckId: "d1", question: "dog", answer: "СЃРѕР±Р°РєР°", status: "unknown" },
-        { id: "c3", deckId: "d2", question: "СЃС‚РѕР»РёС†Р°", answer: "РњРѕСЃРєРІР°", status: "known" }
+        { id: "c1", deckId: "d1", question: "cat", answer: "кот", status: "known" },
+        { id: "c2", deckId: "d1", question: "dog", answer: "собака", status: "unknown" },
+        { id: "c3", deckId: "d2", question: "столица", answer: "Москва", status: "known" }
       ],
       selectedDeckId: "d1",
       tab: "edit",
@@ -132,7 +132,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   check("stats-alltime", $("#stats-alltime").textContent === "4", $("#stats-alltime").textContent);
   const items = $$("#stats-list .stats-item");
   check("stats-items", items.length === 2, String(items.length));
-  check("item1", items[0].textContent.includes("РђРЅРіР»РёР№СЃРєРёР№") && items[0].textContent.includes("2 РєР°СЂС‚"), items[0].textContent);
+  check("item1", items[0].textContent.includes("Английский") && items[0].textContent.includes("2 карт"), items[0].textContent);
   check("item-bar", items[0].querySelector(".stats-bar i").style.width === "50%", items[0].querySelector(".stats-bar i").style.width);
   const days = items[0].querySelectorAll(".stats-days .stats-day");
   check("day-bars", days.length === 7, String(days.length));
@@ -142,11 +142,11 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
 
   items[0].click(); await sleep(400);
   check("deck-detail", !$("#stats-main").classList.contains("hidden") === false && !$("#stats-deck").classList.contains("hidden"));
-  check("detail-title", $("#stats-deck-title").textContent === "РђРЅРіР»РёР№СЃРєРёР№", $("#stats-deck-title").textContent);
+  check("detail-title", $("#stats-deck-title").textContent === "Английский", $("#stats-deck-title").textContent);
   const sessions = $$("#stats-sessions .session-item");
   check("sessions2", sessions.length === 2, String(sessions.length));
   const s0 = sessions[0].textContent;
-  check("session-newest", s0.includes("Р·РЅР°СЋ 2") && s0.includes("РЅРµ Р·РЅР°СЋ 0"), s0);
+  check("session-newest", s0.includes("знаю 2") && s0.includes("не знаю 0"), s0);
 
   $("#stats-back").click(); await sleep(300);
   check("back-main", !$("#stats-main").classList.contains("hidden") && $("#stats-deck").classList.contains("hidden"));
@@ -158,7 +158,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   $("#menu-back-btn").click(); await sleep(500);
   check("menu-again", $("#menu-backdrop").classList.contains("is-open"));
   $("#menu-study-btn").click(); await sleep(600);
-  check("study-on", !$("#menu-backdrop").classList.contains("is-open") && !$("#deck-pick-backdrop").classList.contains("is-open") && meta().includes("1 РёР· 2"), meta());
+  check("study-on", !$("#menu-backdrop").classList.contains("is-open") && !$("#deck-pick-backdrop").classList.contains("is-open") && meta().includes("1 из 2"), meta());
 
   $("#mark-known-btn").click(); await sleep(450);
   $("#mark-known-btn").click(); await sleep(450);

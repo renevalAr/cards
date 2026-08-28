@@ -126,10 +126,10 @@ function clearDropIndicators() {
 }
 
 function moveCardWithinDeck(cardId, anchorId, before) {
-  const deckCards = state.cards.filter((card) => card.deckId === state.selectedDeckId);
   const from = state.cards.findIndex((card) => card.id === cardId);
   if (from === -1) return;
   const [moved] = state.cards.splice(from, 1);
+  const deckCards = state.cards.filter((card) => card.deckId === state.selectedDeckId);
   let anchorIdx = state.cards.findIndex((card) => card.id === anchorId);
   if (anchorIdx === -1) {
     const last = deckCards[deckCards.length - 1];

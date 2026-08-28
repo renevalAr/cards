@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9238 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-e2e-profile"
+$udir = "$env:TEMP\opencode\cdp-e2e-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -55,14 +55,14 @@ try {
       var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
       localStorage.setItem("flashcards-app-v1", JSON.stringify({
         decks: [
-          { id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" },
-          { id: "d2", name: "Р“РµРѕРіСЂР°С„РёСЏ" }
+          { id: "d1", name: "Английский" },
+          { id: "d2", name: "География" }
         ],
         cards: [
-          { id: "c1", deckId: "d1", question: "cat", answer: "РєРѕС‚", status: "new" },
-          { id: "c2", deckId: "d1", question: "dog", answer: "СЃРѕР±Р°РєР°", status: "new" },
-          { id: "c3", deckId: "d1", question: "bird", answer: "РїС‚РёС†Р°", status: "new" },
-          { id: "c4", deckId: "d2", question: "СЃС‚РѕР»РёС†Р° Р РѕСЃСЃРёРё", answer: "РњРѕСЃРєРІР°", status: "known" }
+          { id: "c1", deckId: "d1", question: "cat", answer: "кот", status: "new" },
+          { id: "c2", deckId: "d1", question: "dog", answer: "собака", status: "new" },
+          { id: "c3", deckId: "d1", question: "bird", answer: "птица", status: "new" },
+          { id: "c4", deckId: "d2", question: "столица России", answer: "Москва", status: "known" }
         ],
         selectedDeckId: "d1",
         tab: "edit",
@@ -96,17 +96,17 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#menu-close").click(); await sleep(400);
   check("workspace-edit", !$("#workspace").classList.contains("hidden") && !$("#panel-edit").classList.contains("hidden") && $("#panel-study").classList.contains("hidden"));
   check("rows3", $$("#card-rows li").length === 3, String($$("#card-rows li").length));
-  check("badges-new", $$("#card-rows .badge").every((b) => b.textContent === "РЅРѕРІР°СЏ"), $$("#card-rows .badge").map((b) => b.textContent).join("|"));
-  check("header0", $("#stats").textContent === "Р’СЃРµРіРѕ 3 В· Р·РЅР°СЋ 0 В· РЅРµ Р·РЅР°СЋ 0", $("#stats").textContent);
+  check("badges-new", $$("#card-rows .badge").every((b) => b.textContent === "новая"), $$("#card-rows .badge").map((b) => b.textContent).join("|"));
+  check("header0", $("#stats").textContent === "Всего 3 · знаю 0 · не знаю 0", $("#stats").textContent);
 
   // Add a card via the form
   $("#card-question").value = "apple";
-  $("#card-answer").value = "СЏР±Р»РѕРєРѕ";
+  $("#card-answer").value = "яблоко";
   $("#save-card-btn").click(); await sleep(400);
   check("rows4", $$("#card-rows li").length === 4 && deckCards().length === 4, String(deckCards().length));
-  check("header4", $("#stats").textContent.includes("Р’СЃРµРіРѕ 4"), $("#stats").textContent);
-  check("new-added", deckCards().some((c) => c.question === "apple" && c.answer === "СЏР±Р»РѕРєРѕ" && c.status === "new"));
-  check("form-cleared", $("#card-question").value === "" && $("#card-answer").value === "" && $("#save-card-btn").textContent === "Р”РѕР±Р°РІРёС‚СЊ РєР°СЂС‚РѕС‡РєСѓ");
+  check("header4", $("#stats").textContent.includes("Всего 4"), $("#stats").textContent);
+  check("new-added", deckCards().some((c) => c.question === "apple" && c.answer === "яблоко" && c.status === "new"));
+  check("form-cleared", $("#card-question").value === "" && $("#card-answer").value === "" && $("#save-card-btn").textContent === "Добавить карточку");
 
   // Whitespace-only input must not add a card
   $("#card-question").value = "   ";
@@ -116,7 +116,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   // Edit existing card
   row(0).querySelector(".row-actions button").click(); await sleep(300);
-  check("edit-mode", $("#save-card-btn").textContent === "РЎРѕС…СЂР°РЅРёС‚СЊ" && !$("#cancel-edit-btn").classList.contains("hidden") && $("#card-question").value === "cat", $("#card-question").value);
+  check("edit-mode", $("#save-card-btn").textContent === "Сохранить" && !$("#cancel-edit-btn").classList.contains("hidden") && $("#card-question").value === "cat", $("#card-question").value);
   $("#card-question").value = "cat?";
   $("#save-card-btn").click(); await sleep(400);
   check("edit-saved", deckCards().find((c) => c.id === "c1").question === "cat?" && $$("#card-rows li").length === 4);
@@ -125,39 +125,39 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   // Cancel edit
   row(0).querySelector(".row-actions button").click(); await sleep(300);
   $("#cancel-edit-btn").click(); await sleep(300);
-  check("cancel-edit", $("#save-card-btn").textContent === "Р”РѕР±Р°РІРёС‚СЊ РєР°СЂС‚РѕС‡РєСѓ" && $("#cancel-edit-btn").classList.contains("hidden") && $("#card-question").value === "");
+  check("cancel-edit", $("#save-card-btn").textContent === "Добавить карточку" && $("#cancel-edit-btn").classList.contains("hidden") && $("#card-question").value === "");
 
   // Delete first card (c1) with confirm
   row(0).querySelectorAll(".row-actions button")[1].click(); await sleep(300);
-  check("del-modal", $("#modal-backdrop").classList.contains("is-open") && $("#modal-title").textContent === "РЈРґР°Р»РёС‚СЊ РєР°СЂС‚РѕС‡РєСѓ?", $("#modal-title").textContent);
+  check("del-modal", $("#modal-backdrop").classList.contains("is-open") && $("#modal-title").textContent === "Удалить карточку?", $("#modal-title").textContent);
   $("#modal-ok").click(); await sleep(400);
   check("rows3-after-del", deckCards().length === 3 && !state.cards.some((c) => c.id === "c1"), String(deckCards().length));
-  check("header3", $("#stats").textContent.includes("Р’СЃРµРіРѕ 3"), $("#stats").textContent);
+  check("header3", $("#stats").textContent.includes("Всего 3"), $("#stats").textContent);
 
   // Tab switch to study
   $("#tab-study").click(); await sleep(400);
   check("tab-study-on", !$("#panel-study").classList.contains("hidden") && $("#panel-edit").classList.contains("hidden") && !$("#study-board").classList.contains("hidden"));
-  check("meta1", meta().includes("1 РёР· 3"), meta());
+  check("meta1", meta().includes("1 из 3"), meta());
 
   // Keyboard navigation on document
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
   await sleep(300);
-  check("kbd-right", meta().includes("2 РёР· 3"), meta());
+  check("kbd-right", meta().includes("2 из 3"), meta());
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
   await sleep(300);
-  check("kbd-left", meta().includes("1 РёР· 3"), meta());
+  check("kbd-left", meta().includes("1 из 3"), meta());
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
   await sleep(300);
-  check("kbd-wrap-prev", meta().includes("3 РёР· 3"), meta());
+  check("kbd-wrap-prev", meta().includes("3 из 3"), meta());
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
   await sleep(300);
-  check("kbd-wrap-next", meta().includes("1 РёР· 3"), meta());
+  check("kbd-wrap-next", meta().includes("1 из 3"), meta());
 
   // Buttons
   $("#next-card-btn").click(); await sleep(300);
-  check("btn-next", meta().includes("2 РёР· 3"), meta());
+  check("btn-next", meta().includes("2 из 3"), meta());
   $("#prev-card-btn").click(); await sleep(300);
-  check("btn-prev", meta().includes("1 РёР· 3"), meta());
+  check("btn-prev", meta().includes("1 из 3"), meta());
 
   // Flip marks unknown exactly once
   $("#flashcard").click(); await sleep(300);
@@ -170,34 +170,34 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   // Mark known after flip -> advances; verdict known, daily event already spent at flip
   $("#mark-known-btn").click(); await sleep(500);
-  check("meta2", meta().includes("2 РёР· 3"), meta());
+  check("meta2", meta().includes("2 из 3"), meta());
   check("today-k1", getTodayStats().known === 0, String(getTodayStats().known));
   check("press-reset", $("#mark-known-btn").getAttribute("aria-pressed") === "false" && $("#mark-unknown-btn").getAttribute("aria-pressed") === "false");
 
   // Unflipped unknown on card 2
   $("#mark-unknown-btn").click(); await sleep(500);
-  check("meta3", meta().includes("3 РёР· 3"), meta());
+  check("meta3", meta().includes("3 из 3"), meta());
   check("today-u2", getTodayStats().unknown === 2, String(getTodayStats().unknown));
 
   // Complete round on card 3
   $("#mark-known-btn").click(); await sleep(500);
   check("summary-open", $("#summary-backdrop").classList.contains("is-open"));
-  check("summary-line", $("#summary-line").textContent === "Р’СЃРµРіРѕ 3 В· Р·РЅР°СЋ 2 В· РЅРµ Р·РЅР°СЋ 1", $("#summary-line").textContent);
-  check("repeat-unknown-txt", $("#summary-repeat").textContent === "РџРѕРІС‚РѕСЂРёС‚СЊ РЅРµРёР·СѓС‡РµРЅРЅРѕРµ", $("#summary-repeat").textContent);
+  check("summary-line", $("#summary-line").textContent === "Всего 3 · знаю 2 · не знаю 1", $("#summary-line").textContent);
+  check("repeat-unknown-txt", $("#summary-repeat").textContent === "Повторить неизученное", $("#summary-repeat").textContent);
 
   // Repeat unknown only (1 card)
   $("#summary-repeat").click(); await sleep(500);
-  check("repeat-meta", meta().includes("1 РёР· 1"), meta());
+  check("repeat-meta", meta().includes("1 из 1"), meta());
   $("#mark-known-btn").click(); await sleep(500);
   check("summary2", $("#summary-backdrop").classList.contains("is-open"));
-  check("summary-line2", $("#summary-line").textContent === "Р’СЃРµРіРѕ 1 В· Р·РЅР°СЋ 1 В· РЅРµ Р·РЅР°СЋ 0", $("#summary-line").textContent);
-  check("repeat-all-txt", $("#summary-repeat").textContent === "РџСЂРѕР№С‚Рё РµС‰С‘ СЂР°Р·", $("#summary-repeat").textContent);
+  check("summary-line2", $("#summary-line").textContent === "Всего 1 · знаю 1 · не знаю 0", $("#summary-line").textContent);
+  check("repeat-all-txt", $("#summary-repeat").textContent === "Пройти ещё раз", $("#summary-repeat").textContent);
 
   // To menu
   $("#summary-menu").click(); await sleep(500);
   check("to-menu", $("#menu-backdrop").classList.contains("is-open"));
   const today = $("#menu-today-stats").textContent;
-  check("menu-today", today.includes("РёР·СѓС‡РµРЅРѕ 4") && today.includes("Р·РЅР°СЋ 2") && today.includes("РЅРµ Р·РЅР°СЋ 2"), today);;
+  check("menu-today", today.includes("изучено 4") && today.includes("знаю 2") && today.includes("не знаю 2"), today);;
 
   // Settings over menu
   $("#menu-settings-btn").click(); await sleep(500);
@@ -212,15 +212,15 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("picker-2", $$("#deck-pick-list .deck-pick-item").length === 2, String($$("#deck-pick-list .deck-pick-item").length));
   $("#deck-pick-new").click(); await sleep(300);
   check("create-modal", $("#modal-backdrop").classList.contains("is-open"));
-  $("#modal-input").value = "РќРѕРІР°СЏ";
+  $("#modal-input").value = "Новая";
   $("#modal-ok").click(); await sleep(500);
-  check("new-deck-created", state.decks.some((d) => d.name === "РќРѕРІР°СЏ") && $("#deck-title").textContent === "РќРѕРІР°СЏ", $("#deck-title").textContent);
+  check("new-deck-created", state.decks.some((d) => d.name === "Новая") && $("#deck-title").textContent === "Новая", $("#deck-title").textContent);
   check("deck-list3", $$("#deck-list .deck-item").length === 3, String($$("#deck-list .deck-item").length));
   check("empty-study", !$("#study-empty").classList.contains("hidden"));
 
   // Switch deck via sidebar
-  $$("#deck-list .deck-item").find((b) => b.textContent.includes("РђРЅРіР»РёР№СЃРєРёР№")).click(); await sleep(500);
-  check("switched", $("#deck-title").textContent === "РђРЅРіР»РёР№СЃРєРёР№" && state.selectedDeckId === "d1");
+  $$("#deck-list .deck-item").find((b) => b.textContent.includes("Английский")).click(); await sleep(500);
+  check("switched", $("#deck-title").textContent === "Английский" && state.selectedDeckId === "d1");
   check("rows3-sidebar", $$("#card-rows li").length === 3, String($$("#card-rows li").length));
 
   // Settings from workspace: dark + sea palette + persistence
@@ -251,7 +251,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   await sleep(1000);
   check("menu-open-b", $("#menu-backdrop").classList.contains("is-open"));
-  check("persisted-decks", state.decks.length === 3 && state.decks.some((d) => d.name === "РќРѕРІР°СЏ"), String(state.decks.length));
+  check("persisted-decks", state.decks.length === 3 && state.decks.some((d) => d.name === "Новая"), String(state.decks.length));
   check("persisted-cards", d1Cards().length === 3, String(d1Cards().length));
   check("persisted-selected", state.selectedDeckId === "d1", String(state.selectedDeckId));
   check("persisted-mode", document.documentElement.dataset.mode === "dark", document.documentElement.dataset.mode);
@@ -260,24 +260,24 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   // Close menu -> workspace, bulk add
   $("#menu-close").click(); await sleep(400);
-  check("ws-b", !$("#workspace").classList.contains("hidden") && $("#deck-title").textContent === "РђРЅРіР»РёР№СЃРєРёР№");
+  check("ws-b", !$("#workspace").classList.contains("hidden") && $("#deck-title").textContent === "Английский");
   $("#bulk-btn").click(); await sleep(400);
   check("bulk-open-b", $("#bulk-backdrop").classList.contains("is-open"));
-  $("#bulk-input").value = "pear = РіСЂСѓС€Р°\n1 = one\nСЃС‚РѕР» = table";
+  $("#bulk-input").value = "pear = груша\n1 = one\nстол = table";
   $("#bulk-ok").click(); await sleep(500);
-  check("bulk-added", d1Cards().length === 6 && $("#bulk-feedback").textContent.includes("Р”РѕР±Р°РІР»РµРЅРѕ 3"), $("#bulk-feedback").textContent);
+  check("bulk-added", d1Cards().length === 6 && $("#bulk-feedback").textContent.includes("Добавлено 3"), $("#bulk-feedback").textContent);
   $("#bulk-cancel").click(); await sleep(400);
   check("bulk-closed-b", !$("#bulk-backdrop").classList.contains("is-open"));
 
   // Reset progress via popup
   $("#menu-back-btn").click(); await sleep(400);
   $("#menu-cards-btn").click(); await sleep(400);
-  $$("#deck-pick-list .deck-pick-item").find((b) => b.textContent.includes("РђРЅРіР»РёР№СЃРєРёР№")).querySelector(".deck-pick-more").click(); await sleep(400);
+  $$("#deck-pick-list .deck-pick-item").find((b) => b.textContent.includes("Английский")).querySelector(".deck-pick-more").click(); await sleep(400);
   const popBtns = $$("#menu-pop-actions button").map((b) => b.textContent);
-  check("pop-actions-b", popBtns.length === 7 && popBtns.some((t) => t.includes("РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ")), popBtns.join("|"));
-  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("Р·Р°РЅРѕРІРѕ")).click(); await sleep(300);
-  check("reset-modal", $("#modal-backdrop").classList.contains("is-open") && $("#modal-title").textContent === "РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ?", $("#modal-title").textContent);
-  check("reset-btn", $("#modal-ok").textContent === "РЎР±СЂРѕСЃРёС‚СЊ", $("#modal-ok").textContent);
+  check("pop-actions-b", popBtns.length === 7 && popBtns.some((t) => t.includes("Начать заново")), popBtns.join("|"));
+  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("заново")).click(); await sleep(300);
+  check("reset-modal", $("#modal-backdrop").classList.contains("is-open") && $("#modal-title").textContent === "Начать заново?", $("#modal-title").textContent);
+  check("reset-btn", $("#modal-ok").textContent === "Сбросить", $("#modal-ok").textContent);
   $("#modal-ok").click(); await sleep(500);
   check("all-new-b", d1Cards().every((c) => c.status === "new"), d1Cards().map((c) => c.status).join("|"));
   check("today-reset-kept", state.today.known === 2 && state.today.unknown === 2);
@@ -285,9 +285,9 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   // Study via popup
   $("#menu-back-btn").click(); await sleep(400);
   $("#menu-cards-btn").click(); await sleep(400);
-  $$("#deck-pick-list .deck-pick-item").find((b) => b.textContent.includes("РђРЅРіР»РёР№СЃРєРёР№")).querySelector(".deck-pick-more").click(); await sleep(400);
-  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("РЈС‡РёС‚СЊ РєРѕР»РѕРґСѓ")).click(); await sleep(600);
-  check("study-popup-b", !$("#menu-backdrop").classList.contains("is-open") && !$("#study-board").classList.contains("hidden") && meta().includes("1 РёР· 6"), meta());
+  $$("#deck-pick-list .deck-pick-item").find((b) => b.textContent.includes("Английский")).querySelector(".deck-pick-more").click(); await sleep(400);
+  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("Учить колоду")).click(); await sleep(600);
+  check("study-popup-b", !$("#menu-backdrop").classList.contains("is-open") && !$("#study-board").classList.contains("hidden") && meta().includes("1 из 6"), meta());
 
   check("no-errors-b", Array.isArray(window.__errors) && window.__errors.length === 0, JSON.stringify(window.__errors || []));
   return JSON.stringify(res);

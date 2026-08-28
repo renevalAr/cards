@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9236 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-bulk-profile"
+$udir = "$env:TEMP\opencode\cdp-bulk-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -53,8 +53,8 @@ try {
     var pad = function (n) { return String(n).padStart(2, "0"); };
     var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     localStorage.setItem("flashcards-app-v1", JSON.stringify({
-      decks: [{ id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" }],
-      cards: [{ id: "c1", deckId: "d1", question: "hello", answer: "РїСЂРёРІРµС‚", status: "new" }],
+      decks: [{ id: "d1", name: "Английский" }],
+      cards: [{ id: "c1", deckId: "d1", question: "hello", answer: "привет", status: "new" }],
       selectedDeckId: "d1",
       tab: "edit",
       today: { date: today, known: 0, unknown: 0 },
@@ -84,28 +84,28 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   $("#menu-cards-btn").click(); await sleep(400);
   $$("#deck-pick-list .deck-pick-item")[0].querySelector(".deck-pick-main").click(); await sleep(500);
-  // "РљР°СЂС‚РѕС‡РєРё"
+  // "Карточки"
   check("workspace", !$("#workspace").classList.contains("hidden") && !$("#panel-edit").classList.contains("hidden"));
 
   $("#bulk-btn").click(); await sleep(400);
   check("bulk-open", $("#bulk-backdrop").classList.contains("is-open"));
   check("bulk-focus", document.activeElement === $("#bulk-input"));
 
-  const bulkText = ["РѕРґРёРЅ = one", "РґРІР° = two", "С‚СЂРё = three", "С‡РµС‚С‹СЂРµ = four", "РїСЏС‚СЊ = five", "СЃС‚СЂРѕРєР° Р±РµР· СЂР°Р·РґРµР»РёС‚РµР»СЏ РїСЂРѕРїСѓС‰РµРЅР°", "С€РµСЃС‚СЊ = six", "СЃРµРјСЊ = seven", ""].join("\n");
+  const bulkText = ["один = one", "два = two", "три = three", "четыре = four", "пять = five", "строка без разделителя пропущена", "шесть = six", "семь = seven", ""].join("\n");
   $("#bulk-input").value = bulkText;
   $("#bulk-ok").click(); await sleep(500);
-  check("bulk-feedback", $("#bulk-feedback").textContent.includes("Р”РѕР±Р°РІР»РµРЅРѕ 7") && $("#bulk-feedback").textContent.includes("РїСЂРѕРїСѓС‰РµРЅРѕ 1"), $("#bulk-feedback").textContent);
+  check("bulk-feedback", $("#bulk-feedback").textContent.includes("Добавлено 7") && $("#bulk-feedback").textContent.includes("пропущено 1"), $("#bulk-feedback").textContent);
   check("cards8", cards().length === 8, String(cards().length));
   check("textarea-cleared", $("#bulk-input").value === "");
   const qs = cards().map((c) => c.question);
-  check("parsed", ["РѕРґРёРЅ", "РґРІР°", "С‚СЂРё", "С‡РµС‚С‹СЂРµ", "РїСЏС‚СЊ", "С€РµСЃС‚СЊ", "СЃРµРјСЊ"].every((q) => qs.includes(q)), qs.join("|"));
-  check("no-garbage", !qs.some((q) => q.includes("Р±РµР· СЂР°Р·РґРµР»РёС‚РµР»СЏ")), qs.join("|"));
+  check("parsed", ["один", "два", "три", "четыре", "пять", "шесть", "семь"].every((q) => qs.includes(q)), qs.join("|"));
+  check("no-garbage", !qs.some((q) => q.includes("без разделителя")), qs.join("|"));
   check("all-new", cards().every((c) => c.status === "new"));
-  check("answers", cards().find((c) => c.question === "РґРІР°").answer === "two");
+  check("answers", cards().find((c) => c.question === "два").answer === "two");
 
-  $("#bulk-input").value = "alpha = Р±РµС‚Р°";
+  $("#bulk-input").value = "alpha = бета";
   $("#bulk-ok").click(); await sleep(400);
-  check("batch2", cards().length === 9 && $("#bulk-feedback").textContent.includes("Р”РѕР±Р°РІР»РµРЅРѕ 1"), $("#bulk-feedback").textContent);
+  check("batch2", cards().length === 9 && $("#bulk-feedback").textContent.includes("Добавлено 1"), $("#bulk-feedback").textContent);
   check("rows9", $$("#card-rows li").length === 9, String($$("#card-rows li").length));
 
   $("#bulk-cancel").click(); await sleep(400);
@@ -115,7 +115,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#bulk-btn").click(); await sleep(400);
   $("#bulk-input").value = "   \n  ";
   $("#bulk-ok").click(); await sleep(200);
-  check("empty-warn", $("#bulk-feedback").textContent.includes("РЅРё РѕРґРЅРѕР№ РїР°СЂС‹"), $("#bulk-feedback").textContent);
+  check("empty-warn", $("#bulk-feedback").textContent.includes("ни одной пары"), $("#bulk-feedback").textContent);
   $("#bulk-backdrop").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
   await sleep(300);
   check("bulk-esc", !$("#bulk-backdrop").classList.contains("is-open"));

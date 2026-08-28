@@ -1,11 +1,11 @@
-Ôªøparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9224 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-profile2"
+$udir = "$env:TEMP\opencode\cdp-profile2"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -71,8 +71,8 @@ try {
   $seed = @'
 try {
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
-    decks: [ { id: "d1", name: "–ê–Ω–≥–ª–∏–π—Å–∫–∏–π" } ],
-    cards: [ { id: "c1", deckId: "d1", question: "cat", answer: "–∫–æ—Ç", status: "known" } ],
+    decks: [ { id: "d1", name: "¿Ì„ÎËÈÒÍËÈ" } ],
+    cards: [ { id: "c1", deckId: "d1", question: "cat", answer: "ÍÓÚ", status: "known" } ],
     selectedDeckId: "d1",
     tab: "menu",
     today: { date: "2026-08-20", known: 1, unknown: 0 }

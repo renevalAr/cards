@@ -1,11 +1,11 @@
-Ôªøparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9227 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-profile5"
+$udir = "$env:TEMP\opencode\cdp-profile5"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -71,7 +71,7 @@ try {
   $seed = @'
 try {
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
-    decks: [ { id: "d1", name: "–ê–Ω–≥–ª–∏–π—Å–∫–∏–π" } ],
+    decks: [ { id: "d1", name: "¿Ì„ÎËÈÒÍËÈ" } ],
     cards: [],
     selectedDeckId: "d1",
     tab: "edit",
@@ -99,7 +99,7 @@ window.addEventListener("error", function (e) { window.__errors.push((e.error &&
   check("stats-open", $("#stats-backdrop").classList.contains("is-open"));
   check("empty-visible", !$("#stats-empty").classList.contains("hidden"));
   check("list-hidden", $("#stats-list").classList.contains("hidden"));
-  check("empty-text", $("#stats-go-study").textContent === "–£—á–∏—Ç—å", $("#stats-go-study").textContent);
+  check("empty-text", $("#stats-go-study").textContent === "”˜ËÚ¸", $("#stats-go-study").textContent);
 
   $("#stats-go-study").click(); await sleep(600);
   check("go-study", !$("#stats-backdrop").classList.contains("is-open") && $("#workspace").classList.contains("hidden") === false);

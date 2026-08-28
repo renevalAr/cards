@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9237 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-unit-profile"
+$udir = "$env:TEMP\opencode\cdp-unit-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -91,19 +91,19 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   // --- decks normalization ---
   const ns = normalizeState({
     decks: [
-      { id: "a", name: "  РћС‚СЂСЏРґ  " },
+      { id: "a", name: "  Отряд  " },
       { id: "b", name: "   " },
-      { id: "a", name: "Р”СѓР±Р»СЊ" },
+      { id: "a", name: "Дубль" },
       { id: "c", name: "x".repeat(120) },
-      "РЅРµ-РѕР±СЉРµРєС‚",
+      "не-объект",
       null,
       { id: "d", name: 42 },
     ],
     cards: [],
   });
   check("ns-decks-count", ns.decks.length === 2, String(ns.decks.length));
-  check("ns-decks-trim", ns.decks[0].name === "РћС‚СЂСЏРґ", ns.decks[0].name);
-  check("ns-decks-dedup", !ns.decks.some((x) => x.name === "Р”СѓР±Р»СЊ"));
+  check("ns-decks-trim", ns.decks[0].name === "Отряд", ns.decks[0].name);
+  check("ns-decks-dedup", !ns.decks.some((x) => x.name === "Дубль"));
   check("ns-decks-trunc", ns.decks[1].name.length === 80 && ns.decks[1].name === "x".repeat(80), String(ns.decks[1].name.length));
 
   // --- cards normalization ---
@@ -151,14 +151,14 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("ns-sessions-array", normalizeState({ sessions: "no" }).sessions.length === 0);
 
   // --- splitBulkPair / parseBulkLines ---
-  check("bulk-simple", JSON.stringify(splitBulkPair("РІРѕРїСЂРѕСЃ = РѕС‚РІРµС‚")) === JSON.stringify(["РІРѕРїСЂРѕСЃ", "РѕС‚РІРµС‚"]));
+  check("bulk-simple", JSON.stringify(splitBulkPair("вопрос = ответ")) === JSON.stringify(["вопрос", "ответ"]));
   check("bulk-spaces", JSON.stringify(splitBulkPair("  q  =  a  ")) === JSON.stringify(["q", "a"]));
   check("bulk-multi", JSON.stringify(splitBulkPair("a=b=c")) === JSON.stringify(["a", "b=c"]));
   check("bulk-no-sep", splitBulkPair("no separator") === null);
   check("bulk-leading", splitBulkPair("= x") === null);
   check("bulk-trailing", splitBulkPair("q =") === null);
   check("bulk-empty-q", splitBulkPair(" = a") === null);
-  const pairs = parseBulkLines("one = 1\ntwo=2\n\nР±РµР· СЂР°Р·РґРµР»РёС‚РµР»СЏ\nthree = 3\n");
+  const pairs = parseBulkLines("one = 1\ntwo=2\n\nбез разделителя\nthree = 3\n");
   check("bulk-parse-count", pairs.length === 3, String(pairs.length));
   check("bulk-parse-order", JSON.stringify(pairs[0]) === JSON.stringify(["one", "1"]) && JSON.stringify(pairs[2]) === JSON.stringify(["three", "3"]), JSON.stringify(pairs));
   check("bulk-parse-empty", parseBulkLines("").length === 0 && parseBulkLines("\n \n").length === 0);
@@ -220,7 +220,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("streak-zero-day", computeStreak() === 0, String(computeStreak()));
   state.history = { a: { [day(s0)]: { known: 1, unknown: 0 } }, b: { [day(s1)]: { known: 1, unknown: 0 } } };
   check("streak-across-decks", computeStreak() === 2, String(computeStreak()));
-  check("plural-days", pluralDays(1) === "РґРµРЅСЊ" && pluralDays(2) === "РґРЅСЏ" && pluralDays(4) === "РґРЅСЏ" && pluralDays(5) === "РґРЅРµР№" && pluralDays(11) === "РґРЅРµР№" && pluralDays(21) === "РґРµРЅСЊ" && pluralDays(22) === "РґРЅСЏ", [pluralDays(1), pluralDays(2), pluralDays(5), pluralDays(11), pluralDays(21), pluralDays(22)].join("|"));
+  check("plural-days", pluralDays(1) === "день" && pluralDays(2) === "дня" && pluralDays(4) === "дня" && pluralDays(5) === "дней" && pluralDays(11) === "дней" && pluralDays(21) === "день" && pluralDays(22) === "дня", [pluralDays(1), pluralDays(2), pluralDays(5), pluralDays(11), pluralDays(21), pluralDays(22)].join("|"));
 
   // --- isRoundComplete ---
   state.studyOrder = ["a", "b"];
@@ -236,9 +236,9 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("round-single", isRoundComplete() === true);
 
   // --- badgeFor ---
-  check("badge-known", badgeFor({ status: "known" }).className === "badge known" && badgeFor({ status: "known" }).textContent === "Р·РЅР°СЋ");
-  check("badge-unknown", badgeFor({ status: "unknown" }).className === "badge unknown" && badgeFor({ status: "unknown" }).textContent === "РЅРµ Р·РЅР°СЋ");
-  check("badge-new", badgeFor({ status: "new" }).className === "badge" && badgeFor({ status: "new" }).textContent === "РЅРѕРІР°СЏ");
+  check("badge-known", badgeFor({ status: "known" }).className === "badge known" && badgeFor({ status: "known" }).textContent === "знаю");
+  check("badge-unknown", badgeFor({ status: "unknown" }).className === "badge unknown" && badgeFor({ status: "unknown" }).textContent === "не знаю");
+  check("badge-new", badgeFor({ status: "new" }).className === "badge" && badgeFor({ status: "new" }).textContent === "новая");
 
   // --- makeEl ---
   const el = makeEl("div", "x y", "text");

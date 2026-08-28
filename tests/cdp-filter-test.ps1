@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9240 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-filter-profile"
+$udir = "$env:TEMP\opencode\cdp-filter-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -54,12 +54,12 @@ try {
       var pad = function (n) { return String(n).padStart(2, "0"); };
       var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
       localStorage.setItem("flashcards-app-v1", JSON.stringify({
-        decks: [{ id: "d1", name: "РћСЃРЅРѕРІС‹" }],
+        decks: [{ id: "d1", name: "Основы" }],
         cards: [
           { id: "c1", deckId: "d1", question: "1+1", answer: "2", status: "new" },
-          { id: "c2", deckId: "d1", question: "Р·РЅР°СЋ?", answer: "РґР°", status: "known" },
-          { id: "c3", deckId: "d1", question: "Р·Р°Р±С‹Р»?", answer: "РґР°", status: "unknown" },
-          { id: "c4", deckId: "d1", question: "СЃС‚РѕР»РёС†Р°", answer: "РџР°СЂРёР¶", status: "new" }
+          { id: "c2", deckId: "d1", question: "знаю?", answer: "да", status: "known" },
+          { id: "c3", deckId: "d1", question: "забыл?", answer: "да", status: "unknown" },
+          { id: "c4", deckId: "d1", question: "столица", answer: "Париж", status: "new" }
         ],
         selectedDeckId: "d1",
         tab: "edit",
@@ -94,33 +94,33 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#menu-close").click(); await sleep(400);
 
   check("filters-visible", !$("#card-filters").classList.contains("hidden"));
-  check("filters-btns", $$("#card-filters .filter-btn").map((b) => b.textContent).join("|") === "Р’СЃРµ|РќРѕРІС‹Рµ|Р—РЅР°СЋ|РќРµ Р·РЅР°СЋ", $$("#card-filters .filter-btn").map((b) => b.textContent).join("|"));
+  check("filters-btns", $$("#card-filters .filter-btn").map((b) => b.textContent).join("|") === "Все|Новые|Знаю|Не знаю", $$("#card-filters .filter-btn").map((b) => b.textContent).join("|"));
   check("all-active", activeFilter() === "all" && $$("#card-filters .filter-btn")[0].classList.contains("is-active"), activeFilter());
   check("rows-all", rows().length === 4, String(rows().length));
 
   await setFilter("known");
   check("known-filter", rows().length === 1 && activeFilter() === "known", rows().length + " / " + activeFilter());
-  check("known-badge", badges() === "Р·РЅР°СЋ", badges());
+  check("known-badge", badges() === "знаю", badges());
 
   await setFilter("unknown");
-  check("unknown-filter", rows().length === 1 && badges() === "РЅРµ Р·РЅР°СЋ", rows().length + " / " + badges());
+  check("unknown-filter", rows().length === 1 && badges() === "не знаю", rows().length + " / " + badges());
 
   await setFilter("new");
   check("new-filter", rows().length === 2 && activeFilter() === "new", rows().length + " / " + activeFilter());
-  check("new-badges", badges() === "РЅРѕРІР°СЏ|РЅРѕРІР°СЏ", badges());
+  check("new-badges", badges() === "новая|новая", badges());
 
-  // Delete the only known card while the "Р—РЅР°СЋ" filter is active -> filter empty message
+  // Delete the only known card while the "Знаю" filter is active -> filter empty message
   await setFilter("known");
   rows()[0].querySelector(".row-actions button:last-child").click(); await sleep(400);
-  check("del-modal", $("#modal-backdrop").classList.contains("is-open") && $("#modal-title").textContent === "РЈРґР°Р»РёС‚СЊ РєР°СЂС‚РѕС‡РєСѓ?");
+  check("del-modal", $("#modal-backdrop").classList.contains("is-open") && $("#modal-title").textContent === "Удалить карточку?");
   $("#modal-ok").click(); await sleep(500);
   check("filter-empty", rows().length === 0 && activeFilter() === "known");
-  check("filter-empty-msg", $("#card-rows .empty-row").textContent === "РќРµС‚ РєР°СЂС‚РѕС‡РµРє СЃРѕ СЃС‚Р°С‚СѓСЃРѕРј В«Р·РЅР°СЋВ».", $("#card-rows .empty-row").textContent);
+  check("filter-empty-msg", $("#card-rows .empty-row").textContent === "Нет карточек со статусом «знаю».", $("#card-rows .empty-row").textContent);
 
   await setFilter("all");
   check("all-back", rows().length === 3, String(rows().length));
 
-  // Live update: flip c1 (new) in study while filter "РќРѕРІС‹Рµ" is active -> row disappears
+  // Live update: flip c1 (new) in study while filter "Новые" is active -> row disappears
   await setFilter("new");
   check("new-before-flip", rows().length === 2, String(rows().length));
   $("#tab-study").click(); await sleep(500);
@@ -131,15 +131,15 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#flashcard").click(); await sleep(500);
   check("flipped-c1", state.cards.find((c) => c.id === "c1").status === "unknown", state.cards.find((c) => c.id === "c1").status);
   $("#tab-edit").click(); await sleep(500);
-  check("row-removed-live", rows().length === 1 && !rows().some((li) => li.dataset.cardId === "c1") && badges() === "РЅРѕРІР°СЏ", badges());
+  check("row-removed-live", rows().length === 1 && !rows().some((li) => li.dataset.cardId === "c1") && badges() === "новая", badges());
 
   // Filter bar hidden for an empty deck, then back
   $("#new-deck-btn").click(); await sleep(400);
-  $("#modal-input").value = "РџСѓСЃС‚Р°СЏ";
+  $("#modal-input").value = "Пустая";
   $("#modal-ok").click(); await sleep(500);
-  check("empty-deck-selected", state.selectedDeckId === state.decks[1].id && state.decks[1].name === "РџСѓСЃС‚Р°СЏ");
+  check("empty-deck-selected", state.selectedDeckId === state.decks[1].id && state.decks[1].name === "Пустая");
   check("filters-hidden", $("#card-filters").classList.contains("hidden"));
-  check("no-cards-msg", $("#card-rows .empty-row").textContent === "РљР°СЂС‚РѕС‡РµРє РїРѕРєР° РЅРµС‚ вЂ” Р·Р°РїРѕР»РЅРё С„РѕСЂРјСѓ РІС‹С€Рµ.", $("#card-rows .empty-row").textContent);
+  check("no-cards-msg", $("#card-rows .empty-row").textContent === "Карточек пока нет — заполни форму выше.", $("#card-rows .empty-row").textContent);
   $$("#deck-list .deck-item")[0].click(); await sleep(500);
   check("filters-back", !$("#card-filters").classList.contains("hidden") && activeFilter() === "new" && rows().length === 1, activeFilter() + " / " + rows().length);
 
@@ -174,7 +174,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   units.push(cardMatchesFilter({ status: "known" }) === true && cardMatchesFilter({ status: "new" }) === false);
   state.cardFilter = "all";
   units.push(cardMatchesFilter({ status: "anything" }) === true);
-  units.push(filterLabel("new") === "РЅРѕРІР°СЏ" && filterLabel("known") === "Р·РЅР°СЋ" && filterLabel("unknown") === "РЅРµ Р·РЅР°СЋ");
+  units.push(filterLabel("new") === "новая" && filterLabel("known") === "знаю" && filterLabel("unknown") === "не знаю");
   units.push($$("#card-filters .filter-btn").length === 4);
   state.cardFilter = "all";
   render();

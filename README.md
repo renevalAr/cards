@@ -1,36 +1,144 @@
-﻿# Карточки — flashcard-приложение в эстетике школьной тетради
+﻿# Flashcards — Полноценное веб-приложение
 
-Vanilla HTML/CSS/JS. Без фреймворков, сборки и зависимостей. Офлайн-first: все данные — в твоём браузере (localStorage + IndexedDB), сервера нет.
+Архитектурный каркас для трансформации офлайн-прототипа в полноценный веб-сервис.
 
-## Онлайн
+## Архитектура
 
-**https://renevalar.github.io/cards/** — работает в браузере, с телефона тоже. Данные локальны на каждом устройстве.
-
-## Запуск локально
-
-Открыть `index.html` в Chrome (двойной клик). Всё.
-
-## Возможности
-
-- Колоды и карточки: форма, массовый ввод `вопрос = ответ`, поиск, фильтры, drag-reorder
-- Учить: карточки с флипом / квиз (клавиши 1–4) / полноэкранный режим / двусторонние колоды
-- Озвучка карточек (TTS), картинки в карточках (IndexedDB, сжатие 480px WebP)
-- Экспорт/импорт базы и колод (JSON + CSV)
-- 10 палитр × светлая/тёмная/авто × размер текста S/M/L
-- Статистика: день, серия дней, журнал сессий
-
-## Тесты
-
-29 наборов (PowerShell + Chrome DevTools Protocol), параллельный раннер:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1 -Smoke   # быстро
-powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1          # полный
+```
+Nginx (80/443) → FastAPI (uvicorn) → PostgreSQL 16
+                ↘ Frontend (Vanilla JS)
+                ↘ Media (Local FS)
 ```
 
-CI: GitHub Actions — smoke на каждый push, полный прогон вручную (вкладка Actions → Run workflow).
+## Технологический стек
 
-## Документация
+| Компонент | Технология |
+|---|---|
+| Backend | Python 3.12 + FastAPI |
+| Database | PostgreSQL 16 + Full-Text Search |
+| Auth | JWT (access + refresh tokens) |
+| Frontend | Vanilla JS + REST API |
+| Поиск | PostgreSQL FTS (tsvector, russian) |
+| Тесты | Playwright (Python) |
+| Веб-сервер | Nginx + uvicorn |
+| Деплой | Docker + Docker Compose + GitHub Actions |
 
-Полный контекст для человека или ИИ — [DOCUMENTATION.md](DOCUMENTATION.md): архитектура, все ID/функции, дизайн-система, решения и грабли.
+## Структура проекта
 
+```
+flashcards/
+├── backend/              # FastAPI приложение
+│   ├── app/
+│   │   ├── main.py       # Точка входа
+│   │   ├── config.py     # Настройки (pydantic-settings)
+│   │   ├── database.py   # SQLAlchemy async engine
+│   │   ├── dependencies.py # FastAPI dependencies (auth)
+│   │   ├── models/       # SQLAlchemy модели
+│   │   ├── schemas/      # Pydantic схемы
+│   │   ├── routers/      # API endpoints
+│   │   └── services/     # Бизнес-логика
+│   ├── alembic/          # Миграции базы данных
+│   ├── tests/            # Backend тесты
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── pyproject.toml
+├── frontend/             # Клиентское приложение
+│   ├── index.html
+│   ├── js/
+│   │   ├── api.js        # API клиент
+│   │   ├── auth.js       # Авторизация
+│   │   └── ...
+│   ├── css/
+│   └── assets/
+├── nginx/                # Конфигурация Nginx
+│   ├── nginx.conf
+│   └── ssl/
+├── tests-e2e/            # Playwright E2E тесты
+├── media/                # Загруженные изображения
+├── docker-compose.yml
+└── .github/workflows/    # CI/CD
+    ├── ci.yml
+    └── deploy.yml
+```
+
+## Быстрый старт
+
+### Лальная разработка
+
+```bash
+# 1. Клонировать репозиторий
+git clone https://github.com/renevalAr/cards.git
+cd cards
+
+# 2. Создать .env файл
+cp backend/.env.example backend/.env
+
+# 3. Запустить через Docker Compose
+docker-compose up -d
+
+# 4. Применить миграции
+cd backend
+alembic upgrade head
+
+# 5. Открыть http://localhost
+```
+
+### Разработка бэкенда
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# Запуск с горячей перезагрузкой
+uvicorn app.main:app --reload
+```
+
+### Запуск тестов
+
+```bash
+# Backend тесты
+cd backend
+pytest tests/ -v
+
+# E2E тесты
+pip install playwright pytest-playwright
+playwright install
+pytest tests-e2e/ -v
+```
+
+## API Endpoints
+
+### Аутентификация
+- `POST /api/auth/register` — Регистрация
+- `POST /api/auth/login` — Вход
+- `POST /api/auth/refresh` — Обновление токена
+- `POST /api/auth/logout` — Выход
+- `GET /api/auth/me` — Текущий пользователь
+
+### Колоды
+- `GET /api/decks` — Список колод
+- `POST /api/decks` — Создать колоду
+- `GET /api/decks/{id}` — Получить колоду
+- `PATCH /api/decks/{id}` — Обновить колоду
+- `DELETE /api/decks/{id}` — Удалить колоду
+- `GET /api/decks/{id}/cards` — Карточки (infinite scroll)
+- `POST /api/decks/{id}/cards` — Добавить карточку
+
+### Поиск
+- `GET /api/search/decks?q=` — Поиск колод
+- `GET /api/search/cards?q=&deck_id=` — Поиск карточек
+
+## Безопасность
+
+- bcrypt для хеширования паролей
+- JWT access (15 мин) + refresh (30 дней) токены
+- httpOnly cookies
+- CORS с разрешёнными origins
+- Rate limiting на auth endpoints
+- CSP headers через Nginx
+
+## Лицензия
+
+MIT

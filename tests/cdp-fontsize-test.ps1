@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9330 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-fontsize-profile"
+$udir = "$env:TEMP\opencode\cdp-fontsize-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -52,12 +52,12 @@ try {
   var pad = function (n) { return String(n).padStart(2, "0"); };
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
-    decks: [{ id: "d1", name: "РћСЃРЅРѕРІС‹" }],
+    decks: [{ id: "d1", name: "Основы" }],
     cards: [
-      { id: "c1", deckId: "d1", question: "Р’РѕРїСЂРѕСЃ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЂР°Р·РјРµСЂР°", answer: "РћС‚РІРµС‚", status: "new" },
-      { id: "c2", deckId: "d1", question: "РІ2", answer: "Рѕ2", status: "new" },
-      { id: "c3", deckId: "d1", question: "РІ3", answer: "Рѕ3", status: "new" },
-      { id: "c4", deckId: "d1", question: "РІ4", answer: "Рѕ4", status: "new" }
+      { id: "c1", deckId: "d1", question: "Вопрос для проверки размера", answer: "Ответ", status: "new" },
+      { id: "c2", deckId: "d1", question: "в2", answer: "о2", status: "new" },
+      { id: "c3", deckId: "d1", question: "в3", answer: "о3", status: "new" },
+      { id: "c4", deckId: "d1", question: "в4", answer: "о4", status: "new" }
     ],
     selectedDeckId: "d1",
     tab: "edit",

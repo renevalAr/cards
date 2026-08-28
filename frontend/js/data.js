@@ -29,7 +29,7 @@ function buildBackupPayload() {
     v: EXPORT_VERSION,
     kind: "base",
     exportedAt: new Date().toISOString(),
-    decks: state.decks.map((d) => ({ id: d.id, name: d.name })),
+    decks: state.decks.map((d) => ({ id: d.id, name: d.name, twoSided: Boolean(d.twoSided) })),
     cards: state.cards.map((c) => ({ id: c.id, deckId: c.deckId, question: c.question, answer: c.answer, status: c.status })),
     history: state.history,
     sessions: state.sessions,
@@ -52,7 +52,7 @@ function exportDeckJson(deckId) {
     v: EXPORT_VERSION,
     kind: "deck",
     exportedAt: new Date().toISOString(),
-    deck: { id: deck.id, name: deck.name },
+    deck: { id: deck.id, name: deck.name, twoSided: Boolean(deck.twoSided) },
     cards: cards.map((c) => ({ question: c.question, answer: c.answer, status: c.status })),
   };
   downloadBlob(`колода-${slugifyName(deck.name)}-${todayStamp()}.json`, JSON.stringify(payload, null, 2));
@@ -105,7 +105,7 @@ function parseImportJson(text) {
   if (!isPlainObject(raw)) throw new Error("bad-root");
   if (raw.kind === "deck") {
     const name = typeof raw.deck && typeof raw.deck.name === "string" ? raw.deck.name.trim().slice(0, MAX_NAME_LENGTH) : "";
-    if (!name || !Array.isArray(raw.cards)) throw new Error("bad-deck-file");
+     if (!name || !Array.isArray(raw.cards)) throw new Error("bad-deck-file");
     const cards = raw.cards
       .filter((c) => isPlainObject(c))
       .map((c) => ({
@@ -114,7 +114,7 @@ function parseImportJson(text) {
         status: VALID_STATUSES.has(c.status) ? c.status : "new",
       }))
       .filter((c) => c.question && c.answer);
-    return { kind: "deck", deckName: name, cards };
+    return { kind: "deck", deckName: name, twoSided: Boolean(raw.deck && raw.deck.twoSided), cards };
   }
   const normalized = normalizeState({
     decks: raw.decks,
@@ -242,7 +242,7 @@ function applyImport(parsed, mode) {
 
   if (mode === "replace") {
     if (parsed.kind === "deck") {
-      state.decks = [{ id: uid(), name: parsed.deckName }];
+      state.decks = [{ id: uid(), name: parsed.deckName, twoSided: parsed.twoSided }];
       state.cards = parsed.cards.map((c) => ({ id: uid(), deckId: state.decks[0].id, ...c }));
     } else {
       const next = parsed.state;
@@ -257,8 +257,10 @@ function applyImport(parsed, mode) {
   } else if (parsed.kind === "deck") {
     let deck = state.decks.find((d) => d.name.toLowerCase() === parsed.deckName.toLowerCase());
     if (!deck) {
-      deck = { id: uid(), name: parsed.deckName };
+      deck = { id: uid(), name: parsed.deckName, twoSided: parsed.twoSided };
       state.decks.push(deck);
+    } else if (parsed.twoSided) {
+      deck.twoSided = true;
     }
     const existing = new Set(cardsInDeck(deck.id).map((c) => c.question + "\u0000" + c.answer));
     parsed.cards.forEach(({ question, answer, status }) => {

@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9230 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-focus-profile"
+$udir = "$env:TEMP\opencode\cdp-focus-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -75,11 +75,11 @@ try {
     var pad = function (n) { return String(n).padStart(2, "0"); };
     var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     localStorage.setItem("flashcards-app-v1", JSON.stringify({
-      decks: [{ id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" }],
+      decks: [{ id: "d1", name: "Английский" }],
       cards: [
-        { id: "c1", deckId: "d1", question: "cat", answer: "РєРѕС‚", status: "known" },
-        { id: "c2", deckId: "d1", question: "dog", answer: "СЃРѕР±Р°РєР°", status: "unknown" },
-        { id: "c3", deckId: "d1", question: "bird", answer: "РїС‚РёС†Р°", status: "unknown" }
+        { id: "c1", deckId: "d1", question: "cat", answer: "кот", status: "known" },
+        { id: "c2", deckId: "d1", question: "dog", answer: "собака", status: "unknown" },
+        { id: "c3", deckId: "d1", question: "bird", answer: "птица", status: "unknown" }
       ],
       selectedDeckId: "d1",
       tab: "edit",
@@ -111,13 +111,13 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   // Start study (single deck with cards -> direct)
   $("#menu-study-btn").click(); await sleep(600);
-  check("study-on", $("#study-meta").textContent.includes("1 РёР· 3"), $("#study-meta").textContent);
+  check("study-on", $("#study-meta").textContent.includes("1 из 3"), $("#study-meta").textContent);
 
   // Enter focus mode
   $("#focus-btn").click(); await sleep(400);
   check("focus-open", $("#focus-backdrop").classList.contains("is-open"));
   check("card-in-focus", inFocus());
-  check("focus-meta", $("#focus-meta").textContent.includes("1 РёР· 3"), $("#focus-meta").textContent);
+  check("focus-meta", $("#focus-meta").textContent.includes("1 из 3"), $("#focus-meta").textContent);
   check("focus-active", document.activeElement === $("#flashcard"));
 
   // Flip inside focus
@@ -127,7 +127,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   // Mark unknown (card1 stays unknown) -> advances to card 2, still in focus
   $("#focus-unknown").click(); await sleep(550);
-  check("focus-advance", $("#focus-meta").textContent.includes("2 РёР· 3"), $("#focus-meta").textContent);
+  check("focus-advance", $("#focus-meta").textContent.includes("2 из 3"), $("#focus-meta").textContent);
   check("card-still-in-focus", inFocus());
 
   // Exit via Escape
@@ -146,23 +146,23 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   // Re-enter, complete the round from focus mode (card2 known, card3 known)
   $("#focus-btn").click(); await sleep(400);
   $("#focus-known").click(); await sleep(550); // card 2 -> 3
-  check("focus-meta3", $("#focus-meta").textContent.includes("3 РёР· 3"), $("#focus-meta").textContent);
+  check("focus-meta3", $("#focus-meta").textContent.includes("3 из 3"), $("#focus-meta").textContent);
   $("#focus-known").click(); await sleep(550); // card 3 -> complete
   check("summary-open", $("#summary-backdrop").classList.contains("is-open"));
   check("focus-stays-open", $("#focus-backdrop").classList.contains("is-open"));
   check("card-in-focus-summary", !atHome() && $("#focus-wrap").contains($("#flashcard")));
   check("summary-over-focus", $("#summary-backdrop").style.zIndex === "66", $("#summary-backdrop").style.zIndex);
-  check("summary-line", $("#summary-line").textContent === "Р’СЃРµРіРѕ 3 В· Р·РЅР°СЋ 2 В· РЅРµ Р·РЅР°СЋ 1", $("#summary-line").textContent);
+  check("summary-line", $("#summary-line").textContent === "Всего 3 · знаю 2 · не знаю 1", $("#summary-line").textContent);
 
   // Back to menu (exits focus), restart, focus, exit via close button, panel meta intact
   $("#summary-menu").click(); await sleep(500);
   check("menu-again", $("#menu-backdrop").classList.contains("is-open") && atHome());
   $("#menu-study-btn").click(); await sleep(600);
-  check("study-again", $("#study-meta").textContent.includes("1 РёР· 3"), $("#study-meta").textContent);
+  check("study-again", $("#study-meta").textContent.includes("1 из 3"), $("#study-meta").textContent);
   $("#focus-btn").click(); await sleep(400);
   $("#focus-exit").click(); await sleep(400);
   check("exit-btn", !$("#focus-backdrop").classList.contains("is-open") && atHome());
-  check("panel-meta", $("#study-meta").textContent.includes("1 РёР· 3"), $("#study-meta").textContent);
+  check("panel-meta", $("#study-meta").textContent.includes("1 из 3"), $("#study-meta").textContent);
 
   check("no-errors", Array.isArray(window.__errors) && window.__errors.length === 0, JSON.stringify(window.__errors || []));
 

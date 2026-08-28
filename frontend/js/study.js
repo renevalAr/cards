@@ -1,7 +1,6 @@
 ﻿let swapCleanup = null;
-let flipCounted = new Set();
+let scoredStatus = new Map();
 let sessionMarked = new Set();
-let statusCounted = new Set();
 let focusMode = false;
 let focusTrigger = null;
 let quizActive = false;
@@ -17,6 +16,13 @@ let flipRun = null;
 
 const FLIP_BEZIER = [0.45, 0, 0.25, 1];
 const FLIP_DUR = 620;
+
+function scoreStudy(deckId, entryKey, status) {
+  if (scoredStatus.has(entryKey)) return;
+  scoredStatus.set(entryKey, status);
+  getTodayStats()[status] += 1;
+  recordStudy(deckId, status);
+}
 
 function bezProgress(dur, ms) {
   const t = Math.min(1, Math.max(0, ms / dur));
@@ -205,13 +211,12 @@ function beginRound(ids) {
   state.studyIndex = 0;
   state.flipped = false;
   stopSpeech();
-  flipCounted = new Set();
+  scoredStatus = new Map();
   sessionMarked = new Set();
-  statusCounted = new Set();
 }
 
 function startStudyShuffle() {
-  beginRound(shuffle(buildStudyEntries(state.selectedDeckId)));
+  beginRound(buildStudyEntries(state.selectedDeckId));
 }
 
 function resetStudy() {
@@ -222,9 +227,8 @@ function resetStudy() {
   state.studyIndex = 0;
   state.flipped = false;
   state.studyMode = "flip";
-  flipCounted = new Set();
+  scoredStatus = new Map();
   sessionMarked = new Set();
-  statusCounted = new Set();
   quizActive = false;
   quizAnswered = false;
   quizOrder = [];
@@ -416,13 +420,10 @@ function flipCard(event) {
   document.getElementById("flashcard").classList.add("was-flipped");
   state.flipped = !state.flipped;
   const entryKey = state.studyOrder[state.studyIndex];
-  if (state.flipped && !flipCounted.has(entryKey)) {
-    flipCounted.add(entryKey);
+  if (state.flipped && !scoredStatus.has(entryKey)) {
     sessionMarked.add(entryKey);
-    statusCounted.add(entryKey);
-    getTodayStats().unknown += 1;
     card.status = "unknown";
-    recordStudy(state.selectedDeckId, "unknown");
+    scoreStudy(state.selectedDeckId, entryKey, "unknown");
     saveState();
     renderStats();
     updateCardRowStatus(card.id);
@@ -480,16 +481,7 @@ function markStatus(status) {
   card.status = status;
   const entryKey = state.studyOrder[state.studyIndex];
   sessionMarked.add(entryKey);
-  if (!statusCounted.has(entryKey)) {
-    statusCounted.add(entryKey);
-    if (status === "known") {
-      getTodayStats().known += 1;
-    } else if (!flipCounted.has(entryKey)) {
-      flipCounted.add(entryKey);
-      getTodayStats().unknown += 1;
-    }
-  }
-  recordStudy(state.selectedDeckId, status);
+  scoreStudy(state.selectedDeckId, entryKey, status);
   saveState();
   renderStats();
   updateCardRowStatus(card.id);

@@ -1,11 +1,11 @@
-Ôªøparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9241 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-spacing-profile"
+$udir = "$env:TEMP\opencode\cdp-spacing-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -53,7 +53,7 @@ try {
     var pad = function (n) { return String(n).padStart(2, "0"); };
     var day = function (offset) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() - offset); return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate()); };
     localStorage.setItem("flashcards-app-v1", JSON.stringify({
-      decks: [{ id: "d1", name: "–û—Å–Ω–æ–≤—ã" }],
+      decks: [{ id: "d1", name: "ŒÒÌÓ‚˚" }],
       cards: [{ id: "c1", deckId: "d1", question: "1+1", answer: "2", status: "new" }],
       selectedDeckId: "d1",
       tab: "edit",
@@ -94,7 +94,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   const streak = $("#menu-streak");
   check("streak-shown", !streak.hidden, String(streak.hidden));
   check("streak-margin", getComputedStyle(streak).marginTop === "8px", getComputedStyle(streak).marginTop);
-  check("streak-text", streak.textContent.includes("2 –¥–Ω—è"), streak.textContent);
+  check("streak-text", streak.textContent.includes("2 ‰Ìˇ"), streak.textContent);
   const gStreak = round(gap($("#menu-today-stats"), streak));
   check("streak-gap", gStreak >= 8, String(gStreak));
 
@@ -110,7 +110,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("rename-field-btns", gFld >= 18, String(gFld));
   $("#modal-cancel").click(); await sleep(400);
 
-  // Settings modal: label "–¶–≤–µ—Ç" after mode switch
+  // Settings modal: label "÷‚ÂÚ" after mode switch
   $("#settings-btn").click(); await sleep(400);
   const labels = Array.from(document.querySelectorAll("#settings-backdrop .setting-label"));
   const colorLabel = labels[1];

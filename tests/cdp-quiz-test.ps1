@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9270 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-quiz-profile"
+$udir = "$env:TEMP\opencode\cdp-quiz-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 if (Test-Path $udir) { Remove-Item -Recurse -Force $udir }
@@ -52,14 +52,14 @@ try {
   var pad = function (n) { return String(n).padStart(2, "0"); };
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   localStorage.setItem("flashcards-app-v1", JSON.stringify({
-    decks: [{ id: "d1", name: "РњР°С‚РµРјР°С‚РёРєР°" }],
+    decks: [{ id: "d1", name: "Математика" }],
     cards: [
       { id: "c1", deckId: "d1", question: "1+1", answer: "2", status: "new" },
       { id: "c2", deckId: "d1", question: "2+2", answer: "4", status: "new" },
       { id: "c3", deckId: "d1", question: "3+3", answer: "6", status: "new" },
-      { id: "c4", deckId: "d1", question: "СЃС‚РѕР»РёС†Р° Р РѕСЃСЃРёРё", answer: "РњРѕСЃРєРІР°", status: "new" },
-      { id: "c5", deckId: "d1", question: "СЃС‚РѕР»РёС†Р° Р¤СЂР°РЅС†РёРё", answer: "РџР°СЂРёР¶", status: "new" },
-      { id: "c6", deckId: "d1", question: "5 СѓРјРЅРѕР¶РёС‚СЊ РЅР° 5", answer: "25", status: "new" }
+      { id: "c4", deckId: "d1", question: "столица России", answer: "Москва", status: "new" },
+      { id: "c5", deckId: "d1", question: "столица Франции", answer: "Париж", status: "new" },
+      { id: "c6", deckId: "d1", question: "5 умножить на 5", answer: "25", status: "new" }
     ],
     selectedDeckId: "d1",
     tab: "edit",
@@ -95,7 +95,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
 
   $('[data-qlen="5"]').click(); await sleep(400);
   check("quiz-started", !$("#quiz-area").classList.contains("hidden") && $("#quiz-start").classList.contains("hidden"));
-  check("meta-q1", /РІРѕРїСЂРѕСЃ 1 РёР· 5/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
+  check("meta-q1", /вопрос 1 из 5/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
   const opts = $$("#quiz-options .quiz-option");
   check("options-count", opts.length === 4, String(opts.length));
   check("options-unique", new Set(opts.map((o) => o.textContent)).size === 4);
@@ -105,13 +105,13 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("right-styled", $('#quiz-options .quiz-option[data-ok="1"]').classList.contains("is-right"));
   check("next-shown", !$("#quiz-next").classList.contains("hidden"));
   check("stats-known", getTodayStats().known === 1, String(getTodayStats().known));
-  check("meta-verdict", /РІРµСЂРЅРѕ 1/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
+  check("meta-verdict", /верно 1/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
 
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })); await sleep(250);
-  check("arrows-idle-in-quiz", /РІРѕРїСЂРѕСЃ 2 РёР· 5|РІРѕРїСЂРѕСЃ 1 РёР· 5/.test($("#quiz-meta").textContent) && $("#quiz-next").classList.contains("hidden") === false);
+  check("arrows-idle-in-quiz", /вопрос 2 из 5|вопрос 1 из 5/.test($("#quiz-meta").textContent) && $("#quiz-next").classList.contains("hidden") === false);
 
   $("#quiz-next").click(); await sleep(300);
-  check("meta-q2", /РІРѕРїСЂРѕСЃ 2 РёР· 5/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
+  check("meta-q2", /вопрос 2 из 5/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
   $$('#quiz-options .quiz-option[data-ok="0"]')[0].click(); await sleep(250);
   check("wrong-styled", $$("#quiz-options .quiz-option")[0].classList.contains("is-dim") || $$("#quiz-options .quiz-option.is-wrong").length === 1);
   check("reveal-right", $("#quiz-options .quiz-option.is-right") !== null);
@@ -126,17 +126,17 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   }
   check("summary-open", $("#summary-backdrop").classList.contains("is-open"));
   const line = $("#summary-line").textContent;
-  const um = line.match(/РЅРµ Р·РЅР°С‚СЊ (\d+)/) || line.match(/РЅРµ Р·РЅР°СЋ (\d+)/);
-  const km = line.match(/Р·РЅР°СЋ (\d+)/);
-  check("summary-line-format", line.indexOf("Р’СЃРµРіРѕ 5") === 0 && !!um && !!km, line);
+  const um = line.match(/не знать (\d+)/) || line.match(/не знаю (\d+)/);
+  const km = line.match(/знаю (\d+)/);
+  check("summary-line-format", line.indexOf("Всего 5") === 0 && !!um && !!km, line);
   const unknownCount = um ? Number(um[1]) : 0;
   const knownCount = km ? Number(km[1]) : 0;
   check("summary-math", knownCount + unknownCount === 5 && knownCount >= 1 && unknownCount >= 1, line);
-  check("repeat-mode-quiz", $("#summary-repeat").dataset.mode === "quiz" && $("#summary-repeat").textContent === "РџРѕРІС‚РѕСЂРёС‚СЊ РЅРµРёР·СѓС‡РµРЅРЅРѕРµ", $("#summary-repeat").dataset.mode);
+  check("repeat-mode-quiz", $("#summary-repeat").dataset.mode === "quiz" && $("#summary-repeat").textContent === "Повторить неизученное", $("#summary-repeat").dataset.mode);
   check("session-recorded", state.sessions.length === 1 && state.sessions[0].known === knownCount, String(state.sessions.length));
 
   $("#summary-repeat").click(); await sleep(500);
-  check("retry-length", !$("#quiz-area").classList.contains("hidden") && new RegExp("РІРѕРїСЂРѕСЃ 1 РёР· " + unknownCount + "\\b").test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
+  check("retry-length", !$("#quiz-area").classList.contains("hidden") && new RegExp("вопрос 1 из " + unknownCount + "\\b").test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
 
   for (let guard = 0; guard < 10; guard += 1) {
     if ($("#summary-backdrop").classList.contains("is-open")) break;
@@ -146,8 +146,8 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
     await sleep(220);
   }
   check("retry-summary", $("#summary-backdrop").classList.contains("is-open"));
-  check("retry-all-clean", /Р·РЅР°СЋ \d+ В· РЅРµ Р·РЅР°СЋ 0/.test($("#summary-line").textContent), $("#summary-line").textContent);
-  check("repeat-mode-quizall", $("#summary-repeat").dataset.mode === "quiz-all" && $("#summary-repeat").textContent === "РџСЂРѕР№С‚Рё РµС‰С‘ СЂР°Р·", $("#summary-repeat").dataset.mode);
+  check("retry-all-clean", /знаю \d+ · не знаю 0/.test($("#summary-line").textContent), $("#summary-line").textContent);
+  check("repeat-mode-quizall", $("#summary-repeat").dataset.mode === "quiz-all" && $("#summary-repeat").textContent === "Пройти ещё раз", $("#summary-repeat").dataset.mode);
 
   $("#summary-menu").click(); await sleep(500);
   check("menu-after-summary", $("#menu-backdrop").classList.contains("is-open"));
@@ -156,7 +156,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#tab-study").click(); await sleep(500);
   $("#study-mode-quiz").click(); await sleep(300);
   $('[data-qlen="10"]').click(); await sleep(300);
-  check("qfs-clamp", /РёР· 6/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
+  check("qfs-clamp", /из 6/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
 
   $("#quiz-focus-btn").click(); await sleep(400);
   check("qfs-open", $("#focus-backdrop").classList.contains("is-open") && $("#focus-wrap").contains($("#quiz-area")));
@@ -195,7 +195,7 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("qfs-summary-over", $("#summary-backdrop").classList.contains("is-open") && $("#focus-backdrop").classList.contains("is-open") && $("#summary-backdrop").style.zIndex === "66");
 
   $("#summary-repeat").click(); await sleep(400);
-  check("qfs-retry-in-fs", !$("#summary-backdrop").classList.contains("is-open") && $("#focus-backdrop").classList.contains("is-open") && $("#focus-wrap").contains($("#quiz-area")) && /РІРѕРїСЂРѕСЃ 1 РёР· 6/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
+  check("qfs-retry-in-fs", !$("#summary-backdrop").classList.contains("is-open") && $("#focus-backdrop").classList.contains("is-open") && $("#focus-wrap").contains($("#quiz-area")) && /вопрос 1 из 6/.test($("#quiz-meta").textContent), $("#quiz-meta").textContent);
 
   for (let guard = 0; guard < 14; guard += 1) {
     if ($("#summary-backdrop").classList.contains("is-open")) break;

@@ -1,11 +1,11 @@
-п»їparam(
+param(
   [int]$DebugPort = 0,
   [string]$BrowserExe = ""
 )
 $ErrorActionPreference = "Stop"
 $chrome = if ($BrowserExe) { $BrowserExe } else { "C:\Program Files\Google\Chrome\Application\chrome.exe" }
 $port = $(if ($DebugPort -gt 0) { $DebugPort } else { 9234 })
-$udir = "C:\Users\Lenovo\AppData\Local\Temp\opencode\cdp-reset-profile"
+$udir = "$env:TEMP\opencode\cdp-reset-profile"
 $rootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///" + ($rootDir -replace "\\","/") + "/index.html"
 
@@ -76,14 +76,14 @@ try {
     var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     localStorage.setItem("flashcards-app-v1", JSON.stringify({
       decks: [
-        { id: "d1", name: "РђРЅРіР»РёР№СЃРєРёР№" },
-        { id: "d2", name: "Р“РµРѕРіСЂР°С„РёСЏ" }
+        { id: "d1", name: "Английский" },
+        { id: "d2", name: "География" }
       ],
       cards: [
-        { id: "c1", deckId: "d1", question: "cat", answer: "РєРѕС‚", status: "known" },
-        { id: "c2", deckId: "d1", question: "dog", answer: "СЃРѕР±Р°РєР°", status: "unknown" },
-        { id: "c3", deckId: "d1", question: "bird", answer: "РїС‚РёС†Р°", status: "new" },
-        { id: "c4", deckId: "d2", question: "СЃС‚РѕР»РёС†Р°", answer: "РњРѕСЃРєРІР°", status: "known" }
+        { id: "c1", deckId: "d1", question: "cat", answer: "кот", status: "known" },
+        { id: "c2", deckId: "d1", question: "dog", answer: "собака", status: "unknown" },
+        { id: "c3", deckId: "d1", question: "bird", answer: "птица", status: "new" },
+        { id: "c4", deckId: "d2", question: "столица", answer: "Москва", status: "known" }
       ],
       selectedDeckId: "d1",
       tab: "edit",
@@ -118,16 +118,16 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   $("#menu-cards-btn").click(); await sleep(400);
   $$("#deck-pick-list .deck-pick-item")[0].querySelector(".deck-pick-more").click(); await sleep(400);
   const labels = $$("#menu-pop-actions button").map((b) => b.textContent);
-  check("pop-has-reset", labels.includes("РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ"), labels.join("|"));
+  check("pop-has-reset", labels.includes("Начать заново"), labels.join("|"));
   check("pop-btns7", labels.length === 7, String(labels.length));
 
-  // Click "РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ" (index 3)
-  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("Р·Р°РЅРѕРІРѕ")).click(); await sleep(400);
+  // Click "Начать заново" (index 3)
+  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("заново")).click(); await sleep(400);
   check("confirm-open", $("#modal-backdrop").classList.contains("is-open"));
-  check("confirm-title", $("#modal-title").textContent === "РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ?", $("#modal-title").textContent);
-  check("confirm-kicker", $("#modal-kicker").textContent === "РїСЂРѕРіСЂРµСЃСЃ", $("#modal-kicker").textContent);
-  check("confirm-text", $("#modal-text").textContent.includes("СЃР±СЂРѕС€РµРЅС‹"), $("#modal-text").textContent);
-  check("confirm-btn", $("#modal-ok").textContent === "РЎР±СЂРѕСЃРёС‚СЊ", $("#modal-ok").textContent);
+  check("confirm-title", $("#modal-title").textContent === "Начать заново?", $("#modal-title").textContent);
+  check("confirm-kicker", $("#modal-kicker").textContent === "прогресс", $("#modal-kicker").textContent);
+  check("confirm-text", $("#modal-text").textContent.includes("сброшены"), $("#modal-text").textContent);
+  check("confirm-btn", $("#modal-ok").textContent === "Сбросить", $("#modal-ok").textContent);
   check("confirm-no-input", $("#modal-field").classList.contains("hidden"));
 
   // Confirm reset
@@ -135,15 +135,15 @@ window.addEventListener("unhandledrejection", function (e) { window.__errors.pus
   check("modal-closed", !$("#modal-backdrop").classList.contains("is-open"));
   check("all-new", d1().every((c) => c.status === "new"), JSON.stringify(d1().map((c) => c.status)));
   check("other-deck-intact", d2().every((c) => c.status === "known"));
-  check("header-stats", $("#stats").textContent === "Р’СЃРµРіРѕ 3 В· Р·РЅР°СЋ 0 В· РЅРµ Р·РЅР°СЋ 0", $("#stats").textContent);
+  check("header-stats", $("#stats").textContent === "Всего 3 · знаю 0 · не знаю 0", $("#stats").textContent);
   const badges = $$("#card-rows .badge").map((b) => b.textContent);
-  check("row-badges", badges.length === 3 && badges.every((b) => b === "РЅРѕРІР°СЏ"), badges.join("|"));
+  check("row-badges", badges.length === 3 && badges.every((b) => b === "новая"), badges.join("|"));
 
   // Cancel path: reset again, cancel, nothing changes
   $("#menu-back-btn").click(); await sleep(400);
   $("#menu-cards-btn").click(); await sleep(400);
   $$("#deck-pick-list .deck-pick-item")[0].querySelector(".deck-pick-more").click(); await sleep(400);
-  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("Р·Р°РЅРѕРІРѕ")).click(); await sleep(400);
+  [...document.querySelectorAll("#menu-pop-actions button")].find(b=>b.textContent.includes("заново")).click(); await sleep(400);
   check("confirm2", $("#modal-backdrop").classList.contains("is-open"));
   $("#modal-cancel").click(); await sleep(400);
   check("cancel-closed", !$("#modal-backdrop").classList.contains("is-open"));

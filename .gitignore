@@ -9,3 +9,22 @@ desktop.ini
 # editor
 .vscode/
 *.swp
+
+# Python / backend
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+backend/.env
+backend/__pycache__/
+
+# Docker
+media/*
+!media/.gitkeep
+
+# Node (for future)
+node_modules/

@@ -1,0 +1,30 @@
+# Auto detect text files and normalize line endings to LF on commit
+* text=auto
+
+# PowerShell scripts: CRLF line endings (Windows-native)
+*.ps1 text eol=crlf
+
+# Shell scripts: LF line endings (Unix-native)
+*.sh text eol=lf
+
+# Source files: LF line endings
+*.js text eol=lf
+*.py text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

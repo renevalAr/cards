@@ -3,42 +3,68 @@ name: CI
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: "Test mode"
-        required: true
-        default: "smoke"
-        type: choice
-        options: [smoke, full]
+  pull_request:
+    branches: [main]
 
 jobs:
-  tests:
-    runs-on: windows-latest
-    timeout-minutes: 30
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test_flashcards
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Chrome
-        id: chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          chrome-version: stable
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
 
-      - name: Smoke tests (push)
-        if: github.event_name == 'push'
-        shell: pwsh
-        run: ./tests/run-tests.ps1 -Smoke -Parallel 5 -BrowserExe "${{ steps.chrome.outputs.chrome-path }}"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
 
-      - name: Full tests (manual)
-        if: github.event_name == 'workflow_dispatch'
-        shell: pwsh
-        run: ./tests/run-tests.ps1 -Parallel 5 -BrowserExe "${{ steps.chrome.outputs.chrome-path }}"
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_flashcards
+        run: alembic upgrade head
 
-      - name: Failure log
-        if: failure()
-        uses: actions/upload-artifact@v4
+      - name: Run tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_flashcards
+          SECRET_KEY: test-secret-key
+        run: pytest tests/ -v --tb=short
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          name: failure-log
-          path: tests/results/
-          if-no-files-found: ignore
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install playwright pytest-playwright
+          playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pytest tests-e2e/ -v --tb=short
