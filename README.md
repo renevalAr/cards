@@ -31,7 +31,7 @@ flashcards/
 │   ├── app/
 │   │   ├── main.py       # Точка входа
 │   │   ├── config.py     # Настройки (pydantic-settings)
-│   │   ├── database.py   # SQLAlchemy async engine
+│   │   ├── database.py   # SQLAlchemy sync engine (psycopg2)
 │   │   ├── dependencies.py # FastAPI dependencies (auth)
 │   │   ├── models/       # SQLAlchemy модели
 │   │   ├── schemas/      # Pydantic схемы
@@ -45,7 +45,7 @@ flashcards/
 ├── frontend/             # Клиентское приложение
 │   ├── index.html
 │   ├── js/
-│   │   ├── api.js        # API клиент
+│   │   ├── api.js        # API клиент + Auth + Decks
 │   │   ├── auth.js       # Авторизация
 │   │   └── ...
 │   ├── css/
@@ -63,7 +63,7 @@ flashcards/
 
 ## Быстрый старт
 
-### Лальная разработка
+### Локальная разработка
 
 ```bash
 # 1. Клонировать репозиторий
@@ -126,9 +126,10 @@ pytest tests-e2e/ -v
 - `GET /api/decks/{id}/cards` — Карточки (infinite scroll)
 - `POST /api/decks/{id}/cards` — Добавить карточку
 
-### Поиск
-- `GET /api/search/decks?q=` — Поиск колод
-- `GET /api/search/cards?q=&deck_id=` — Поиск карточек
+### Публичные колоды
+- `GET /api/decks/share/{slug}` — Публичная колода по ссылке
+- `POST /api/decks/{id}/share` — Включить шаринг
+- `DELETE /api/decks/{id}/share` — Отключить шаринг
 
 ## Безопасность
 

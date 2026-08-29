@@ -1,6 +1,6 @@
 # Flashcards — Project Documentation
 
-> Полный контекст проекта для человека или ИКИ. Прочитай этот файл — и можно работать над любой частью без дополнительного изучения кода.
+> Полный контекст проекта для человека или AI. Прочитай этот файл — и можно работать над любой частью без дополнительного изучения кода.
 > Стиль: машинно-ориентированный (таблицы, ID, селекторы). Текст RU, заголовки EN.
 
 ---
@@ -49,7 +49,7 @@
 |---|---|
 | `app/main.py` | FastAPI application, middleware, routers registration |
 | `app/config.py` | Settings via pydantic-settings (env vars) |
-| `app/database.py` | SQLAlchemy async engine + session |
+| `app/database.py` | SQLAlchemy sync engine (psycopg2) + session |
 | `app/dependencies.py` | `get_current_user` (JWT verification) |
 | `app/middleware.py` | Rate limiting, request logging |
 | `app/logging_config.py` | Structured JSON logging |
@@ -73,22 +73,22 @@
 
 | Файл | Строк | Роль |
 |---|---|---|
-| `index.html` | 490+ | Вся разметка + auth UI + inline theme script |
-| `style.css` | 2920+ | Все стили + auth styles |
-| `js/api.js` | 80+ | API client + Auth module + Decks module |
-| `js/api/data.js` | 80+ | Data layer (CRUD, share, study, migration) |
-| `js/virtual-list.js` | 80+ | IntersectionObserver-based infinite scroll |
-| `js/share.js` | 50+ | Public deck viewing + share link copying |
-| `storage.js` | 301 | Local state + localStorage persistence (offline mode) |
-| `modal.js` | 169 | Generic modal, focus-trap, overlay pattern |
+| `index.html` | 517 | Вся разметка + auth UI + inline theme script |
+| `style.css` | 2993 | Все стили + auth styles |
+| `js/api.js` | 151 | API client + Auth module + Decks module |
+| `js/api/data.js` | 108 | Data layer (CRUD, share, study, migration) |
+| `js/virtual-list.js` | 119 | IntersectionObserver-based infinite scroll |
+| `js/share.js` | 58 | Public deck viewing + share link copying |
+| `storage.js` | 323 | Local state + localStorage persistence (offline mode) |
+| `modal.js` | 191 | Generic modal, focus-trap, overlay pattern |
 | `ui.js` | 509 | Palettes, rendering, search, appearance |
-| `study.js` | 720 | Flip, quiz, focus mode, round lifecycle |
+| `study.js` | 712 | Flip, quiz, focus mode, round lifecycle |
 | `menu.js` | 390 | Main menu, deck picker, tour |
 | `stats.js` | 204 | Statistics window |
 | `library.js` | 178 | Demo decks |
-| `data.js` | 366 | Import/export (JSON+CSV) |
+| `data.js` | 368 | Import/export (JSON+CSV) |
 | `images.js` | 91 | IndexedDB image storage + compression |
-| `app.js` | 634+ | CRUD, bulk input, initialization, auth handlers |
+| `app.js` | 752 | CRUD, bulk input, initialization, auth handlers |
 
 ### Infrastructure
 
@@ -98,7 +98,6 @@
 | `docker-compose.override.yml` | Local dev overrides |
 | `nginx/nginx.conf` | Reverse proxy, rate limiting, CSP, SSL-ready |
 | `backend/Dockerfile` | Python 3.12 + uvicorn + healthcheck |
-| `Makefile` | Dev commands (up, test, migrate, shell) |
 | `.github/workflows/ci.yml` | CI: backend tests + E2E |
 | `.github/workflows/deploy.yml` | CD: build + deploy to VPS |
 
@@ -555,13 +554,13 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | Variable | Default | Description |
 |---|---|---|
 | `SECRET_KEY` | `change-me-in-production` | JWT signing key |
-| `DATABASE_URL` | `postgresql+asyncpg://flashcards:flashcards@db:5432/flashcards` | Database connection (asyncpg for SQLAlchemy, psycopg2 for Alembic) |
+| `DATABASE_URL` | `postgresql://flashcards:flashcards@db:5432/flashcards` | Database connection (psycopg2 for SQLAlchemy and Alembic) |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | Refresh token lifetime |
 | `EMAIL_API_KEY` | `` | SendGrid API key |
 | `EMAIL_FROM` | `no-reply@flashcards.app` | Sender email |
 | `CORS_ORIGINS` | `["http://localhost"]` | Allowed CORS origins |
-| `ALLOWED_HOSTS` | `["localhost", "*.localhost", "flashcards.app", "testserver"]` | Trusted hosts |
+| `ALLOWED_HOSTS` | `["localhost", "*.localhost", "testserver"]` | Trusted hosts |
 | `SECURE_COOKIES` | `False` | Enable secure flag for cookies (True in production) |
 | `RATE_LIMIT_ENABLED` | `True` | Enable rate limiting on auth endpoints |
 
@@ -683,7 +682,7 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 - `?v= нужен на ВСЕХ ассетах, не только CSS | Кэшировался старый ui.js под новым style.css: координаты писались не на <html>, круг шёл из фолбэка 50%/50% («всегда из той же точки»). Лечение: версионировать каждый <script src> + детектор — head-скрипт хранит __ASSET_V, app.js ставит __RUNTIME_V; расхождение через секунду после load показывает toast «Ctrl+F5» (старый код сам себя поймать не может) |
 - У `Map` нет метода `.add` (только `.set`) — опечатка внутри click-обработчика даёт неперехваченное исключение, которое в тестах выглядит как `Script error.` в `__errs`, а не как падение сценария.
 - Тесты, кликающие кнопки меню действий колоды, не должны использовать числовые индексы (`[3]`) — состав меню меняется; искать по `textContent.includes("...")`.
-- **Backend: lazy loading в async SQLAlchemy** — использовать `selectinload()` для relationships, иначе `MissingGreenLet` error.
+- **Backend: lazy loading в sync SQLAlchemy** — использовать `selectinload()` для relationships, иначе `MissingGreenlet` error.
 - **Backend: JWTError импорт** — в `dependencies.py` нужен `from jose import jwt, JWTError`.
 - **Backend: email status code** — SendGrid возвращает 202, не 200.
 - **Backend: deck_id тип** — в API endpoints использовать `UUID`, не `str`.
@@ -713,7 +712,7 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | High | Настроить SSL на VPS (Let's Encrypt) | ⏳ |
 | High | Настроить email-провайдер (SendGrid) | ⏳ |
 | Medium | Полная миграция фронтенда на API | ⏳ |
-| Medium | Service Worker для оффлайн-режима | ⏳ |
+| Medium | Service Worker для оффлайн-режима | ✅ Реализован (sw.js) |
 | Low | Elasticsearch для продвинутого поиска | ⏳ |
 | Low | Мобильное приложение (PWA) | ⏳ |
 
