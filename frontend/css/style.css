@@ -1539,9 +1539,9 @@ html[data-palette="slate"] .face::before {
 }
 
 .menu-backdrop.is-open {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
   transition: opacity 0.3s var(--ease), visibility 0s;
 }
 
