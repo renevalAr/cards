@@ -1549,7 +1549,7 @@ html[data-palette="slate"] .face::before {
   inset: 0;
   z-index: 40;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 12px 16px 18px;
   background:
@@ -1664,6 +1664,7 @@ html[data-palette="indigo"] .menu-backdrop {
 @media (max-height: 520px) {
   .menu-backdrop {
     padding: 1px 6px 4px;
+    align-items: flex-start;
   }
   .menu-cover {
     padding: 1px 6px 1px;
