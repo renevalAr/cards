@@ -806,56 +806,28 @@ html[data-palette="slate"] .main {
   transition: transform var(--t) var(--ease), box-shadow var(--t), filter var(--t), background var(--t), color var(--t);
 }
 
-.workspace-title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.btn-login-round {
-  width: 40px;
-  height: 40px;
-  padding: 0;
+.btn-login {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s var(--spring);
-  animation: login-pulse 2s ease-in-out infinite;
+  transition: background 0.2s ease;
 }
 
-.btn-login-round:hover {
-  transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  animation: none;
+.btn-login:hover {
+  background: var(--surface-2, rgba(0,0,0,0.05));
 }
 
-.btn-login-round:active {
-  transform: scale(0.95);
-}
-
-.btn-login-round svg {
+.btn-login svg {
   width: 20px;
   height: 20px;
-  color: #fff;
-  transition: transform 0.3s var(--ease);
-}
-
-.btn-login-round:hover svg {
-  transform: translateX(2px);
-}
-
-@keyframes login-pulse {
-  0%, 100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 0 var(--accent);
-  }
-  50% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 8px transparent;
-  }
+  color: var(--ink, #2c2218);
 }
 
 .tab:hover,
