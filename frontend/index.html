@@ -64,6 +64,15 @@
       .menu-backdrop{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
     </style>
 
+      <style>
+      body{opacity:0;transition:opacity .15s}
+      body.fonts-loaded{opacity:1}
+    </style>
+    <script>
+      document.fonts.ready.then(function(){
+        document.body.classList.add('fonts-loaded');
+      });
+    </script>
   </head>
   <body>
     <aside class="sidebar">
