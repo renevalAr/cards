@@ -1,0 +1,511 @@
+﻿<!DOCTYPE html>
+<html lang="ru" data-mode="light" data-palette="ember" data-mode-pref="light" data-fontsize="m"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточки</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%23e85d04'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle'%3E%E2%9C%8F%3C/text%3E%3C/svg%3E">
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var palettes = [
+          "ember", "sea", "moss", "berry", "violet", "gold", "crimson", "teal", "slate", "indigo",
+        ];
+        var mode = null;
+        var palette = null;
+        var old = null;
+        try {
+          old = localStorage.getItem("flashcards-theme");
+          mode = localStorage.getItem("flashcards-mode");
+          palette = localStorage.getItem("flashcards-palette");
+        } catch (error) {
+          // хранилище недоступно — остаёмся на значениях из разметки
+        }
+        if (!mode && old === "night") mode = "dark";
+        if (!palette && old) {
+          palette = old === "night" || old === "orange" ? "ember" : old;
+        }
+        if (mode !== "light" && mode !== "dark" && mode !== "auto") mode = "light";
+        if (palettes.indexOf(palette) === -1) palette = "ember";
+        root.setAttribute("data-mode-pref", mode);
+        var resolved = mode;
+        if (mode === "auto") {
+          resolved = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        root.setAttribute("data-mode", resolved);
+        var fs = null;
+        try { fs = localStorage.getItem("flashcards-fontsize"); } catch (error) {}
+        if (fs !== "s" && fs !== "l") fs = "m";
+        root.setAttribute("data-fontsize", fs);
+        root.setAttribute("data-palette", palette);
+        window.__ASSET_V = "40";
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            if (window.__RUNTIME_V !== window.__ASSET_V) {
+              var el = document.getElementById("storage-alert");
+              if (el) {
+                el.textContent = "Часть файлов устарела из-за кэша — нажмите Ctrl+F5 для обновления.";
+                el.hidden = false;
+              }
+            }
+          }, 900);
+        });
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&amp;family=PT+Serif:ital,wght@0,400;1,700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=40">
+  </head>
+  <body class="modal-open">
+    <aside class="sidebar">
+      <div class="holes" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <header class="brand">
+        <p class="subject">тетрадь / картотека</p>
+        <h1><span class="marker">Карточки</span></h1>
+        <p class="lede">Вопрос и ответ. Клик переворачивает.</p>
+      </header>
+
+      <button type="button" class="btn btn-primary" id="new-deck-btn">+ колода</button>
+      <nav class="deck-list" id="deck-list" aria-label="Колоды"></nav>
+      <button type="button" class="btn settings-btn" id="settings-btn">Настройки</button>
+    </aside>
+
+    <main class="main">
+      <span class="margin-label" aria-hidden="true">поля</span>
+      <section class="empty" id="empty-state">
+        <p class="tape" aria-hidden="true">черновик</p>
+        <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 42 C 18 10, 46 6, 56 30 C 61 46, 38 58, 25 49 C 15 42, 26 26, 41 30" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"></path></svg>
+        <h2>Пока пусто</h2>
+        <p>
+          Заведи колоду, напиши пару «вопрос — ответ», потом учись на вкладке «Учить».
+          Данные остаются в этом браузере.
+        </p>
+        <button type="button" class="btn btn-primary" id="empty-new-deck-btn">
+          Завести колоду
+        </button>
+        <button type="button" class="btn" id="empty-menu-btn">← Меню</button>
+      </section>
+
+      <section class="workspace hidden" id="workspace">
+        <header class="workspace-header">
+          <div>
+            <p class="subject" id="deck-kicker">колода</p>
+            <h2 id="deck-title">Колода</h2>
+            <p class="stats" id="stats"></p>
+          </div>
+          <div class="header-actions">
+            <button type="button" class="btn" id="menu-back-btn">← Меню</button>
+            <button type="button" class="btn" id="rename-deck-btn">Переименовать</button>
+            <button type="button" class="btn btn-danger" id="delete-deck-btn">Удалить</button>
+          </div>
+        </header>
+
+        <div class="tabs" role="tablist" aria-label="Режимы">
+          <button type="button" class="tab is-active" id="tab-edit" role="tab" aria-selected="true" aria-controls="panel-edit">Карточки</button>
+          <button type="button" class="tab" id="tab-study" role="tab" aria-selected="false" aria-controls="panel-study">Учить</button>
+        </div>
+
+        <div class="panel" id="panel-edit" role="tabpanel" aria-labelledby="tab-edit">
+          <form class="card-form" id="card-form">
+            <span class="washi" aria-hidden="true"></span>
+            <input type="hidden" id="card-id">
+            <label>
+              Вопрос
+              <textarea id="card-question" rows="3"></textarea>
+            </label>
+            <label>
+              Ответ
+              <textarea id="card-answer" rows="3"></textarea>
+            </label>
+            <div class="img-row" id="img-row">
+              <button type="button" class="btn" id="image-btn">Картинка…</button>
+              <input type="file" id="card-image" accept="image/*" hidden="">
+              <span class="img-preview hidden" id="image-preview">
+                <img id="image-thumb" alt="">
+                <button type="button" class="img-clear" id="image-clear" aria-label="Убрать картинку">✕</button>
+              </span>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="save-card-btn">Добавить карточку</button>
+              <button type="button" class="btn" id="bulk-btn">Массовый ввод</button>
+              <button type="button" class="btn hidden" id="cancel-edit-btn">Отмена</button>
+            </div>
+          </form>
+          <div class="search-box" id="card-search-row">
+            <input type="text" id="card-search" placeholder="Поиск по карточкам…" autocomplete="off">
+            <button type="button" class="search-clear" id="card-search-clear" aria-label="Очистить поиск" tabindex="-1">
+              <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 2.5 L11.5 11.5 M11.5 2.5 L2.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+            </button>
+          </div>
+          <div class="filters" id="card-filters" role="group" aria-label="Фильтр карточек">
+            <button type="button" class="btn filter-btn is-active" data-filter="all">Все</button>
+            <button type="button" class="btn filter-btn" data-filter="new">Новые</button>
+            <button type="button" class="btn filter-btn" data-filter="known">Знаю</button>
+            <button type="button" class="btn filter-btn" data-filter="unknown">Не знаю</button>
+          </div>
+          <ul class="card-rows" id="card-rows"></ul>
+        </div>
+
+        <div class="panel hidden" id="panel-study" role="tabpanel" aria-labelledby="tab-study">
+          <div class="study" id="study-empty">
+            <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><path d="M10 44 C 22 14, 44 10, 54 32 C 58 46, 38 56, 27 47 C 18 40, 28 26, 42 30" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"></path></svg>
+            <p>Сначала добавь карточки на соседней вкладке.</p>
+          </div>
+          <div class="study hidden" id="study-board">
+            <div class="study-modes" id="study-modes" role="group" aria-label="Режим изучения">
+              <button type="button" class="btn is-active" id="study-mode-flip">Карточки</button>
+              <button type="button" class="btn" id="study-mode-quiz">Квиз</button>
+              <button type="button" class="btn" id="two-sided-btn" aria-pressed="false" title="Показывать карты в обе стороны">⇄ обе стороны</button>
+            </div>
+            <div id="flip-area">
+              <p class="study-meta" id="study-meta" aria-live="polite"></p>
+              <div class="flashcard-wrap">
+                <button type="button" class="flashcard" id="flashcard">
+                  <span class="flashcard-inner">
+                    <span class="face front">
+                      <span class="clip" aria-hidden="true"></span>
+                      <span class="stamp">вопрос</span>
+                      <img id="face-img-front" class="face-img hidden" alt="">
+                      <span class="face-text" id="flashcard-question"></span>
+                      <small>клик — переворот</small>
+                      <span class="face-speak" data-side="front" role="button" tabindex="-1" aria-label="Озвучить вопрос">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.4 6a9 9 0 0 1 0 12"></path></svg>
+                      </span>
+                    </span>
+                    <span class="face back">
+                      <span class="stamp">ответ</span>
+                      <span class="face-text" id="flashcard-answer"></span>
+                      <small>клик — вернуть вопрос</small>
+                      <span class="face-speak" data-side="back" role="button" tabindex="-1" aria-label="Озвучить ответ">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.4 6a9 9 0 0 1 0 12"></path></svg>
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div class="study-actions">
+                <button type="button" class="btn" id="focus-btn" aria-label="Во весь экран" title="Во весь экран">⛶</button>
+                <button type="button" class="btn" id="prev-card-btn" aria-label="Предыдущая карточка">←</button>
+                <button type="button" class="btn" id="mark-unknown-btn" aria-pressed="false">Не знаю</button>
+                <button type="button" class="btn btn-primary" id="mark-known-btn" aria-pressed="false">Знаю</button>
+                <button type="button" class="btn" id="next-card-btn" aria-label="Следующая карточка">→</button>
+              </div>
+            </div>
+            <div class="study hidden" id="quiz-start">
+              <p class="study-meta">Сколько вопросов собрать?</p>
+              <div class="form-actions">
+                <button type="button" class="btn" data-qlen="5">Быстрый · 5</button>
+                <button type="button" class="btn" data-qlen="10">Обычный · 10</button>
+                <button type="button" class="btn btn-primary" data-qlen="0">Вся колода</button>
+              </div>
+            </div>
+            <div class="study hidden" id="quiz-area">
+              <p class="study-meta" id="quiz-meta" aria-live="polite"></p>
+              <div class="summary-bar quiz-progress"><i id="quiz-fill"></i></div>
+              <p class="quiz-question" id="quiz-question"></p>
+              <div class="quiz-options" id="quiz-options"></div>
+              <div class="form-actions quiz-next-row">
+                <button type="button" class="btn" id="quiz-focus-btn" aria-label="Во весь экран" title="Во весь экран">⛶</button>
+                <button type="button" class="btn btn-primary hidden" id="quiz-next">Дальше</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="focus-backdrop" id="focus-backdrop" role="dialog" aria-modal="true" aria-label="Полноэкранное изучение" tabindex="-1">
+      <div class="focus-top">
+        <p class="study-meta" id="focus-meta" aria-live="polite"></p>
+        <button type="button" class="btn" id="focus-exit" aria-label="Выйти из полноэкранного режима">✕</button>
+      </div>
+      <div class="focus-wrap" id="focus-wrap"></div>
+      <div class="focus-controls" id="focus-controls">
+        <button type="button" class="btn" id="focus-prev" aria-label="Предыдущая карточка">←</button>
+        <button type="button" class="btn" id="focus-unknown" aria-pressed="false">Не знаю</button>
+        <button type="button" class="btn btn-primary" id="focus-known" aria-pressed="false">Знаю</button>
+        <button type="button" class="btn" id="focus-next" aria-label="Следующая карточка">→</button>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="settings-backdrop">
+      <div class="modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
+        <p class="subject">вид</p>
+        <h3 id="settings-title">Настройки</h3>
+
+        <p class="setting-label">Свет</p>
+        <div class="mode-switch" id="mode-switch">
+          <button type="button" class="btn is-active" data-mode="light">Светлая</button>
+          <button type="button" class="btn" data-mode="dark">Тёмная</button>
+          <button type="button" class="btn" data-mode="auto">Авто</button>
+        </div>
+
+        <p class="setting-label">Цвет</p>
+        <div class="theme-dots" id="theme-dots"><button type="button" class="theme-dot is-active" data-palette="ember" title="Охра" aria-label="Охра" style="background-color: rgb(232, 93, 4);"></button><button type="button" class="theme-dot" data-palette="sea" title="Синий" aria-label="Синий" style="background-color: rgb(21, 109, 138);"></button><button type="button" class="theme-dot" data-palette="moss" title="Мох" aria-label="Мох" style="background-color: rgb(74, 122, 50);"></button><button type="button" class="theme-dot" data-palette="berry" title="Ягода" aria-label="Ягода" style="background-color: rgb(155, 45, 92);"></button><button type="button" class="theme-dot" data-palette="violet" title="Фиолет" aria-label="Фиолет" style="background-color: rgb(107, 63, 160);"></button><button type="button" class="theme-dot" data-palette="gold" title="Золото" aria-label="Золото" style="background-color: rgb(195, 146, 45);"></button><button type="button" class="theme-dot" data-palette="crimson" title="Алый" aria-label="Алый" style="background-color: rgb(192, 57, 43);"></button><button type="button" class="theme-dot" data-palette="teal" title="Бирюза" aria-label="Бирюза" style="background-color: rgb(15, 122, 108);"></button><button type="button" class="theme-dot" data-palette="slate" title="Графит" aria-label="Графит" style="background-color: rgb(77, 93, 115);"></button><button type="button" class="theme-dot" data-palette="indigo" title="Индиго" aria-label="Индиго" style="background-color: rgb(57, 73, 171);"></button></div>
+
+        <p class="setting-label">Размер текста в карточках</p>
+        <div class="mode-switch" id="fontsize-switch">
+          <button type="button" class="btn" data-size="s">S</button>
+          <button type="button" class="btn" data-size="m">M</button>
+          <button type="button" class="btn" data-size="l">L</button>
+        </div>
+
+        <p class="setting-label">Данные</p>
+        <div class="form-actions data-actions">
+          <button type="button" class="btn" id="export-all-btn">Скачать базу (JSON)</button>
+          <button type="button" class="btn" id="export-csv-btn">Скачать CSV</button>
+          <button type="button" class="btn btn-primary" id="import-btn">Импорт файла…</button>
+          <input type="file" id="import-file" accept=".json,.csv,text/csv,application/json" hidden="">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="settings-close">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="modal-backdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+        <p class="subject" id="modal-kicker">колода</p>
+        <h3 id="modal-title">Название</h3>
+        <p id="modal-text"></p>
+        <label class="modal-field" id="modal-field">
+          Название
+          <input type="text" id="modal-input" maxlength="80">
+        </label>
+        <div class="form-actions">
+          <button type="button" class="btn" id="modal-cancel">Отмена</button>
+          <button type="button" class="btn btn-primary" id="modal-ok">Готово</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-backdrop is-open" id="menu-backdrop">
+      <div class="menu-cover" role="dialog" aria-modal="true" aria-labelledby="menu-title" tabindex="-1">
+        <header class="menu-header">
+          <div>
+            <p class="subject">тетрадь / картотека</p>
+            <h1 id="menu-title"><span class="marker">Карточки</span></h1>
+          </div>
+          <button type="button" class="btn" id="menu-close" aria-label="Закрыть меню">✕</button>
+        </header>
+
+        <section class="menu-today tour-highlight" id="menu-today" aria-label="Изучено сегодня">
+          <p class="subject">сегодня</p>
+          <p id="menu-today-stats">изучено 0 · знаю 0 · не знаю 0</p>
+          <p class="menu-streak" id="menu-streak" hidden=""></p>
+        </section>
+
+        <div class="menu-actions">
+          <button type="button" class="btn btn-primary menu-study" id="menu-study-btn">Учить</button>
+          <button type="button" class="btn menu-section" id="menu-cards-btn">Колоды</button>
+          <button type="button" class="btn menu-section" id="menu-library-btn">Библиотека</button>
+          <button type="button" class="btn menu-section" id="menu-migrate-btn">Мигрировать</button>
+          <button type="button" class="btn menu-section" id="menu-stats-btn">Статистика</button>
+          <button type="button" class="btn menu-section" id="menu-settings-btn">Настройки</button>
+        </div>
+
+        <section class="menu-theme" aria-label="Тема">
+          <p class="subject">примерь тему</p>
+          <div class="mode-switch" id="menu-mode-switch">
+            <button type="button" class="btn is-active" data-mode="light">Светлая</button>
+            <button type="button" class="btn" data-mode="dark">Тёмная</button>
+            <button type="button" class="btn" data-mode="auto">Авто</button>
+          </div>
+          <div class="theme-dots" id="menu-theme-dots"><button type="button" class="theme-dot is-active" data-palette="ember" title="Охра" aria-label="Охра" style="background-color: rgb(232, 93, 4);"></button><button type="button" class="theme-dot" data-palette="sea" title="Синий" aria-label="Синий" style="background-color: rgb(21, 109, 138);"></button><button type="button" class="theme-dot" data-palette="moss" title="Мох" aria-label="Мох" style="background-color: rgb(74, 122, 50);"></button><button type="button" class="theme-dot" data-palette="berry" title="Ягода" aria-label="Ягода" style="background-color: rgb(155, 45, 92);"></button><button type="button" class="theme-dot" data-palette="violet" title="Фиолет" aria-label="Фиолет" style="background-color: rgb(107, 63, 160);"></button><button type="button" class="theme-dot" data-palette="gold" title="Золото" aria-label="Золото" style="background-color: rgb(195, 146, 45);"></button><button type="button" class="theme-dot" data-palette="crimson" title="Алый" aria-label="Алый" style="background-color: rgb(192, 57, 43);"></button><button type="button" class="theme-dot" data-palette="teal" title="Бирюза" aria-label="Бирюза" style="background-color: rgb(15, 122, 108);"></button><button type="button" class="theme-dot" data-palette="slate" title="Графит" aria-label="Графит" style="background-color: rgb(77, 93, 115);"></button><button type="button" class="theme-dot" data-palette="indigo" title="Индиго" aria-label="Индиго" style="background-color: rgb(57, 73, 171);"></button></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="deck-pick-backdrop">
+      <div class="modal deck-pick" role="dialog" aria-modal="true" aria-labelledby="deck-pick-title" tabindex="-1">
+        <p class="subject" id="deck-pick-kicker">колоды</p>
+        <h3 id="deck-pick-title">Колоды</h3>
+        <div class="deck-pick-actions">
+          <button type="button" class="btn" id="deck-pick-new">+ колода</button>
+        </div>
+        <div class="deck-pick-list" id="deck-pick-list"></div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="deck-pick-cancel">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="menu-pop-backdrop">
+      <div class="modal menu-pop" role="dialog" aria-modal="true" aria-labelledby="menu-pop-title" tabindex="-1">
+        <p class="subject" id="menu-pop-kicker">колода</p>
+        <h3 id="menu-pop-title">Действия</h3>
+        <div class="menu-pop-actions" id="menu-pop-actions"></div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="menu-pop-cancel">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="library-backdrop">
+      <div class="modal library" role="dialog" aria-modal="true" aria-labelledby="library-title" tabindex="-1">
+        <p class="subject" id="library-kicker">библиотека</p>
+        <h3 id="library-title">Колоды для примера</h3>
+        <p class="library-hint">Добавь готовую колоду одним нажатием — карточки появятся в твоём списке.</p>
+        <div class="library-list" id="library-list"></div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="library-cancel">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="bulk-backdrop">
+      <div class="modal bulk" role="dialog" aria-modal="true" aria-labelledby="bulk-title" tabindex="-1">
+        <p class="subject" id="bulk-kicker">массовый ввод</p>
+        <h3 id="bulk-title">Добавить много карточек</h3>
+        <p class="library-hint" id="bulk-hint">Каждая строка — одна карточка: вопрос = ответ. Разделитель — первый знак «=» в строке.</p>
+        <textarea id="bulk-input" rows="8" spellcheck="false" aria-label="Пары вопрос — ответ"></textarea>
+        <p class="bulk-feedback" id="bulk-feedback" aria-live="polite"></p>
+        <div class="form-actions">
+          <button type="button" class="btn" id="bulk-cancel">Закрыть</button>
+          <button type="button" class="btn btn-primary" id="bulk-ok">Добавить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="summary-backdrop">
+      <div class="modal summary-modal" role="dialog" aria-modal="true" aria-labelledby="summary-title" tabindex="-1">
+        <p class="subject" id="summary-kicker">итог</p>
+        <h3 id="summary-title">Раунд завершён</h3>
+        <p class="summary-line" id="summary-line"></p>
+        <div class="summary-bar"><i id="summary-fill"></i></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="summary-repeat">Повторить неизученное</button>
+          <button type="button" class="btn" id="summary-stats">Статистика</button>
+          <button type="button" class="btn" id="summary-menu">В меню</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-backdrop" id="stats-backdrop">
+      <div class="stats-window" role="dialog" aria-modal="true" aria-labelledby="stats-title" tabindex="-1">
+        <header class="stats-header">
+          <div>
+            <p class="subject">статистика</p>
+            <h1 id="stats-title">Свод</h1>
+          </div>
+          <button type="button" class="btn" id="stats-close" aria-label="Закрыть статистику">✕</button>
+        </header>
+
+        <div id="stats-main">
+          <section class="stats-summary" aria-label="Общий свод">
+            <div class="stats-figure">
+              <span class="stats-number" id="stats-total">0</span>
+              <span class="subject">карточек всего</span>
+            </div>
+            <div class="stats-figure">
+              <span class="stats-number" id="stats-today">0</span>
+              <span class="subject">изучено сегодня</span>
+            </div>
+            <div class="stats-figure">
+              <span class="stats-number" id="stats-alltime">0</span>
+              <span class="subject">за всё время</span>
+            </div>
+          </section>
+
+          <div class="stats-list" id="stats-list"></div>
+
+          <div class="stats-empty hidden" id="stats-empty">
+            <p class="subject">пока пусто</p>
+            <h3>Начни учиться</h3>
+            <p>Статистика появится после первых повторений.</p>
+            <button type="button" class="btn btn-primary" id="stats-go-study">Учить</button>
+          </div>
+        </div>
+
+        <div class="stats-deck hidden" id="stats-deck">
+          <button type="button" class="btn" id="stats-back">← к колодам</button>
+          <p class="subject" id="stats-deck-kicker">колода</p>
+          <h2 id="stats-deck-title"></h2>
+          <div class="stats-sessions" id="stats-sessions"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="data-backdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="data-title" tabindex="-1">
+        <p class="subject">импорт</p>
+        <h3 id="data-title">Применить файл?</h3>
+        <p id="data-text"></p>
+        <div class="form-actions">
+          <button type="button" class="btn" id="data-cancel">Отмена</button>
+          <button type="button" class="btn btn-danger" id="data-replace">Заменить всё</button>
+          <button type="button" class="btn btn-primary" id="data-merge">Слить с текущими</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tour-tip" id="tour-tip" role="tooltip" data-side="below" style="--arrow-x: 150px; left: 229px; top: 211.501px;">
+      <p id="tour-text">Счётчик показывает, сколько карточек ты изучил сегодня.</p>
+      <div class="tour-actions">
+        <button type="button" class="btn" id="tour-skip">Пропустить</button>
+        <button type="button" class="btn btn-primary" id="tour-next">Дальше</button>
+      </div>
+    </div>
+
+    <div class="theme-bloom" id="theme-bloom" aria-hidden="true"></div>
+
+    <div class="storage-alert" id="storage-alert" role="alert" hidden="">
+      Не удалось сохранить данные. Хранилище переполнено или недоступно.
+    </div>
+
+    <div class="auth-backdrop" id="auth-backdrop">
+      <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab is-active" id="auth-tab-login">Вход</button>
+          <button type="button" class="auth-tab" id="auth-tab-register">Регистрация</button>
+        </div>
+        <form class="auth-form" id="auth-login-form">
+          <label>Email<input type="email" name="email" required="" autocomplete="email"></label>
+          <label>Пароль<input type="password" name="password" required="" autocomplete="current-password"></label>
+          <button type="submit" class="btn btn-primary">Войти</button>
+          <p class="auth-error" id="auth-login-error" role="alert" hidden=""></p>
+        </form>
+        <form class="auth-form hidden" id="auth-register-form">
+          <label>Email<input type="email" name="email" required="" autocomplete="email"></label>
+          <label>Пароль<input type="password" name="password" required="" minlength="8" autocomplete="new-password"></label>
+          <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+          <p class="auth-error" id="auth-register-error" role="alert" hidden=""></p>
+        </form>
+      </div>
+    </div>
+
+    <div class="auth-bar" id="auth-bar" hidden="">
+      <span class="auth-user" id="auth-user-email"></span>
+      <button type="button" class="btn" id="auth-logout-btn">Выйти</button>
+    </div>
+
+    <script src="js/api.js?v=40"></script>
+    <script src="js/api/data.js?v=40"></script>
+    <script src="js/app-data.js?v=40"></script>
+    <script src="js/virtual-list.js?v=40"></script>
+    <script src="js/share.js?v=40"></script>
+    <script src="js/router.js?v=40"></script>
+    <script src="js/storage.js?v=40"></script>
+    <script src="js/modal.js?v=40"></script>
+    <script src="js/ui.js?v=40"></script>
+    <script src="js/study.js?v=40"></script>
+    <script src="js/menu.js?v=40"></script>
+    <script src="js/stats.js?v=40"></script>
+    <script src="js/library.js?v=40"></script>
+    <script src="js/data.js?v=40"></script>
+    <script src="js/images.js?v=40"></script>
+    <script src="js/app.js?v=40"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
+        });
+      }
+    </script>
+  
+
+</body></html>

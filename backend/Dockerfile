@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /data/media && \
+RUN chmod +x entrypoint.sh && \
+    mkdir -p /data/media && \
     adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app /data
 
@@ -22,4 +23,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["./entrypoint.sh"]
