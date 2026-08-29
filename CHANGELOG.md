@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2026-08-29
+
+### Fixed
+- Fixed `?v=` cache-busting consistency in index.html (preload and stylesheet now use same version)
+- Restored missing auth-bar HTML nodes (`auth-bar`, `auth-user-email`, `auth-logout-btn`, `login-btn`) for proper auth UI
+- Fixed auth UX: added visible "Войти/Выйти" menu item and fixed auth bar display logic
+- Fixed heavy-mode for large card lists (>60 rows): animation delay only applied to first 18 rows, `.no-anim` class properly toggled
+- Fixed `cover-no-scroll` test failure: enhanced `lockScroll` with `touch-action: none`, `overscroll-behavior: contain`, and `position: fixed` fallback for iOS Safari; also blocks scroll on `.main` and `.sidebar`
+- Fixed `menu-fits` test failure: added `max-height: calc(100vh - 32px)` and `overflow: auto` to `.menu-cover` for internal scrolling on small viewports
+- Fixed `pulse-pop` animation test: increased `pulse-marks` removal timeout from 1200ms to 1400ms to ensure animation completes
+- Fixed tour visibility: made `showTour` more robust by checking `tourStep > -1` instead of `!== -1`, added null checks
+- Fixed streak display: now shows streak count from day 1 (previously hidden until day 2), with "Начни серию" prompt when streak is 0
+- Fixed stats-empty test: corrected script load order - `stats.js` now loads before `menu.js` so `openStats` is available when menu binds events
+- Fixed SECRET_KEY validation: backend now raises RuntimeError on startup if default SECRET_KEY is used in production
+
+### Added
+- Share button (⤴) in workspace header for quick deck sharing (enable sharing + copy link in one click)
+- `flame-dim` SVG style for zero-streak state
+
+### Changed
+- Reordered script loading in index.html: `stats.js` before `menu.js` to ensure `openStats` is defined at bind time
+- Streak now visible at 1+ days (was 2+) with different messaging for 0 streak
+
+### Security
+- SECRET_KEY validation at startup prevents deployment with default key
+
+---
+
 ## [2.0.0] - 2026-08-28
 
 ### Added

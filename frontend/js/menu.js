@@ -16,13 +16,14 @@ function renderMenu() {
     `изучено ${today.known + today.unknown} · знаю ${today.known} · не знаю ${today.unknown}`;
   const streak = computeStreak();
   const streakEl = document.getElementById("menu-streak");
-  if (streak >= 2) {
-    streakEl.hidden = false;
+  streakEl.hidden = false;
+  if (streak >= 1) {
     streakEl.innerHTML =
       '<svg class="flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 C 15 7, 19 9.5, 19 14 A 7 7 0 0 1 5 14 C 5 10, 9 8, 12 2 Z" fill="var(--accent-3)"/></svg>Серия · ' +
       streak + " " + pluralDays(streak) + " подряд";
   } else {
-    streakEl.hidden = true;
+    streakEl.innerHTML =
+      '<svg class="flame flame-dim" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 C 15 7, 19 9.5, 19 14 A 7 7 0 0 1 5 14 C 5 10, 9 8, 12 2 Z" fill="currentColor"/></svg>Начни серию — повтори сегодня';
   }
 }
 
@@ -234,7 +235,7 @@ function openFirstDeck() {
 }
 
 function showTour() {
-  if (tourStep !== -1) return;
+  if (tourStep > -1 && tourStep < tourSteps.length) return;
   tourSteps = [
     {
       target: "#menu-today",
@@ -259,7 +260,9 @@ function showTour() {
   ];
   tourStep = 0;
   const tip = document.getElementById("tour-tip");
+  if (!tip) return;
   tip.hidden = false;
+  document.getElementById("tour-text").textContent = "";
   document.getElementById("tour-next").textContent = "Дальше";
   renderTourStep();
 }

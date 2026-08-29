@@ -57,22 +57,14 @@
     </script>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Serif:ital,wght@0,400;1,700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Serif:ital,wght@0,400;1,700&display=swap"></noscript>
-    <link rel="preload" href="css/style.css?v=50" as="style">
+    <link rel="preload" href="css/style.css?v=41" as="style">
     <link rel="stylesheet" href="css/style.css?v=41" />
   
     <style>
       .menu-backdrop{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
     </style>
 
-      <style>
-      body{opacity:0;transition:opacity .15s}
-      body.fonts-loaded{opacity:1}
-    </style>
-    <script>
-      document.fonts.ready.then(function(){
-        document.body.classList.add('fonts-loaded');
-      });
-    </script>
+  
   </head>
   <body>
     <aside class="sidebar">
@@ -119,6 +111,7 @@
           </div>
           <div class="header-actions">
             <button type="button" class="btn" id="menu-back-btn">← Меню</button>
+            <button type="button" class="btn" id="share-deck-btn" title="Поделиться колодой">⤴</button>
             <button type="button" class="btn" id="rename-deck-btn">Переименовать</button>
             <button type="button" class="btn btn-danger" id="delete-deck-btn">Удалить</button>
           </div>
@@ -332,6 +325,7 @@
           <button type="button" class="btn menu-section" id="menu-migrate-btn">Мигрировать</button>
           <button type="button" class="btn menu-section" id="menu-stats-btn">Статистика</button>
           <button type="button" class="btn menu-section" id="menu-settings-btn">Настройки</button>
+          <button type="button" class="btn menu-section menu-auth" id="menu-auth-btn">Войти</button>
         </div>
 
         <section class="menu-theme" aria-label="Тема">
@@ -504,6 +498,12 @@
       </div>
     </div>
 
+    <div class="auth-bar hidden" id="auth-bar">
+      <span class="auth-user-email" id="auth-user-email"></span>
+      <button type="button" class="btn btn-login-text" id="login-btn">Войти</button>
+      <button type="button" class="btn btn-login-text hidden" id="auth-logout-btn">Выйти</button>
+    </div>
+
     <script src="js/api.js?v=41"></script>
     <script src="js/api/data.js?v=41"></script>
     <script src="js/app-data.js?v=41"></script>
@@ -514,8 +514,8 @@
     <script src="js/modal.js?v=41"></script>
     <script src="js/ui.js?v=41"></script>
     <script src="js/study.js?v=41"></script>
-    <script src="js/menu.js?v=41"></script>
     <script src="js/stats.js?v=41"></script>
+    <script src="js/menu.js?v=41"></script>
     <script src="js/library.js?v=41"></script>
     <script src="js/data.js?v=41"></script>
     <script src="js/images.js?v=41"></script>

@@ -293,6 +293,37 @@ body {
 
 body.modal-open {
   overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: contain;
+  height: 100vh;
+  max-height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+html.modal-open {
+  overflow: hidden;
+  height: 100vh;
+  max-height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+body.modal-open .main,
+body.modal-open .sidebar {
+  overflow: hidden;
+  pointer-events: none;
+  max-height: 100vh;
+}
+
+@supports (-webkit-touch-callout: none) {
+  body.modal-open {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
 }
 
 ::view-transition-old(root),
@@ -817,7 +848,10 @@ html[data-palette="slate"] .main {
 .btn-primary,
 .mode-switch .btn.is-active,
 .filters .filter-btn.is-active {
-  background: var(--accent);
+  background-color: var(--accent);
+  background-image: var(--study-pattern);
+  background-size: var(--study-size, auto);
+  background-position: var(--study-pos, 0 0);
   color: var(--on-accent);
 }
 
@@ -1514,9 +1548,10 @@ html[data-palette="slate"] .face::before {
   position: fixed;
   inset: 0;
   z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px 16px 18px;
   background:
     radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--accent-2) 40%, transparent), transparent 46%),
     radial-gradient(circle at 88% 84%, color-mix(in srgb, var(--margin) 34%, transparent), transparent 46%),
@@ -1529,6 +1564,7 @@ html[data-palette="slate"] .face::before {
   visibility: hidden;
   pointer-events: none;
   transition: opacity 0.3s var(--ease), visibility 0s linear 0.3s;
+  overflow: auto;
 }
 
 .menu-backdrop {
@@ -1609,17 +1645,83 @@ html[data-palette="indigo"] .menu-backdrop {
 .menu-cover {
   position: relative;
   width: min(600px, 100%);
-  padding: 20px 30px 18px;
+  max-height: calc(100vh - 70px);
+  padding: 8px 16px 8px;
   background: var(--card);
   border: 2px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 22px 60px rgba(10, 8, 5, 0.28), 0 4px 0 var(--shadow);
   transform: scale(0.92);
   transition: transform 0.3s var(--spring);
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .menu-backdrop.is-open .menu-cover {
   transform: none;
+}
+
+@media (max-height: 520px) {
+  .menu-backdrop {
+    padding: 1px 6px 4px;
+  }
+  .menu-cover {
+    padding: 1px 6px 1px;
+    max-height: calc(100vh - 30px);
+  }
+  .menu-header {
+    gap: 0;
+  }
+  .menu-header h1 {
+    font-size: clamp(18px, 4vw, 24px);
+    margin: 0;
+    line-height: 1;
+  }
+  .menu-today {
+    margin-top: 0;
+    padding: 0 3px;
+  }
+  .menu-today p {
+    font-size: 12px;
+  }
+  .menu-today .menu-streak {
+    margin: 1px 0 0;
+    font-size: 11px;
+  }
+  .menu-actions {
+    gap: 1px;
+    margin-top: 1px;
+  }
+  .menu-actions .btn {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
+  .menu-study {
+    padding: 2px;
+    font-size: 12px;
+  }
+  .menu-theme {
+    margin-top: 1px;
+    padding-top: 2px;
+  }
+  .menu-theme .mode-switch {
+    margin-top: 1px;
+  }
+  .menu-theme .mode-switch .btn {
+    padding: 2px 4px;
+    font-size: 11px;
+  }
+  .menu-theme .theme-dots {
+    margin: 1px 0 2px;
+  }
+  .menu-theme .theme-dot {
+    width: 18px;
+    height: 18px;
+  }
+  .menu-pop-actions {
+    gap: 1px;
+    margin-top: 1px;
+  }
 }
 
 .menu-header {
@@ -1668,11 +1770,6 @@ html[data-palette="indigo"] .menu-backdrop {
   padding: 14px;
   font-size: 18px;
   font-weight: 700;
-}
-
-.menu-study,
-#stats-go-study,
-#menu-pop-actions .btn-primary {
   background-image: var(--study-pattern);
   background-size: var(--study-size, auto);
   background-position: var(--study-pos, 0 0);

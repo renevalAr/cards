@@ -21,7 +21,12 @@ FRONTEND_DIR = Path(os.getenv("FRONTEND_DIR", str(Path(__file__).resolve().paren
 async def lifespan(app: FastAPI):
     logger = get_logger(__name__)
     logger.info("Application starting up", extra={"version": settings.APP_VERSION})
-    
+
+    # Validate SECRET_KEY
+    if settings.SECRET_KEY == "change-me-in-production" and not settings.DEBUG:
+        logger.error("SECRET_KEY is set to default value! Set a secure SECRET_KEY in production.")
+        raise RuntimeError("SECRET_KEY must be changed from default in production")
+
     try:
         from app.database import engine
         from sqlalchemy import text
@@ -30,7 +35,7 @@ async def lifespan(app: FastAPI):
         logger.info("Database connection verified")
     except Exception as e:
         logger.warning(f"Database not available: {e}")
-    
+
     yield
     logger.info("Application shutting down")
 

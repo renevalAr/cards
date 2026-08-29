@@ -290,6 +290,25 @@ function bindEvents() {
   document.getElementById("empty-new-deck-btn").addEventListener("click", createDeck);
   document.getElementById("rename-deck-btn").addEventListener("click", renameDeck);
   document.getElementById("delete-deck-btn").addEventListener("click", deleteDeck);
+  document.getElementById("share-deck-btn").addEventListener("click", async () => {
+    const deck = selectedDeck();
+    if (!deck) return;
+    if (deck.share_slug) {
+      const ok = await Share.copyShareLink(deck);
+      if (typeof showToast === "function") showToast(ok ? "Ссылка скопирована" : "Не удалось скопировать", ok ? "ok" : "warn");
+    } else {
+      const updated = await Share.enableSharing(deck.id);
+      if (updated && updated.share_slug) {
+        deck.share_slug = updated.share_slug;
+        deck.is_public = true;
+        saveState();
+        const ok = await Share.copyShareLink(deck);
+        if (typeof showToast === "function") showToast(ok ? "Колода опубликована, ссылка скопирована" : "Колода опубликована", ok ? "ok" : "warn");
+      } else {
+        if (typeof showToast === "function") showToast("Не удалось опубликовать", "warn");
+      }
+    }
+  });
   document.getElementById("card-form").addEventListener("submit", saveCard);
   document.getElementById("card-form").addEventListener("keydown", (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
@@ -324,7 +343,7 @@ function bindEvents() {
     searchDebounce = setTimeout(() => {
       searchDebounce = null;
       renderCardRows();
-    }, 120);
+    }, 80);
   });
   searchInput.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -594,7 +613,7 @@ function bindMotionExtras() {
     const has = !!rowsEl.querySelector("mark.search-hit");
     if (has && !hadMarks) {
       rowsEl.classList.add("pulse-marks");
-      setTimeout(() => rowsEl.classList.remove("pulse-marks"), 1200);
+      setTimeout(() => rowsEl.classList.remove("pulse-marks"), 1400);
     }
     hadMarks = has;
   });
@@ -638,13 +657,27 @@ function showAuthBar() {
   const bar = document.getElementById("auth-bar");
   const email = document.getElementById("auth-user-email");
   const loginBtn = document.getElementById("login-btn");
-  if (Auth.getUser()) {
-    email.textContent = Auth.getUser().email;
-    bar.hidden = false;
-    if (loginBtn) loginBtn.hidden = true;
+  const logoutBtn = document.getElementById("auth-logout-btn");
+  const menuAuth = document.getElementById("menu-auth-btn");
+  if (!bar) return;
+  const user = Auth.getUser();
+  if (user) {
+    if (email) email.textContent = user.email;
+    bar.classList.remove("hidden");
+    if (loginBtn) loginBtn.classList.add("hidden");
+    if (logoutBtn) logoutBtn.classList.remove("hidden");
+    if (menuAuth) {
+      menuAuth.textContent = "Выйти";
+      menuAuth.classList.add("menu-auth-out");
+    }
   } else {
-    bar.hidden = true;
-    if (loginBtn) loginBtn.hidden = false;
+    bar.classList.add("hidden");
+    if (loginBtn) loginBtn.classList.remove("hidden");
+    if (logoutBtn) logoutBtn.classList.add("hidden");
+    if (menuAuth) {
+      menuAuth.textContent = "Войти";
+      menuAuth.classList.remove("menu-auth-out");
+    }
   }
 }
 
@@ -749,10 +782,26 @@ function bindAuthEvents() {
   if (workspaceLoginBtn) {
     workspaceLoginBtn.addEventListener("click", () => showAuthModal());
   }
+
+  const menuAuthBtn = document.getElementById("menu-auth-btn");
+  if (menuAuthBtn) {
+    menuAuthBtn.addEventListener("click", async () => {
+      if (Auth.getUser()) {
+        await Auth.logout();
+        showAuthBar();
+        if (typeof closeAllMenus === "function") closeAllMenus();
+        if (typeof showToast === "function") showToast("Вы вышли", "ok");
+      } else {
+        if (typeof closeAllMenus === "function") closeAllMenus();
+        showAuthModal();
+      }
+    });
+  }
 }
 
 (async () => {
   bindAuthEvents();
+  showAuthBar();
   const user = await Auth.init();
   if (user) {
     showAuthBar();

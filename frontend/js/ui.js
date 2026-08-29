@@ -221,7 +221,7 @@ function renderCardRows() {
     const li = makeEl("li");
     li.dataset.cardId = card.id;
     li.draggable = true;
-    li.style.animationDelay = Math.min(index, 18) * 30 + "ms";
+    if (index < 18) li.style.animationDelay = index * 30 + "ms";
 
     const body = makeEl("div");
     const qp = makeEl("p");

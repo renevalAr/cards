@@ -1,6 +1,7 @@
 ﻿let modalResolver = null;
 let modalTrigger = null;
 let settingsTrigger = null;
+let savedScrollY = 0;
 
 function getFocusable(backdrop) {
   return Array.from(
@@ -11,7 +12,16 @@ function getFocusable(backdrop) {
 }
 
 function lockScroll(lock) {
+  if (lock) {
+    savedScrollY = window.scrollY || document.documentElement.scrollTop;
+    document.body.style.top = `-${savedScrollY}px`;
+  }
   document.body.classList.toggle("modal-open", lock);
+  document.documentElement.classList.toggle("modal-open", lock);
+  if (!lock) {
+    document.body.style.top = "";
+    window.scrollTo(0, savedScrollY);
+  }
 }
 
 function showLayer(backdrop) {
