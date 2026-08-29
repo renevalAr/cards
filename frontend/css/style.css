@@ -1531,6 +1531,13 @@ html[data-palette="slate"] .face::before {
   transition: opacity 0.3s var(--ease), visibility 0s linear 0.3s;
 }
 
+.menu-backdrop {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease), visibility 0s linear 0.3s;
+}
+
 .menu-backdrop.is-open {
   opacity: 1;
   visibility: visible;
