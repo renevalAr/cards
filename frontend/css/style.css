@@ -806,6 +806,31 @@ html[data-palette="slate"] .main {
   transition: transform var(--t) var(--ease), box-shadow var(--t), filter var(--t), background var(--t), color var(--t);
 }
 
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.btn-icon:hover {
+  background: var(--surface-2, #f5ecd9);
+  transform: translateY(-1px);
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink, #2c2218);
+}
+
 .tab:hover,
 .btn:hover {
   filter: brightness(1.06);
@@ -2991,32 +3016,30 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   z-index: 100;
 }
 
-.menu-login {
+.menu-login-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px 16px;
-  margin-top: 8px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
+  justify-content: center;
+  background: var(--surface-2, #f5ecd9);
+  border: 2px solid var(--border, #2c2218);
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 16px;
   transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
 }
 
-.menu-login:hover {
+.menu-login-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.menu-login svg {
+.menu-login-btn svg {
   width: 20px;
   height: 20px;
-  flex: none;
+  color: var(--ink, #2c2218);
 }
 
 .auth-user {

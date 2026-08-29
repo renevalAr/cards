@@ -744,6 +744,11 @@ function bindAuthEvents() {
   if (loginMenuBtn) {
     loginMenuBtn.addEventListener("click", () => showAuthModal());
   }
+
+  const workspaceLoginBtn = document.getElementById("workspace-login-btn");
+  if (workspaceLoginBtn) {
+    workspaceLoginBtn.addEventListener("click", () => showAuthModal());
+  }
 }
 
 (async () => {

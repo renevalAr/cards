@@ -61,7 +61,7 @@
       href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Serif:ital,wght@0,400;1,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css?v=43" />
+    <link rel="stylesheet" href="css/style.css?v=44" />
   </head>
   <body>
     <aside class="sidebar">
@@ -104,6 +104,9 @@
             <p class="stats" id="stats"></p>
           </div>
           <div class="header-actions">
+            <button type="button" class="btn btn-icon" id="workspace-login-btn" aria-label="Войти">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            </button>
             <button type="button" class="btn" id="menu-back-btn">← Меню</button>
             <button type="button" class="btn" id="rename-deck-btn">Переименовать</button>
             <button type="button" class="btn btn-danger" id="delete-deck-btn">Удалить</button>
@@ -310,12 +313,10 @@
           <button type="button" class="btn btn-primary menu-study" id="menu-study-btn">Учить</button>
           <button type="button" class="btn menu-section" id="menu-cards-btn">Колоды</button>
           <button type="button" class="btn menu-section" id="menu-library-btn">Библиотека</button>
-          <button type="button" class="btn menu-section" id="menu-migrate-btn">Синхронизировать</button>
           <button type="button" class="btn menu-section" id="menu-stats-btn">Статистика</button>
           <button type="button" class="btn menu-section" id="menu-settings-btn">Настройки</button>
-          <button type="button" class="btn menu-login" id="menu-login-btn">
+          <button type="button" class="btn btn-icon menu-login-btn" id="menu-login-btn" aria-label="Войти">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            <span>Войти</span>
           </button>
         </div>
 
@@ -489,22 +490,22 @@
       </div>
     </div>
 
-    <script src="js/api.js?v=43"></script>
-    <script src="js/api/data.js?v=43"></script>
-    <script src="js/app-data.js?v=43"></script>
-    <script src="js/virtual-list.js?v=43"></script>
-    <script src="js/share.js?v=43"></script>
-    <script src="js/router.js?v=43"></script>
-    <script src="js/storage.js?v=43"></script>
-    <script src="js/modal.js?v=43"></script>
-    <script src="js/ui.js?v=43"></script>
-    <script src="js/study.js?v=43"></script>
-    <script src="js/menu.js?v=43"></script>
-    <script src="js/stats.js?v=43"></script>
-    <script src="js/library.js?v=43"></script>
-    <script src="js/data.js?v=43"></script>
-    <script src="js/images.js?v=43"></script>
-    <script src="js/app.js?v=43"></script>
+    <script src="js/api.js?v=44"></script>
+    <script src="js/api/data.js?v=44"></script>
+    <script src="js/app-data.js?v=44"></script>
+    <script src="js/virtual-list.js?v=44"></script>
+    <script src="js/share.js?v=44"></script>
+    <script src="js/router.js?v=44"></script>
+    <script src="js/storage.js?v=44"></script>
+    <script src="js/modal.js?v=44"></script>
+    <script src="js/ui.js?v=44"></script>
+    <script src="js/study.js?v=44"></script>
+    <script src="js/menu.js?v=44"></script>
+    <script src="js/stats.js?v=44"></script>
+    <script src="js/library.js?v=44"></script>
+    <script src="js/data.js?v=44"></script>
+    <script src="js/images.js?v=44"></script>
+    <script src="js/app.js?v=44"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
