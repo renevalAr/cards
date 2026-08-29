@@ -739,6 +739,11 @@ function bindAuthEvents() {
       }
     });
   }
+
+  const loginMenuBtn = document.getElementById("menu-login-btn");
+  if (loginMenuBtn) {
+    loginMenuBtn.addEventListener("click", () => showAuthModal());
+  }
 }
 
 (async () => {

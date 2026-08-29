@@ -61,7 +61,7 @@
       href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Serif:ital,wght@0,400;1,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css?v=42" />
+    <link rel="stylesheet" href="css/style.css?v=43" />
   </head>
   <body>
     <aside class="sidebar">
@@ -76,7 +76,6 @@
       </header>
 
       <button type="button" class="btn btn-primary" id="new-deck-btn">+ колода</button>
-      <button type="button" class="btn" id="login-btn">Войти</button>
       <nav class="deck-list" id="deck-list" aria-label="Колоды"></nav>
       <button type="button" class="btn settings-btn" id="settings-btn">Настройки</button>
     </aside>
@@ -311,9 +310,13 @@
           <button type="button" class="btn btn-primary menu-study" id="menu-study-btn">Учить</button>
           <button type="button" class="btn menu-section" id="menu-cards-btn">Колоды</button>
           <button type="button" class="btn menu-section" id="menu-library-btn">Библиотека</button>
-          <button type="button" class="btn menu-section" id="menu-migrate-btn">Мигрировать</button>
+          <button type="button" class="btn menu-section" id="menu-migrate-btn">Синхронизировать</button>
           <button type="button" class="btn menu-section" id="menu-stats-btn">Статистика</button>
           <button type="button" class="btn menu-section" id="menu-settings-btn">Настройки</button>
+          <button type="button" class="btn menu-login" id="menu-login-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <span>Войти</span>
+          </button>
         </div>
 
         <section class="menu-theme" aria-label="Тема">
@@ -486,27 +489,22 @@
       </div>
     </div>
 
-    <div class="auth-bar" id="auth-bar" hidden>
-      <span class="auth-user" id="auth-user-email"></span>
-      <button type="button" class="btn" id="auth-logout-btn">Выйти</button>
-    </div>
-
-    <script src="js/api.js?v=41"></script>
-    <script src="js/api/data.js?v=41"></script>
-    <script src="js/app-data.js?v=41"></script>
-    <script src="js/virtual-list.js?v=41"></script>
-    <script src="js/share.js?v=41"></script>
-    <script src="js/router.js?v=41"></script>
-    <script src="js/storage.js?v=41"></script>
-    <script src="js/modal.js?v=41"></script>
-    <script src="js/ui.js?v=41"></script>
-    <script src="js/study.js?v=41"></script>
-    <script src="js/menu.js?v=41"></script>
-    <script src="js/stats.js?v=41"></script>
-    <script src="js/library.js?v=41"></script>
-    <script src="js/data.js?v=41"></script>
-    <script src="js/images.js?v=41"></script>
-    <script src="js/app.js?v=41"></script>
+    <script src="js/api.js?v=43"></script>
+    <script src="js/api/data.js?v=43"></script>
+    <script src="js/app-data.js?v=43"></script>
+    <script src="js/virtual-list.js?v=43"></script>
+    <script src="js/share.js?v=43"></script>
+    <script src="js/router.js?v=43"></script>
+    <script src="js/storage.js?v=43"></script>
+    <script src="js/modal.js?v=43"></script>
+    <script src="js/ui.js?v=43"></script>
+    <script src="js/study.js?v=43"></script>
+    <script src="js/menu.js?v=43"></script>
+    <script src="js/stats.js?v=43"></script>
+    <script src="js/library.js?v=43"></script>
+    <script src="js/data.js?v=43"></script>
+    <script src="js/images.js?v=43"></script>
+    <script src="js/app.js?v=43"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
