@@ -15,12 +15,14 @@ function lockScroll(lock) {
 }
 
 function showLayer(backdrop) {
+  backdrop.hidden = false;
   backdrop.classList.add("is-open");
   void backdrop.offsetWidth;
 }
 
 function hideLayer(backdrop) {
   backdrop.classList.remove("is-open");
+  backdrop.hidden = true;
 }
 
 function trapTabKey(backdrop, event) {
