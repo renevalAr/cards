@@ -2902,10 +2902,16 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .auth-backdrop[hidden] {
   display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .auth-modal {
@@ -2915,6 +2921,8 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   width: 360px;
   max-width: 90vw;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1001;
 }
 
 .auth-tabs {
