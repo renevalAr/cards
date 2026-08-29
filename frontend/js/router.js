@@ -25,8 +25,8 @@ const Router = {
         }
         break;
       case "deck":
-        if (params[0] && typeof DeckUI !== "undefined") {
-          DeckUI.show(params[0]);
+        if (params[0] && typeof menuOpenCards === "function") {
+          menuOpenCards(params[0]);
         } else if (typeof openMenu === "function") {
           openMenu();
         }
