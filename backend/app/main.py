@@ -14,7 +14,7 @@ from app.logging_config import setup_logging, get_logger
 settings = get_settings()
 setup_logging()
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

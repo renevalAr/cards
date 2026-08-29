@@ -15,7 +15,9 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       - DATABASE_URL=postgresql+asyncpg://flashcards:flashcards@db:5432/flashcards
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
