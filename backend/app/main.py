@@ -20,6 +20,17 @@ FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 async def lifespan(app: FastAPI):
     logger = get_logger(__name__)
     logger.info("Application starting up", extra={"version": settings.APP_VERSION})
+    
+    try:
+        from app.database import engine
+        from app.models import Base
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("Database connection verified")
+    except Exception as e:
+        logger.warning(f"Database not available: {e}")
+    
     yield
     logger.info("Application shutting down")
 
