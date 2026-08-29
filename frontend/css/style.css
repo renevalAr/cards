@@ -806,29 +806,56 @@ html[data-palette="slate"] .main {
   transition: transform var(--t) var(--ease), box-shadow var(--t), filter var(--t), background var(--t), color var(--t);
 }
 
-.btn-icon {
-  width: 36px;
-  height: 36px;
+.workspace-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-login-round {
+  width: 40px;
+  height: 40px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 2px solid var(--line);
-  border-radius: 8px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.18s var(--ease), transform 0.18s var(--ease);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s var(--spring);
+  animation: login-pulse 2s ease-in-out infinite;
 }
 
-.btn-icon:hover {
-  background: var(--surface-2, #f5ecd9);
-  transform: translateY(-1px);
+.btn-login-round:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  animation: none;
 }
 
-.btn-icon svg {
-  width: 18px;
-  height: 18px;
-  color: var(--ink, #2c2218);
+.btn-login-round:active {
+  transform: scale(0.95);
+}
+
+.btn-login-round svg {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  transition: transform 0.3s var(--ease);
+}
+
+.btn-login-round:hover svg {
+  transform: translateX(2px);
+}
+
+@keyframes login-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 0 var(--accent);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 8px transparent;
+  }
 }
 
 .tab:hover,
