@@ -2915,7 +2915,7 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .auth-modal {
-  background: var(--surface);
+  background: var(--surface, #fffaf2);
   border-radius: var(--radius);
   padding: 32px;
   width: 360px;
