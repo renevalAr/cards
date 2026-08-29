@@ -232,7 +232,11 @@ html[data-mode="light"] {
   --paper: color-mix(in srgb, var(--accent) 12%, #f5ecd9);
   --side: color-mix(in srgb, var(--accent) 30%, #e4ceab);
   --card: color-mix(in srgb, var(--accent) 7%, #fffaf2);
+  --surface: var(--card);
+  --surface-2: color-mix(in srgb, var(--accent) 5%, #f5ecd9);
   --ink: #2c2218;
+  --text-muted: #5f5144;
+  --border: #2c2218;
   --muted: #5f5144;
   --line: #2c2218;
   --danger: #b42323;
@@ -250,7 +254,11 @@ html[data-mode="dark"] {
   --paper: color-mix(in srgb, var(--accent) 11%, #12110f);
   --side: color-mix(in srgb, var(--accent) 18%, #1a1714);
   --card: color-mix(in srgb, var(--accent) 14%, #221c18);
+  --surface: var(--card);
+  --surface-2: color-mix(in srgb, var(--accent) 10%, #1a1714);
   --ink: #f3ebe0;
+  --text-muted: #c4b3a2;
+  --border: #eadccb;
   --muted: #c4b3a2;
   --line: #eadccb;
   --danger: #ff8a7a;
@@ -2894,6 +2902,10 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+}
+
+.auth-backdrop[hidden] {
+  display: none;
 }
 
 .auth-modal {

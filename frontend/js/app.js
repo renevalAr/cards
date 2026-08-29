@@ -637,11 +637,14 @@ function hideAuthModal() {
 function showAuthBar() {
   const bar = document.getElementById("auth-bar");
   const email = document.getElementById("auth-user-email");
+  const loginBtn = document.getElementById("login-btn");
   if (Auth.getUser()) {
     email.textContent = Auth.getUser().email;
     bar.hidden = false;
+    if (loginBtn) loginBtn.hidden = true;
   } else {
     bar.hidden = true;
+    if (loginBtn) loginBtn.hidden = false;
   }
 }
 
@@ -712,6 +715,11 @@ function bindAuthEvents() {
     await Auth.logout();
     showAuthBar();
   });
+
+  const loginBtn = document.getElementById("login-btn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => showAuthModal());
+  }
 
   const migrateBtn = document.getElementById("menu-migrate-btn");
   if (migrateBtn) {
