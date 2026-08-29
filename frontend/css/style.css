@@ -3016,6 +3016,8 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .btn-login-icon {
