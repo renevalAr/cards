@@ -15,7 +15,7 @@ from app.logging_config import setup_logging, get_logger
 settings = get_settings()
 setup_logging()
 
-FRONTEND_DIR = Path(os.getenv("FRONTEND_DIR", Path(__file__).resolve().parent.parent.parent / "frontend"))
+FRONTEND_DIR = Path(os.getenv("FRONTEND_DIR", str(Path(__file__).resolve().parent.parent.parent / "frontend")))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,7 +24,6 @@ async def lifespan(app: FastAPI):
     
     try:
         from app.database import engine
-        from app.models import Base
         from sqlalchemy import text
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
