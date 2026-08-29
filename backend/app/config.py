@@ -21,9 +21,10 @@ class Settings(BaseSettings):
     MEDIA_ROOT: str = "/var/www/media"
     MEDIA_URL: str = "/media"
 
-    CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000", "https://flashcards.fly.dev"]
-    ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "flashcards.fly.dev", "*.fly.dev", "testserver"]
+    CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000", "https://*.nexusai.run"]
+    ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "*.nexusai.run", "testserver"]
     SECURE_COOKIES: bool = False
+    RATE_LIMIT_ENABLED: bool = True
 
 
 @lru_cache
