@@ -627,11 +627,11 @@ function verifyStylesFresh() {
 verifyStylesFresh();
 
 function showAuthModal() {
-  document.getElementById("auth-backdrop").hidden = false;
+  document.getElementById("auth-backdrop").classList.add("is-open");
 }
 
 function hideAuthModal() {
-  document.getElementById("auth-backdrop").hidden = true;
+  document.getElementById("auth-backdrop").classList.remove("is-open");
 }
 
 function showAuthBar() {
