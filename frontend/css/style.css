@@ -1,4 +1,4 @@
-п»ї:root {
+:root {
   --font: "PT Sans", "Segoe UI", sans-serif;
   --serif: "PT Serif", Georgia, serif;
   --radius: 16px;
@@ -1136,7 +1136,7 @@ input[type="text"]:focus {
   transform: rotateY(180deg);
 }
 
-/* ==== Face speak (РѕР·РІСѓС‡РєР° РЅР° РєР°СЂС‚Рµ) ==== */
+/* ==== Face speak (озвучка на карте) ==== */
 
 .face-speak {
   position: absolute;
@@ -1419,7 +1419,7 @@ html[data-palette="slate"] .face::before {
   padding: 14px 18px;
 }
 
-/* ==== РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ СЂРµР¶РёРј РёР·СѓС‡РµРЅРёСЏ ==== */
+/* ==== Полноэкранный режим изучения ==== */
 
 .focus-backdrop {
   position: fixed;
@@ -1529,7 +1529,7 @@ html[data-palette="slate"] .face::before {
   z-index: 46;
 }
 
-/* ==== Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ ==== */
+/* ==== Главное меню ==== */
 
 .menu-backdrop {
   --menu-pattern: none;
@@ -1562,7 +1562,7 @@ html[data-palette="slate"] .face::before {
   transition: opacity 0.3s var(--ease), visibility 0s;
 }
 
-/* РЈРЅРёРєР°Р»СЊРЅС‹Рµ СѓР·РѕСЂС‹ С„РѕРЅР° РґР»СЏ РєР°Р¶РґРѕР№ РїР°Р»РёС‚СЂС‹ */
+/* Уникальные узоры фона для каждой палитры */
 
 html[data-palette="ember"] .menu-backdrop {
   --menu-pattern:
@@ -1639,7 +1639,7 @@ html[data-palette="indigo"] .menu-backdrop {
   transform: none;
 }
 
-.menu-header {
+.menu-title-row {`n  display: flex;`n  align-items: center;`n  gap: 12px;`n}`n`n.menu-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -1719,7 +1719,7 @@ html[data-palette="indigo"] .menu-backdrop {
   margin-top: 8px;
 }
 
-/* ==== Р’С‹Р±РѕСЂ РєРѕР»РѕРґС‹ ==== */
+/* ==== Выбор колоды ==== */
 
 .deck-pick {
   width: min(520px, 100%);
@@ -1780,7 +1780,7 @@ html[data-palette="indigo"] .menu-backdrop {
   color: var(--muted);
 }
 
-/* ==== Р‘РёР±Р»РёРѕС‚РµРєР° РґРµРјРѕ-РєРѕР»РѕРґ ==== */
+/* ==== Библиотека демо-колод ==== */
 
 .library {
   width: min(540px, 100%);
@@ -1841,7 +1841,7 @@ html[data-palette="indigo"] .menu-backdrop {
   justify-self: start;
 }
 
-/* ==== РњР°СЃСЃРѕРІС‹Р№ РІРІРѕРґ РєР°СЂС‚РѕС‡РµРє ==== */
+/* ==== Массовый ввод карточек ==== */
 
 .bulk {
   width: min(560px, 100%);
@@ -1889,7 +1889,7 @@ html[data-palette="indigo"] .menu-backdrop {
   transition: width 0.4s var(--ease);
 }
 
-/* ==== РС‚РѕРі СЂР°СѓРЅРґР° ==== */
+/* ==== Итог раунда ==== */
 
 .summary-line {
   margin: 10px 0 0;
@@ -1916,7 +1916,7 @@ html[data-palette="indigo"] .menu-backdrop {
   margin-top: 18px;
 }
 
-/* ==== РћРєРЅРѕ СЃС‚Р°С‚РёСЃС‚РёРєРё ==== */
+/* ==== Окно статистики ==== */
 
 .stats-backdrop {
   position: fixed;
@@ -2138,7 +2138,7 @@ html[data-palette="indigo"] .menu-backdrop {
 
 
 
-/* ==== РўСѓР»С‚РёРїС‹-С‚СѓСЂ ==== */
+/* ==== Тултипы-тур ==== */
 
 .tour-tip {
   position: fixed;
@@ -2330,7 +2330,7 @@ html[data-palette="indigo"] .menu-backdrop {
   }
 }
 
-/* ==== РњРёРєСЂРѕ-Р°РЅРёРјР°С†РёРё Рё РёРЅС‚РµСЂР°РєС‚РёРІ ==== */
+/* ==== Микро-анимации и интерактив ==== */
 
 .btn,
 .tab {
@@ -2508,7 +2508,7 @@ mark.search-hit {
   background-clip: padding-box;
 }
 
-/* ==== Р’РѕР»РЅР° 2: СЃС†РµРЅР°СЂРЅС‹Рµ Р°РЅРёРјР°С†РёРё ==== */
+/* ==== Волна 2: сценарные анимации ==== */
 
 .tabs {
   position: relative;
@@ -2892,7 +2892,7 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .quiz-option.is-right::before {
-  content: "вњ“";
+  content: "?";
   background: var(--known);
   border-color: transparent;
   color: #fff8f0;
@@ -2900,7 +2900,7 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .quiz-option.is-wrong::before {
-  content: "вњ•";
+  content: "?";
   background: var(--danger);
   border-color: transparent;
   color: #fff8f0;
@@ -3062,3 +3062,44 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   opacity: 0.6;
 }
 
+
+.btn-login-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex: none;
+}
+
+.btn-login-icon:hover {
+  background: var(--surface-2, rgba(0,0,0,0.05));
+}
+
+.btn-login-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--ink, #2c2218);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2, #e0e0e0) 25%, var(--surface, #f0f0f0) 50%, var(--surface-2, #e0e0e0) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-card { height: 60px; margin-bottom: 8px; }
+.skeleton-text { height: 16px; margin-bottom: 8px; width: 60%; }
+.skeleton-text-short { height: 16px; width: 40%; }
