@@ -3020,6 +3020,15 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   justify-content: space-between;
 }
 
+.menu-title-row > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-login-icon {
+  flex-shrink: 0;
+}
+
 .btn-login-icon {
   display: flex;
   align-items: center;
