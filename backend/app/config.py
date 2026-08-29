@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "2.0.0"
     DEBUG: bool = False
 
-    DATABASE_URL: str = "postgresql+asyncpg://user:pass@db:5432/flashcards"
+    DATABASE_URL: str = "postgresql://user:pass@db:5432/flashcards"
     SECRET_KEY: str = "change-me-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     MEDIA_ROOT: str = "/var/www/media"
     MEDIA_URL: str = "/media"
 
-    CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000", "https://*.nexusai.run"]
-    ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "*.nexusai.run", "testserver"]
+    CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000"]
+    ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "testserver"]
     SECURE_COOKIES: bool = False
     RATE_LIMIT_ENABLED: bool = True
 

@@ -16,10 +16,10 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql+asyncpg://flashcards:flashcards@db:5432/flashcards
+      - DATABASE_URL=postgresql://flashcards:flashcards@db:5432/flashcards
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - EMAIL_API_KEY=${EMAIL_API_KEY:-}
       - EMAIL_FROM=${EMAIL_FROM:-no-reply@flashcards.app}
