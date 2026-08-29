@@ -61,7 +61,7 @@
       href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Serif:ital,wght@0,400;1,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css?v=47" />
+    <link rel="stylesheet" href="css/style.css?v=41" />
   </head>
   <body>
     <aside class="sidebar">
@@ -76,6 +76,7 @@
       </header>
 
       <button type="button" class="btn btn-primary" id="new-deck-btn">+ колода</button>
+      <button type="button" class="btn" id="login-btn">Войти</button>
       <nav class="deck-list" id="deck-list" aria-label="Колоды"></nav>
       <button type="button" class="btn settings-btn" id="settings-btn">Настройки</button>
     </aside>
@@ -98,14 +99,11 @@
 
       <section class="workspace hidden" id="workspace">
         <header class="workspace-header">
-          <div class="workspace-title-row">
+          <div>
             <p class="subject" id="deck-kicker">колода</p>
             <h2 id="deck-title">Колода</h2>
-            <button type="button" class="btn-login-icon" id="workspace-login-btn" title="Войти">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            </button>
+            <p class="stats" id="stats"></p>
           </div>
-          <p class="stats" id="stats"></p>
           <div class="header-actions">
             <button type="button" class="btn" id="menu-back-btn">← Меню</button>
             <button type="button" class="btn" id="rename-deck-btn">Переименовать</button>
@@ -297,15 +295,15 @@
       <div class="menu-cover" role="dialog" aria-modal="true" aria-labelledby="menu-title" tabindex="-1">
         <header class="menu-header">
           <div class="menu-title-row">
-            <button type="button" class="btn-login-icon" id="menu-login-btn" title="�����">
+            <button type="button" class="btn-login-icon" id="menu-login-btn" title="Войти">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
             </button>
             <div>
-              <p class="subject">������� / ���������</p>
-              <h1 id="menu-title"><span class="marker">��������</span></h1>
+              <p class="subject">тетрадь / картотека</p>
+              <h1 id="menu-title"><span class="marker">Карточки</span></h1>
             </div>
           </div>
-          <button type="button" class="btn" id="menu-close" aria-label="������� ����">?</button>
+          <button type="button" class="btn" id="menu-close" aria-label="Закрыть меню">✕</button>
         </header>
 
         <section class="menu-today" id="menu-today" aria-label="Изучено сегодня">
@@ -318,12 +316,10 @@
           <button type="button" class="btn btn-primary menu-study" id="menu-study-btn">Учить</button>
           <button type="button" class="btn menu-section" id="menu-cards-btn">Колоды</button>
           <button type="button" class="btn menu-section" id="menu-library-btn">Библиотека</button>
+          <button type="button" class="btn menu-section" id="menu-migrate-btn">Мигрировать</button>
           <button type="button" class="btn menu-section" id="menu-stats-btn">Статистика</button>
           <button type="button" class="btn menu-section" id="menu-settings-btn">Настройки</button>
         </div>
-        <button type="button" class="btn-login-icon" id="menu-login-btn" title="Войти">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        </button>
 
         <section class="menu-theme" aria-label="Тема">
           <p class="subject">примерь тему</p>
@@ -474,7 +470,7 @@
       Не удалось сохранить данные. Хранилище переполнено или недоступно.
     </div>
 
-    <div class="auth-backdrop" id="auth-backdrop">
+    <div class="auth-backdrop" id="auth-backdrop" hidden>
       <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
         <div class="auth-tabs">
           <button type="button" class="auth-tab is-active" id="auth-tab-login">Вход</button>
@@ -495,22 +491,27 @@
       </div>
     </div>
 
-    <script src="js/api.js?v=47"></script>
-    <script src="js/api/data.js?v=47"></script>
-    <script src="js/app-data.js?v=47"></script>
-    <script src="js/virtual-list.js?v=47"></script>
-    <script src="js/share.js?v=47"></script>
-    <script src="js/router.js?v=47"></script>
-    <script src="js/storage.js?v=47"></script>
-    <script src="js/modal.js?v=47"></script>
-    <script src="js/ui.js?v=47"></script>
-    <script src="js/study.js?v=47"></script>
-    <script src="js/menu.js?v=47"></script>
-    <script src="js/stats.js?v=47"></script>
-    <script src="js/library.js?v=47"></script>
-    <script src="js/data.js?v=47"></script>
-    <script src="js/images.js?v=47"></script>
-    <script src="js/app.js?v=47"></script>
+    <div class="auth-bar" id="auth-bar" hidden>
+      <span class="auth-user" id="auth-user-email"></span>
+      <button type="button" class="btn" id="auth-logout-btn">Выйти</button>
+    </div>
+
+    <script src="js/api.js?v=41"></script>
+    <script src="js/api/data.js?v=41"></script>
+    <script src="js/app-data.js?v=41"></script>
+    <script src="js/virtual-list.js?v=41"></script>
+    <script src="js/share.js?v=41"></script>
+    <script src="js/router.js?v=41"></script>
+    <script src="js/storage.js?v=41"></script>
+    <script src="js/modal.js?v=41"></script>
+    <script src="js/ui.js?v=41"></script>
+    <script src="js/study.js?v=41"></script>
+    <script src="js/menu.js?v=41"></script>
+    <script src="js/stats.js?v=41"></script>
+    <script src="js/library.js?v=41"></script>
+    <script src="js/data.js?v=41"></script>
+    <script src="js/images.js?v=41"></script>
+    <script src="js/app.js?v=41"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {

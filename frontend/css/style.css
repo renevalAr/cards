@@ -1,4 +1,4 @@
-:root {
+п»ї:root {
   --font: "PT Sans", "Segoe UI", sans-serif;
   --serif: "PT Serif", Georgia, serif;
   --radius: 16px;
@@ -806,30 +806,6 @@ html[data-palette="slate"] .main {
   transition: transform var(--t) var(--ease), box-shadow var(--t), filter var(--t), background var(--t), color var(--t);
 }
 
-.btn-login {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn-login:hover {
-  background: var(--surface-2, rgba(0,0,0,0.05));
-}
-
-.btn-login svg {
-  width: 20px;
-  height: 20px;
-  color: var(--ink, #2c2218);
-}
-
 .tab:hover,
 .btn:hover {
   filter: brightness(1.06);
@@ -1136,7 +1112,7 @@ input[type="text"]:focus {
   transform: rotateY(180deg);
 }
 
-/* ==== Face speak (озвучка на карте) ==== */
+/* ==== Face speak (РѕР·РІСѓС‡РєР° РЅР° РєР°СЂС‚Рµ) ==== */
 
 .face-speak {
   position: absolute;
@@ -1419,7 +1395,7 @@ html[data-palette="slate"] .face::before {
   padding: 14px 18px;
 }
 
-/* ==== Полноэкранный режим изучения ==== */
+/* ==== РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ СЂРµР¶РёРј РёР·СѓС‡РµРЅРёСЏ ==== */
 
 .focus-backdrop {
   position: fixed;
@@ -1529,7 +1505,7 @@ html[data-palette="slate"] .face::before {
   z-index: 46;
 }
 
-/* ==== Главное меню ==== */
+/* ==== Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ ==== */
 
 .menu-backdrop {
   --menu-pattern: none;
@@ -1562,7 +1538,7 @@ html[data-palette="slate"] .face::before {
   transition: opacity 0.3s var(--ease), visibility 0s;
 }
 
-/* Уникальные узоры фона для каждой палитры */
+/* РЈРЅРёРєР°Р»СЊРЅС‹Рµ СѓР·РѕСЂС‹ С„РѕРЅР° РґР»СЏ РєР°Р¶РґРѕР№ РїР°Р»РёС‚СЂС‹ */
 
 html[data-palette="ember"] .menu-backdrop {
   --menu-pattern:
@@ -1639,7 +1615,7 @@ html[data-palette="indigo"] .menu-backdrop {
   transform: none;
 }
 
-.menu-title-row {`n  display: flex;`n  align-items: center;`n  gap: 12px;`n}`n`n.menu-header {
+.menu-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -1719,7 +1695,7 @@ html[data-palette="indigo"] .menu-backdrop {
   margin-top: 8px;
 }
 
-/* ==== Выбор колоды ==== */
+/* ==== Р’С‹Р±РѕСЂ РєРѕР»РѕРґС‹ ==== */
 
 .deck-pick {
   width: min(520px, 100%);
@@ -1780,7 +1756,7 @@ html[data-palette="indigo"] .menu-backdrop {
   color: var(--muted);
 }
 
-/* ==== Библиотека демо-колод ==== */
+/* ==== Р‘РёР±Р»РёРѕС‚РµРєР° РґРµРјРѕ-РєРѕР»РѕРґ ==== */
 
 .library {
   width: min(540px, 100%);
@@ -1841,7 +1817,7 @@ html[data-palette="indigo"] .menu-backdrop {
   justify-self: start;
 }
 
-/* ==== Массовый ввод карточек ==== */
+/* ==== РњР°СЃСЃРѕРІС‹Р№ РІРІРѕРґ РєР°СЂС‚РѕС‡РµРє ==== */
 
 .bulk {
   width: min(560px, 100%);
@@ -1889,7 +1865,7 @@ html[data-palette="indigo"] .menu-backdrop {
   transition: width 0.4s var(--ease);
 }
 
-/* ==== Итог раунда ==== */
+/* ==== РС‚РѕРі СЂР°СѓРЅРґР° ==== */
 
 .summary-line {
   margin: 10px 0 0;
@@ -1916,7 +1892,7 @@ html[data-palette="indigo"] .menu-backdrop {
   margin-top: 18px;
 }
 
-/* ==== Окно статистики ==== */
+/* ==== РћРєРЅРѕ СЃС‚Р°С‚РёСЃС‚РёРєРё ==== */
 
 .stats-backdrop {
   position: fixed;
@@ -2138,7 +2114,7 @@ html[data-palette="indigo"] .menu-backdrop {
 
 
 
-/* ==== Тултипы-тур ==== */
+/* ==== РўСѓР»С‚РёРїС‹-С‚СѓСЂ ==== */
 
 .tour-tip {
   position: fixed;
@@ -2330,7 +2306,7 @@ html[data-palette="indigo"] .menu-backdrop {
   }
 }
 
-/* ==== Микро-анимации и интерактив ==== */
+/* ==== РњРёРєСЂРѕ-Р°РЅРёРјР°С†РёРё Рё РёРЅС‚РµСЂР°РєС‚РёРІ ==== */
 
 .btn,
 .tab {
@@ -2508,7 +2484,7 @@ mark.search-hit {
   background-clip: padding-box;
 }
 
-/* ==== Волна 2: сценарные анимации ==== */
+/* ==== Р’РѕР»РЅР° 2: СЃС†РµРЅР°СЂРЅС‹Рµ Р°РЅРёРјР°С†РёРё ==== */
 
 .tabs {
   position: relative;
@@ -2892,7 +2868,7 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .quiz-option.is-right::before {
-  content: "?";
+  content: "вњ“";
   background: var(--known);
   border-color: transparent;
   color: #fff8f0;
@@ -2900,7 +2876,7 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .quiz-option.is-wrong::before {
-  content: "?";
+  content: "вњ•";
   background: var(--danger);
   border-color: transparent;
   color: #fff8f0;
@@ -2926,21 +2902,20 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.28s var(--ease), visibility 0s linear 0.28s;
-}
-
-.auth-backdrop.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition: opacity 0.28s var(--ease), visibility 0s;
+}
+
+.auth-backdrop[hidden] {
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .auth-modal {
-  background: var(--surface, #fffaf2);
+  background: var(--surface);
   border-radius: var(--radius);
   padding: 32px;
   width: 360px;
@@ -3015,32 +2990,6 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   z-index: 100;
 }
 
-.menu-login-btn {
-  flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-2, #f5ecd9);
-  border: 2px solid var(--border, #2c2218);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
-}
-
-.menu-login-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.menu-login-btn svg {
-  width: 20px;
-  height: 20px;
-  color: var(--ink, #2c2218);
-}
-
 .auth-user {
   font-size: 14px;
   color: var(--text-muted);
@@ -3062,6 +3011,12 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   opacity: 0.6;
 }
 
+
+.menu-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .btn-login-icon {
   display: flex;
@@ -3087,19 +3042,3 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   height: 20px;
   color: var(--ink, #2c2218);
 }
-
-.skeleton {
-  background: linear-gradient(90deg, var(--surface-2, #e0e0e0) 25%, var(--surface, #f0f0f0) 50%, var(--surface-2, #e0e0e0) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.skeleton-card { height: 60px; margin-bottom: 8px; }
-.skeleton-text { height: 16px; margin-bottom: 8px; width: 60%; }
-.skeleton-text-short { height: 16px; width: 40%; }
