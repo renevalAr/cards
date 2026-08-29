@@ -76,7 +76,6 @@
       </header>
 
       <button type="button" class="btn btn-primary" id="new-deck-btn">+ колода</button>
-      <button type="button" class="btn" id="login-btn">Войти</button>
       <nav class="deck-list" id="deck-list" aria-label="Колоды"></nav>
       <button type="button" class="btn settings-btn" id="settings-btn">Настройки</button>
     </aside>
@@ -102,6 +101,9 @@
           <div>
             <p class="subject" id="deck-kicker">колода</p>
             <h2 id="deck-title">Колода</h2>
+            <button type="button" class="btn-login-icon" id="workspace-login-btn" title="Войти">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
             <p class="stats" id="stats"></p>
           </div>
           <div class="header-actions">
@@ -295,13 +297,13 @@
       <div class="menu-cover" role="dialog" aria-modal="true" aria-labelledby="menu-title" tabindex="-1">
         <header class="menu-header">
           <div class="menu-title-row">
-            <button type="button" class="btn-login-icon" id="menu-login-btn" title="Войти">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            </button>
             <div>
               <p class="subject">тетрадь / картотека</p>
               <h1 id="menu-title"><span class="marker">Карточки</span></h1>
             </div>
+            <button type="button" class="btn-login-icon" id="menu-login-btn" title="Войти">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
           </div>
           <button type="button" class="btn" id="menu-close" aria-label="Закрыть меню">✕</button>
         </header>
@@ -489,11 +491,6 @@
           <p class="auth-error" id="auth-register-error" role="alert" hidden></p>
         </form>
       </div>
-    </div>
-
-    <div class="auth-bar" id="auth-bar" hidden>
-      <span class="auth-user" id="auth-user-email"></span>
-      <button type="button" class="btn" id="auth-logout-btn">Выйти</button>
     </div>
 
     <script src="js/api.js?v=41"></script>
