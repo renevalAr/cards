@@ -1,4 +1,3 @@
-import pytest
 
 
 def test_migrate_data(auth_client):

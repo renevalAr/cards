@@ -149,3 +149,55 @@ const Decks = {
     return API.post(`/decks/${id}/cards`, data);
   },
 };
+
+const Data = {
+  async deleteCard(id) {
+    return API.delete(`/cards/${id}`);
+  },
+
+  async enableShare(deckId) {
+    return API.post(`/decks/${deckId}/share`);
+  },
+
+  async disableShare(deckId) {
+    return API.delete(`/decks/${deckId}/share`);
+  },
+
+  async getPublicDeck(slug) {
+    return API.get(`/decks/share/${slug}`);
+  },
+
+  async getPublicCards(slug) {
+    return API.get(`/decks/share/${slug}/cards`);
+  },
+
+  async migrateData(payload) {
+    return API.post("/migrate", payload);
+  },
+
+  exportLocalData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      return {
+        version: "migration-v1",
+        exported_at: new Date().toISOString(),
+        decks: (data.decks || []).map((deck) => ({
+          name: deck.name,
+          description: deck.description || null,
+          two_sided: deck.two_sided || false,
+          cards: (data.cards || [])
+            .filter((c) => c.deckId === deck.id)
+            .map((c) => ({
+              question: c.question,
+              answer: c.answer,
+              status: c.status || "new",
+            })),
+        })),
+      };
+    } catch {
+      return null;
+    }
+  },
+};

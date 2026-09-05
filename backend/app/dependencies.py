@@ -2,7 +2,6 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyCookie
-from sqlalchemy import select
 from jose import jwt, JWTError, ExpiredSignatureError
 
 from app.config import get_settings

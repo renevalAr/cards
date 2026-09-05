@@ -1,6 +1,5 @@
 import logging
 import sys
-from datetime import datetime, timezone
 
 
 def setup_logging(level: str = "INFO") -> None:

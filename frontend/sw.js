@@ -3,8 +3,7 @@ const STATIC_ASSETS = [
   "/",
   "/css/style.css",
   "/js/api.js",
-  "/js/api/data.js",
-  "/js/virtual-list.js",
+
   "/js/share.js",
   "/js/router.js",
   "/js/app-data.js",
