@@ -124,7 +124,10 @@ def logout(request: Request, response: Response, db=Depends(get_db)):
         ).scalar_one_or_none()
         if db_token:
             db_token.is_revoked = True
-            db.commit()
+            try:
+                db.commit()
+            except Exception:
+                db.rollback()
 
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")

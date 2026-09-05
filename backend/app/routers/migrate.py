@@ -14,27 +14,32 @@ def migrate_data(payload: MigrationPayload, user: User = Depends(get_current_use
         raise HTTPException(status_code=400, detail="No decks to migrate")
 
     migrated = []
-    for deck_data in payload.decks:
-        deck = Deck(
-            owner_id=user.id,
-            name=deck_data.name,
-            description=deck_data.description,
-            two_sided=deck_data.two_sided,
-        )
-        db.add(deck)
-        db.flush()
-
-        for idx, card_data in enumerate(deck_data.cards):
-            card = Card(
-                deck_id=deck.id,
-                question=card_data.question,
-                answer=card_data.answer,
-                status=card_data.status if card_data.status in ("new", "known", "unknown") else "new",
-                position=idx + 1,
+    try:
+        for deck_data in payload.decks:
+            deck = Deck(
+                owner_id=user.id,
+                name=deck_data.name,
+                description=deck_data.description,
+                two_sided=deck_data.two_sided,
             )
-            db.add(card)
+            db.add(deck)
+            db.flush()
 
-        migrated.append({"id": str(deck.id), "name": deck.name, "cards_count": len(deck_data.cards)})
+            for idx, card_data in enumerate(deck_data.cards):
+                card = Card(
+                    deck_id=deck.id,
+                    question=card_data.question,
+                    answer=card_data.answer,
+                    status=card_data.status if card_data.status in ("new", "known", "unknown") else "new",
+                    position=idx + 1,
+                )
+                db.add(card)
 
-    db.commit()
+            migrated.append({"id": str(deck.id), "name": deck.name, "cards_count": len(deck_data.cards)})
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
     return {"migrated": migrated, "total_decks": len(migrated)}

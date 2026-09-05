@@ -2,11 +2,17 @@ const Share = {
   currentDeck: null,
 
   async viewPublicDeck(slug) {
-    const deck = await Data.getPublicDeck(slug);
-    const cards = await Data.getPublicCards(slug);
-    this.currentDeck = { ...deck, cards };
-    this._renderPublicDeck();
-    return this.currentDeck;
+    try {
+      const deck = await Data.getPublicDeck(slug);
+      const cards = await Data.getPublicCards(slug);
+      this.currentDeck = { ...deck, cards };
+      this._renderPublicDeck();
+      return this.currentDeck;
+    } catch (err) {
+      console.error("Failed to load public deck:", err);
+      if (typeof showToast === "function") showToast("Не удалось загрузить публичную колоду", "warn");
+      return null;
+    }
   },
 
   async enableSharing(deckId) {

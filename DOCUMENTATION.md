@@ -37,7 +37,7 @@
 | Шрифты | PT Sans + PT Serif с Google Fonts (`display=swap`), фолбэки Segoe UI / Georgia |
 | Язык UI | Русский (строки захардкожены в JS/HTML) |
 | Палитры | 10, темы светлая/тёмная, выбор сохраняется |
-| Тесты | 30 PowerShell CDP-скриптов (smoke), 25 pytest backend tests, 10 Playwright E2E |
+| Тесты | 31 PowerShell CDP-скриптов (smoke), 44 pytest backend tests, 10 Playwright E2E |
 
 ---
 
@@ -72,7 +72,7 @@
 
 | Файл | Строк | Роль |
 |---|---|---|
-| `index.html` | 494 | Вся разметка + auth UI + inline theme script |
+| `index.html` | 529 | Вся разметка + auth UI + inline theme script |
 | `style.css` | 2733 | Все стили + auth styles |
 | `js/api.js` | 200 | API client + Auth module + Decks module + Data module |
 | `js/share.js` | 50 | Public deck viewing + share link copying |
@@ -502,6 +502,7 @@ FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russia
 |---|---|---|
 | PATCH | `/api/cards/{id}` | Update card |
 | DELETE | `/api/cards/{id}` | Delete card |
+| PUT | `/api/cards/reorder` | Reorder cards (body: `{card_ids: [uuid, ...]}`) |
 | POST | `/api/cards/{id}/image` | Upload card image (multipart) |
 | DELETE | `/api/cards/{id}/image` | Delete card image |
 
@@ -518,8 +519,8 @@ FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russia
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/api/study/session` | Start study session |
-| PATCH | `/api/study/session/{id}` | Update session progress |
+| POST | `/api/study/session?deck_id={id}` | Start study session (deck_id as query param) |
+| PATCH | `/api/study/session/{id}?known=N&unknown=N` | Update session progress (known/unknown as query params) |
 | GET | `/api/study/stats` | Get user statistics |
 
 ### 7.6 Migration Endpoint
@@ -534,6 +535,7 @@ FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russia
 |---|---|---|
 | GET | `/api/health` | Basic healthcheck |
 | GET | `/api/health/detailed` | Detailed healthcheck (includes DB status) |
+| GET | `/api/metrics` | Prometheus-style metrics (requires auth) |
 
 ---
 
@@ -554,12 +556,12 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | Variable | Default | Description |
 |---|---|---|
 | `SECRET_KEY` | `change-me-in-production` | JWT signing key |
-| `DATABASE_URL` | `postgresql://flashcards:flashcards@db:5432/flashcards` | Database connection (psycopg2 for SQLAlchemy and Alembic) |
+| `DATABASE_URL` | `postgresql://user:pass@db:5432/flashcards` | Database connection (psycopg2 for SQLAlchemy and Alembic) |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | Refresh token lifetime |
 | `EMAIL_API_KEY` | `` | SendGrid API key |
 | `EMAIL_FROM` | `no-reply@flashcards.app` | Sender email |
-| `CORS_ORIGINS` | `["http://localhost"]` | Allowed CORS origins |
+| `CORS_ORIGINS` | `["http://localhost", "http://localhost:3000"]` | Allowed CORS origins |
 | `ALLOWED_HOSTS` | `["localhost", "*.localhost", "testserver"]` | Trusted hosts |
 | `SECURE_COOKIES` | `False` | Enable secure flag for cookies (True in production) |
 | `RATE_LIMIT_ENABLED` | `True` | Enable rate limiting on auth endpoints |
@@ -582,6 +584,9 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | `backend/tests/test_cards.py` | CRUD, pagination, FTS search |
 | `backend/tests/test_migrate.py` | Data migration |
 | `backend/tests/test_health.py` | Healthcheck endpoints |
+| `backend/tests/test_auth_extended.py` | Logout revoke, refresh, register dup, weak password |
+| `backend/tests/test_share.py` | Share enable/disable, public access, isolation |
+| `backend/tests/test_study_api.py` | Study session CRUD, validation, isolation |
 
 ### 9.2 E2E Tests (Playwright)
 

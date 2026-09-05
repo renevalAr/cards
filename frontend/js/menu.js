@@ -34,7 +34,11 @@ function openMenu() {
   showLayer(backdrop);
   lockScroll(true);
   backdrop.querySelector(".menu-cover").focus();
-  if (!localStorage.getItem(ONBOARD_KEY)) showTour();
+  try {
+    if (!localStorage.getItem(ONBOARD_KEY)) showTour();
+  } catch {
+    showTour();
+  }
 }
 
 function closeMenu() {

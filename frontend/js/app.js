@@ -1,5 +1,8 @@
 let editImageId = null;
 
+function $(id) { return document.getElementById(id); }
+function $on(id, event, handler) { var el = $(id); if (el) el.addEventListener(event, handler); }
+
 function startEditCard(cardId) {
   const card = state.cards.find((item) => item.id === cardId);
   if (!card) return;
@@ -286,11 +289,12 @@ function saveCard(event) {
 }
 
 function bindEvents() {
-  document.getElementById("new-deck-btn").addEventListener("click", createDeck);
-  document.getElementById("empty-new-deck-btn").addEventListener("click", createDeck);
-  document.getElementById("rename-deck-btn").addEventListener("click", renameDeck);
-  document.getElementById("delete-deck-btn").addEventListener("click", deleteDeck);
-  document.getElementById("share-deck-btn").addEventListener("click", async () => {
+  function on(id, evt, fn) { var el = $(id); if (el) el.addEventListener(evt, fn); }
+  on("new-deck-btn", "click", createDeck);
+  on("empty-new-deck-btn", "click", createDeck);
+  on("rename-deck-btn", "click", renameDeck);
+  on("delete-deck-btn", "click", deleteDeck);
+  on("share-deck-btn", "click", async () => {
     const deck = selectedDeck();
     if (!deck) return;
     if (deck.share_slug) {
@@ -800,15 +804,20 @@ function bindAuthEvents() {
 }
 
 (async () => {
-  bindAuthEvents();
-  showAuthBar();
-  const user = await Auth.init();
-  if (user) {
+  try {
+    bindAuthEvents();
     showAuthBar();
-    await AppData.syncFromServer();
-    if (typeof render === "function") render();
+    const user = await Auth.init();
+    if (user) {
+      showAuthBar();
+      await AppData.syncFromServer();
+      if (typeof render === "function") render();
+    }
+    if (typeof Router !== "undefined") Router.init();
+  } catch (err) {
+    console.error("App init failed:", err);
+    if (typeof Router !== "undefined") Router.init();
   }
-  if (typeof Router !== "undefined") Router.init();
 })();
 
 

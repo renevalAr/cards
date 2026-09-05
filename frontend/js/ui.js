@@ -389,8 +389,12 @@ function systemDark() {
 function modePref() {
   const attr = document.documentElement.dataset.modePref;
   if (attr === "auto" || attr === "light" || attr === "dark") return attr;
-  const v = localStorage.getItem(MODE_KEY);
-  return v === "auto" || v === "light" || v === "dark" ? v : "light";
+  try {
+    const v = localStorage.getItem(MODE_KEY);
+    return v === "auto" || v === "light" || v === "dark" ? v : "light";
+  } catch {
+    return "light";
+  }
 }
 
 function effectiveMode(pref) {

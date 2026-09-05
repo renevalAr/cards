@@ -16,7 +16,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         if self.enabled and request.url.path.startswith("/api/auth"):
-            client_ip = request.client.host
+            client_ip = request.client.host if request.client else "unknown"
             now = time.time()
 
             RATE_LIMITS[client_ip] = [
@@ -71,7 +71,7 @@ class SecurityLoggingMiddleware(BaseHTTPMiddleware):
             logger = logging.getLogger("security")
             logger.warning(
                 f"Security event: {response.status_code} {request.method} {request.url.path} "
-                f"from {request.client.host}"
+                f"from {request.client.host if request.client else 'unknown'}"
             )
 
         return response

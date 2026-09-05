@@ -46,5 +46,9 @@ def delete_image(image_path: str) -> None:
     if not image_path:
         return
     filepath = image_path.replace(settings.MEDIA_URL, settings.MEDIA_ROOT)
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    real_media = os.path.realpath(settings.MEDIA_ROOT)
+    real_filepath = os.path.realpath(filepath)
+    if not real_filepath.startswith(real_media + os.sep) and real_filepath != real_media:
+        return
+    if os.path.exists(real_filepath):
+        os.remove(real_filepath)
