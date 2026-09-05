@@ -228,7 +228,14 @@ function isQuotaError(error) {
   );
 }
 
+let _saveTimer = null;
 function saveState() {
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_doSave, 200);
+}
+
+function _doSave() {
+  _saveTimer = null;
   const payload = () => ({
     v: SCHEMA_VERSION,
     decks: state.decks,

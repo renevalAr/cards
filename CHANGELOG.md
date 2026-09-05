@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2026-09-05
+
+### Removed
+- Deleted `routers/study.py` — 3 orphaned study session endpoints (frontend uses localStorage)
+- Deleted `services/image.py` — unused server-side image handling (frontend uses IndexedDB)
+- Deleted `tests/test_study_api.py` — tests for removed study endpoints
+- Removed card image endpoints (`POST/DELETE /api/cards/{id}/image`)
+- Removed card update endpoint (`PATCH /api/cards/{id}`)
+- Removed card reorder endpoint (`PUT /api/cards/reorder`)
+- Removed unused model fields: `Card.image_path`, `Card.search_vector`, `Deck.search_vector`
+- Removed unused schemas: `CardReorder`
+- Removed unused config: `EMAIL_API_KEY`, `EMAIL_FROM`
+- Removed dead frontend functions: `Decks.get()`, `Decks.update()`, `AppData.isSyncing()`, `AppData.getError()`, `Router.navigate()`, `Router.getCurrentRoute()`, `Router.getCurrentParams()`
+- Removed dead CSS classes: `.auth-user`, `.scroll-sentinel`, `.list-loader`, `.list-end`
+
+### Security
+- Share slug now uses `secrets.token_urlsafe(12)` (72+ bits entropy) instead of UUID[:8] (32 bits)
+- Cookie `SameSite` changed from `lax` to `strict` for CSRF protection
+- Migration endpoint now limited to max 50 decks, 500 cards per deck, 5000 chars per field
+- Card create/update now limited to max 5000 chars per field
+- `health/detailed` no longer leaks DB error messages
+- Rate limiter now evicts stale entries every 5 minutes (prevents memory leak)
+
+### Fixed
+- `RateLimitMiddleware` now uses `settings.RATE_LIMIT_ENABLED` instead of `os.getenv()`
+- `main.py` now imports `Depends` from FastAPI (was missing)
+
+### Performance
+- `saveState()` now debounced at 200ms (batches rapid mutations)
+- Refresh token cleanup on refresh (removes expired tokens for user)
+
+### Documentation
+- Updated API docs: removed 7 dead endpoints
+- Updated model schema: removed `image_path`, `search_vector`
+- Updated test count: 38 backend tests
+- Updated DEPENDENCIES.md: removed deleted files
+
+---
+
 ## [2.2.0] - 2026-09-05
 
 ### Fixed

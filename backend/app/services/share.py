@@ -1,5 +1,5 @@
-import uuid
+import secrets
 
 
 def generate_share_slug() -> str:
-    return str(uuid.uuid4())[:8]
+    return secrets.token_urlsafe(12)

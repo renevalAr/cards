@@ -76,19 +76,15 @@ class CardStatus(str, Enum):
     unknown = "unknown"
 
 
-class CardReorder(BaseModel):
-    card_ids: list[UUID] = Field(..., min_length=1)
-
-
 class CardCreate(BaseModel):
-    question: str = Field(..., min_length=1)
-    answer: str = Field(..., min_length=1)
+    question: str = Field(..., min_length=1, max_length=5000)
+    answer: str = Field(..., min_length=1, max_length=5000)
     status: CardStatus = CardStatus.new
 
 
 class CardUpdate(BaseModel):
-    question: Optional[str] = Field(None, min_length=1)
-    answer: Optional[str] = Field(None, min_length=1)
+    question: Optional[str] = Field(None, min_length=1, max_length=5000)
+    answer: Optional[str] = Field(None, min_length=1, max_length=5000)
     status: Optional[CardStatus] = None
 
 
@@ -100,7 +96,6 @@ class CardResponse(BaseModel):
     question: str
     answer: str
     status: str
-    image_path: Optional[str]
     position: int
     created_at: datetime
     updated_at: datetime

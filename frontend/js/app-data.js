@@ -78,12 +78,4 @@ const AppData = {
     state.cards = state.cards.filter((c) => c.id !== cardId);
     saveState();
   },
-
-  isSyncing() {
-    return this.syncing;
-  },
-
-  getError() {
-    return this.error;
-  },
 };

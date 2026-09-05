@@ -3096,27 +3096,6 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
   z-index: 100;
 }
 
-.auth-user {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.scroll-sentinel {
-  height: 1px;
-}
-
-.list-loader,
-.list-end {
-  text-align: center;
-  padding: 16px;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.list-end {
-  opacity: 0.6;
-}
-
 
 .menu-title-row {
   display: flex;

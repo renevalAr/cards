@@ -1,24 +1,35 @@
 import time
-import os
 from datetime import datetime, timezone
 from collections import defaultdict
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.config import get_settings
+
 RATE_LIMITS = defaultdict(list)
+RATE_LIMITS_LAST_CLEANUP = 0
+RATE_LIMIT_CLEANUP_INTERVAL = 300  # 5 minutes
+RATE_LIMIT_TTL = 600  # 10 minutes
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, requests_per_minute: int = 5):
         super().__init__(app)
         self.rpm = requests_per_minute
-        self.enabled = os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true"
+        self.enabled = get_settings().RATE_LIMIT_ENABLED
 
     async def dispatch(self, request: Request, call_next):
+        global RATE_LIMITS_LAST_CLEANUP
         if self.enabled and request.url.path.startswith("/api/auth"):
-            client_ip = request.client.host if request.client else "unknown"
             now = time.time()
 
+            if now - RATE_LIMITS_LAST_CLEANUP > RATE_LIMIT_CLEANUP_INTERVAL:
+                RATE_LIMITS_LAST_CLEANUP = now
+                expired = [ip for ip, ts_list in RATE_LIMITS.items() if not ts_list or now - ts_list[-1] > RATE_LIMIT_TTL]
+                for ip in expired:
+                    del RATE_LIMITS[ip]
+
+            client_ip = request.client.host if request.client else "unknown"
             RATE_LIMITS[client_ip] = [
                 t for t in RATE_LIMITS[client_ip] if now - t < 60
             ]

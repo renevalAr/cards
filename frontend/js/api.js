@@ -122,16 +122,8 @@ const Decks = {
     return API.get("/decks");
   },
 
-  async get(id) {
-    return API.get(`/decks/${id}`);
-  },
-
   async create(data) {
     return API.post("/decks", data);
-  },
-
-  async update(id, data) {
-    return API.patch(`/decks/${id}`, data);
   },
 
   async delete(id) {

@@ -6,16 +6,16 @@ class MigrationDeck(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     two_sided: bool = False
-    cards: list["MigrationCard"] = []
+    cards: list["MigrationCard"] = Field(..., max_length=500)
 
 
 class MigrationCard(BaseModel):
-    question: str = Field(..., min_length=1)
-    answer: str = Field(..., min_length=1)
+    question: str = Field(..., min_length=1, max_length=5000)
+    answer: str = Field(..., min_length=1, max_length=5000)
     status: str = "new"
 
 
 class MigrationPayload(BaseModel):
     version: str = "migration-v1"
     exported_at: Optional[str] = None
-    decks: list[MigrationDeck] = []
+    decks: list[MigrationDeck] = Field(..., max_length=50)

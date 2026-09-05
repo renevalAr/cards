@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, date
 from sqlalchemy import String, Boolean, Text, Integer, DateTime, ForeignKey, func, Date
-from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -32,7 +32,6 @@ class Deck(Base):
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     share_slug: Mapped[str] = mapped_column(String(50), unique=True, nullable=True, index=True)
     two_sided: Mapped[bool] = mapped_column(Boolean, default=False)
-    search_vector: Mapped[str] = mapped_column(TSVECTOR, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -48,9 +47,7 @@ class Card(Base):
     question: Mapped[str] = mapped_column(Text, nullable=False)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="new", index=True)
-    image_path: Mapped[str] = mapped_column(String(500), nullable=True)
     position: Mapped[int] = mapped_column(Integer, default=0)
-    search_vector: Mapped[str] = mapped_column(TSVECTOR, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

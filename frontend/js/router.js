@@ -49,16 +49,4 @@ const Router = {
         if (typeof openMenu === "function") openMenu();
     }
   },
-
-  navigate(path) {
-    window.location.hash = path;
-  },
-
-  getCurrentRoute() {
-    return this.currentRoute;
-  },
-
-  getCurrentParams() {
-    return this.currentParams;
-  },
 };

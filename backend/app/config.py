@@ -7,16 +7,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     APP_NAME: str = "Flashcards"
-    APP_VERSION: str = "2.2.0"
+    APP_VERSION: str = "2.3.0"
     DEBUG: bool = False
 
     DATABASE_URL: str = "postgresql://user:pass@db:5432/flashcards"
     SECRET_KEY: str = "change-me-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
-
-    EMAIL_API_KEY: str = ""
-    EMAIL_FROM: str = "no-reply@flashcards.app"
 
     MEDIA_ROOT: str = "/var/www/media"
     MEDIA_URL: str = "/media"

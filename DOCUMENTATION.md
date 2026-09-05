@@ -37,7 +37,7 @@
 | Шрифты | PT Sans + PT Serif с Google Fonts (`display=swap`), фолбэки Segoe UI / Georgia |
 | Язык UI | Русский (строки захардкожены в JS/HTML) |
 | Палитры | 10, темы светлая/тёмная, выбор сохраняется |
-| Тесты | 31 PowerShell CDP-скриптов (smoke), 44 pytest backend tests, 10 Playwright E2E |
+| Тесты | 31 PowerShell CDP-скриптов (smoke), 38 pytest backend tests, 10 Playwright E2E |
 
 ---
 
@@ -58,13 +58,11 @@
 | `app/schemas/migration.py` | Migration payload schemas |
 | `app/routers/auth.py` | Register, login, /me |
 | `app/routers/decks.py` | Deck CRUD + card pagination + FTS search |
-| `app/routers/cards.py` | Card CRUD + image upload |
+| `app/routers/cards.py` | Card delete |
 | `app/routers/share.py` | Public deck access by slug |
-| `app/routers/study.py` | Study sessions + stats |
 | `app/routers/migrate.py` | Data migration from local storage |
 | `app/services/auth.py` | bcrypt + JWT utilities |
-| `app/services/image.py` | Pillow compression + file management |
-| `app/services/share.py` | Share slug generation |
+| `app/services/share.py` | Share slug generation (secrets.token_urlsafe) |
 | `alembic/` | Database migrations |
 | `tests/` | pytest test suite |
 
@@ -275,8 +273,8 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | `DEMO_DECKS` | 3 демо-колоды: английский 30 карт, столицы 12, элементы 16 | library.js |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | backend/app/config.py |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | backend/app/config.py |
-| `MAX_IMAGE_SIZE` | 2MB | backend/app/services/image.py |
-| `MAX_DIMENSION` | 480px | backend/app/services/image.py |
+| MAX_IMAGE_SIZE | 2MB | frontend/js/images.js |
+| MAX_DIMENSION | 480px | frontend/js/images.js |
 
 Модульные переменные-состояния: `swapCleanup`, `scoredStatus`, `sessionMarked`, `focusMode`, `focusTrigger`, `quizActive`, `quizAnswered`, `quizOrder`, `quizIndex`, `quizRight`, `quizWrong`, `quizRetry`, `quizFullscreen`, `flipAnims`, `flipRun` (study.js); `menuPopTrigger`, `tourStep`, `tourSteps` (menu.js); `modalResolver`, `modalTrigger`, `settingsTrigger` (modal.js); `libraryTrigger` (library.js); `bulkTrigger`, `dragCardId`, `rowsBound`, `hadMarks`, `pendingImage`, `editImageId` (app.js); `prevDeckId` (ui.js). Константы анимации флипа: `FLIP_BEZIER=[0.45,0,0.25,1]`, `FLIP_DUR=620`.
 
@@ -400,13 +398,13 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 
 ```sql
 users (id UUID PK, email UNIQUE, password_hash, display_name, is_active, is_verified, created_at, updated_at)
-decks (id UUID PK, owner_id FK→users, name, description, is_public, share_slug UNIQUE, two_sided, search_vector TSVECTOR, created_at, updated_at)
-cards (id UUID PK, deck_id FK→decks, question, answer, status, image_path, position, search_vector TSVECTOR, created_at, updated_at)
+decks (id UUID PK, owner_id FK→users, name, description, is_public, share_slug UNIQUE, two_sided, created_at, updated_at)
+cards (id UUID PK, deck_id FK→decks, question, answer, status, position, created_at, updated_at)
 refresh_tokens (id UUID PK, user_id FK→users, token_hash, expires_at, is_revoked, created_at)
 study_sessions (id UUID PK, user_id FK→users, deck_id FK→decks, known_count, unknown_count, studied_at DATE, created_at)
 ```
 
-FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russian language search.
+FTS search: `decks` and `cards` use `to_tsvector('russian', ...)` at query time (runtime).
 
 ### 5.3 localStorage Keys
 
@@ -500,11 +498,7 @@ FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russia
 
 | Method | Path | Description |
 |---|---|---|
-| PATCH | `/api/cards/{id}` | Update card |
 | DELETE | `/api/cards/{id}` | Delete card |
-| PUT | `/api/cards/reorder` | Reorder cards (body: `{card_ids: [uuid, ...]}`) |
-| POST | `/api/cards/{id}/image` | Upload card image (multipart) |
-| DELETE | `/api/cards/{id}/image` | Delete card image |
 
 ### 7.4 Share Endpoints
 
@@ -515,21 +509,13 @@ FTS indexes: `decks.search_vector` (GIN), `cards.search_vector` (GIN) — Russia
 | POST | `/api/decks/{id}/share` | Enable sharing (generate slug) |
 | DELETE | `/api/decks/{id}/share` | Disable sharing |
 
-### 7.5 Study Endpoints
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/api/study/session?deck_id={id}` | Start study session (deck_id as query param) |
-| PATCH | `/api/study/session/{id}?known=N&unknown=N` | Update session progress (known/unknown as query params) |
-| GET | `/api/study/stats` | Get user statistics |
-
-### 7.6 Migration Endpoint
+### 7.5 Migration Endpoint
 
 | Method | Path | Description |
 |---|---|---|
 | POST | `/api/migrate` | Migrate data from local storage |
 
-### 7.7 Healthcheck
+### 7.6 Healthcheck
 
 | Method | Path | Description |
 |---|---|---|
@@ -586,7 +572,6 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | `backend/tests/test_health.py` | Healthcheck endpoints |
 | `backend/tests/test_auth_extended.py` | Logout revoke, refresh, register dup, weak password |
 | `backend/tests/test_share.py` | Share enable/disable, public access, isolation |
-| `backend/tests/test_study_api.py` | Study session CRUD, validation, isolation |
 
 ### 9.2 E2E Tests (Playwright)
 

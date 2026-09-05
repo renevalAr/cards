@@ -15,12 +15,12 @@ settings = get_settings()
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     response.set_cookie(
         "access_token", access_token,
-        httponly=True, samesite="lax", max_age=900,
+        httponly=True, samesite="strict", max_age=900,
         secure=settings.SECURE_COOKIES,
     )
     response.set_cookie(
         "refresh_token", refresh_token,
-        httponly=True, samesite="lax", max_age=2592000,
+        httponly=True, samesite="strict", max_age=2592000,
         secure=settings.SECURE_COOKIES,
     )
 
@@ -93,6 +93,15 @@ def refresh(request: Request, response: Response, db=Depends(get_db)):
         raise HTTPException(status_code=401, detail="Refresh token expired")
 
     db_token.is_revoked = True
+
+    expired_tokens = db.execute(
+        select(RefreshToken).where(
+            RefreshToken.user_id == user_id,
+            RefreshToken.expires_at < datetime.now(timezone.utc),
+        )
+    ).scalars().all()
+    for expired in expired_tokens:
+        db.delete(expired)
 
     user = db.get(User, user_id)
     if not user:

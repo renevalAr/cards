@@ -133,9 +133,9 @@ models/__init__.py
   ↓
 schemas/__init__.py, schemas/migration.py
   ↓
-services/auth.py, services/image.py, services/share.py
+services/auth.py, services/share.py
   ↓
-routers/auth.py, routers/decks.py, routers/cards.py, routers/share.py, routers/study.py, routers/migrate.py
+routers/auth.py, routers/decks.py, routers/cards.py, routers/share.py, routers/migrate.py
   ↓
 dependencies.py (get_current_user)
   ↓
@@ -175,13 +175,6 @@ main.py (FastAPI app, routes, lifespan)
 
 | Endpoint | Notes |
 |---|---|
-| `POST /api/study/session` | Frontend tracks study in localStorage |
-| `PATCH /api/study/session/{id}` | Same |
-| `GET /api/study/stats` | Same |
-| `POST /api/cards/{id}/image` | Frontend uses IndexedDB |
-| `DELETE /api/cards/{id}/image` | Same |
-| `PATCH /api/cards/{id}` | Card editing is local-only |
-| `PUT /api/cards/reorder` | No reorder UI |
 | `GET /api/health/detailed` | Infrastructure only |
 | `GET /api/metrics` | Infrastructure only |
 
@@ -194,6 +187,6 @@ main.py (FastAPI app, routes, lifespan)
 | Circular deps (JS) | 0 |
 | Circular deps (Python) | 0 |
 | Phantom frontend calls | 0 |
-| Orphaned backend endpoints | 9 |
+| Orphaned backend endpoints | 2 |
 | Load-order issues | 0 |
 | Dead frontend globals | 0 |
