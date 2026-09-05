@@ -408,6 +408,14 @@ input:focus-visible {
   outline: none;
 }
 
+.menu-cover:focus-visible,
+.stats-window:focus-visible,
+.modal:focus-visible,
+.tour-tip:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .sidebar {
   position: relative;
   display: flex;
@@ -1565,13 +1573,6 @@ html[data-palette="slate"] .face::before {
   pointer-events: none;
   transition: opacity 0.3s var(--ease), visibility 0s linear 0.3s;
   overflow: auto;
-}
-
-.menu-backdrop {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.3s var(--ease), visibility 0s linear 0.3s;
 }
 
 .menu-backdrop.is-open {

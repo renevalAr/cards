@@ -82,7 +82,7 @@ const Data = {
 
   exportLocalData() {
     try {
-      const raw = localStorage.getItem("flashcards-app-v1");
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
       const data = JSON.parse(raw);
       return {

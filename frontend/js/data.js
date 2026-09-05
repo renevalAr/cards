@@ -104,7 +104,7 @@ function parseImportJson(text) {
   const raw = JSON.parse(text);
   if (!isPlainObject(raw)) throw new Error("bad-root");
   if (raw.kind === "deck") {
-    const name = typeof raw.deck && typeof raw.deck.name === "string" ? raw.deck.name.trim().slice(0, MAX_NAME_LENGTH) : "";
+    const name = raw.deck && typeof raw.deck.name === "string" ? raw.deck.name.trim().slice(0, MAX_NAME_LENGTH) : "";
      if (!name || !Array.isArray(raw.cards)) throw new Error("bad-deck-file");
     const cards = raw.cards
       .filter((c) => isPlainObject(c))

@@ -281,6 +281,7 @@ function renderTourStep() {
 }
 
 function positionTourTip(target, side) {
+  if (!target) return;
   const tip = document.getElementById("tour-tip");
   const tipWidth = tip.offsetWidth;
   const tipHeight = tip.offsetHeight;

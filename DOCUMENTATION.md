@@ -37,7 +37,7 @@
 | Шрифты | PT Sans + PT Serif с Google Fonts (`display=swap`), фолбэки Segoe UI / Georgia |
 | Язык UI | Русский (строки захардкожены в JS/HTML) |
 | Палитры | 10, темы светлая/тёмная, выбор сохраняется |
-| Тесты | 30 PowerShell CDP-скриптов (smoke), 25 pytest backend tests, 6 Playwright E2E |
+| Тесты | 30 PowerShell CDP-скриптов (smoke), 25 pytest backend tests, 10 Playwright E2E |
 
 ---
 
@@ -73,29 +73,30 @@
 
 | Файл | Строк | Роль |
 |---|---|---|
-| `index.html` | 517 | Вся разметка + auth UI + inline theme script |
-| `style.css` | 2993 | Все стили + auth styles |
-| `js/api.js` | 151 | API client + Auth module + Decks module |
-| `js/api/data.js` | 108 | Data layer (CRUD, share, study, migration) |
-| `js/virtual-list.js` | 119 | IntersectionObserver-based infinite scroll |
-| `js/share.js` | 58 | Public deck viewing + share link copying |
-| `storage.js` | 323 | Local state + localStorage persistence (offline mode) |
-| `modal.js` | 191 | Generic modal, focus-trap, overlay pattern |
-| `ui.js` | 509 | Palettes, rendering, search, appearance |
-| `study.js` | 712 | Flip, quiz, focus mode, round lifecycle |
-| `menu.js` | 390 | Main menu, deck picker, tour |
-| `stats.js` | 204 | Statistics window |
-| `library.js` | 178 | Demo decks |
-| `data.js` | 368 | Import/export (JSON+CSV) |
-| `images.js` | 91 | IndexedDB image storage + compression |
-| `app.js` | 752 | CRUD, bulk input, initialization, auth handlers |
+| `index.html` | 494 | Вся разметка + auth UI + inline theme script |
+| `style.css` | 2733 | Все стили + auth styles |
+| `js/api.js` | 129 | API client + Auth module + Decks module |
+| `js/api/data.js` | 90 | Data layer (CRUD, share, study, migration) |
+| `js/virtual-list.js` | 105 | IntersectionObserver-based infinite scroll |
+| `js/share.js` | 50 | Public deck viewing + share link copying |
+| `js/app-data.js` | 79 | Server sync layer (syncFromServer, CRUD wrappers) |
+| `js/router.js` | 57 | Hash-based routing (init, navigate, _handleRoute) |
+| `storage.js` | 293 | Local state + localStorage persistence (offline mode) |
+| `modal.js` | 180 | Generic modal, focus-trap, overlay pattern |
+| `ui.js` | 454 | Palettes, rendering, search, appearance |
+| `study.js` | 644 | Flip, quiz, focus mode, round lifecycle |
+| `menu.js` | 356 | Main menu, deck picker, tour |
+| `stats.js` | 186 | Statistics window |
+| `library.js` | 169 | Demo decks |
+| `data.js` | 344 | Import/export (JSON+CSV) |
+| `images.js` | 84 | IndexedDB image storage + compression |
+| `app.js` | 760 | CRUD, bulk input, initialization, auth handlers |
 
 ### Infrastructure
 
 | Файл | Роль |
 |---|---|
 | `docker-compose.yml` | Nginx + FastAPI + PostgreSQL |
-| `docker-compose.override.yml` | Local dev overrides |
 | `nginx/nginx.conf` | Reverse proxy, rate limiting, CSP, SSL-ready |
 | `backend/Dockerfile` | Python 3.12 + uvicorn + healthcheck |
 | `.github/workflows/ci.yml` | CI: backend tests + E2E |
@@ -103,9 +104,10 @@
 
 **Порядок загрузки скриптов** (все перед `</body>`):
 ```
-js/api.js → js/api/data.js → js/virtual-list.js → js/share.js →
-storage.js → modal.js → ui.js → study.js → menu.js → stats.js →
-library.js → data.js → images.js → app.js
+js/api.js → js/api/data.js → js/app-data.js → js/virtual-list.js →
+js/share.js → js/router.js → storage.js → modal.js → ui.js →
+study.js → menu.js → stats.js → library.js → data.js →
+images.js → app.js
 ```
 
 ---
@@ -182,7 +184,7 @@ state = {
 | Auth | `auth-backdrop`, `auth-tab-login`, `auth-tab-register`, `auth-login-form`, `auth-register-form`, `auth-login-error`, `auth-register-error`, `auth-bar`, `auth-user-email`, `auth-logout-btn` | Формы входа/регистрации, бар пользователя |
 | Sidebar | `new-deck-btn`, `deck-list`, `settings-btn` | создание колоды, список, настройки |
 | Empty | `empty-state`, `empty-new-deck-btn`, `empty-menu-btn` | экран «Пока пусто» |
-| Workspace | `workspace`, `deck-title`, `stats`, `menu-back-btn`, `rename-deck-btn`, `delete-deck-btn` | шапка колоды |
+| Workspace | `workspace`, `deck-kicker`, `deck-title`, `stats`, `workspace-login-btn`, `menu-back-btn`, `share-deck-btn`, `rename-deck-btn`, `delete-deck-btn` | шапка колоды |
 | Tabs | `tab-edit`, `tab-study`, `panel-edit`, `panel-study` | вкладки (role=tablist) |
 | Edit | `card-form`, `card-id`(hidden), `card-question`, `card-answer`, `image-btn`, `card-image`(hidden file), `image-preview`, `image-thumb`, `image-clear`, `save-card-btn`, `bulk-btn`, `cancel-edit-btn`, `card-search-row`, `card-search`, `card-search-clear`, `card-filters`, `card-rows` | форма (+картинка) + поиск + фильтры + список |
 | Study | `study-empty`, `study-board`, `study-modes`, `study-mode-flip`, `study-mode-quiz`, `two-sided-btn`, `flip-area`, `study-meta`, `flashcard`, `flashcard-question`, `flashcard-answer`, `focus-btn`, `prev-card-btn`, `next-card-btn`, `mark-known-btn`, `mark-unknown-btn` | доска изучения (на обеих гранях карты — без-ID спаны `.face-speak` с SVG-иконкой озвучки) |
@@ -215,7 +217,7 @@ state = {
 Открытие всегда через `showLayer(backdrop)` (= classList.add + reflow), затем `lockScroll(true)` и focus(). Закрытие — `hideLayer(backdrop)`.
 Закрытие: снять класс, `lockScroll(false)`, вернуть фокус на триггер (`canFocus(el)` проверяет подключённость и видимость).
 
-Z-index шкала: `menu-backdrop` 40 · `modal-backdrop` 40 · `stats-backdrop` 45 · `settings-backdrop` 46 · `focus-backdrop` 60 · `tour-tip` 70 · `theme-bloom` 310. Тайминги появления: модалки и focus — 0.28s, меню и статистика — 0.3s.
+Z-index шкала: `menu-backdrop` 40 · `modal-backdrop` 40 · `data-backdrop` 47 · `stats-backdrop` 45 · `settings-backdrop` 46 · `focus-backdrop` 60 · `tour-tip` 70 · `theme-bloom` 300 · `storage-alert` 310. Тайминги появления: модалки и focus — 0.28s, меню и статистика — 0.3s.
 
 Escape: у каждого бэкдропа свой keydown со `stopPropagation()`; плюс документный fallback `closeTopModal()` (input-модалка → настройки). Tab внутри окна — `trapTabKey(backdrop, event)` по списку `getFocusable()`.
 
@@ -243,7 +245,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 
 | Файл | Функции |
 |---|---|
-| storage.js | `dateKey`, `todayDateKey`, `resetTodayIfNeeded`, `getTodayStats`, `uid`, `isPlainObject`, `migrateSchema`, `normalizeHistory`, `normalizeSessions`, `normalizeState`, `showStorageAlert`, `loadState`, `saveState`, `selectedDeck`, `cardsInDeck`, `recordStudy`, `recordSession`, `getDeckHistory`, `getAllTimeStats`, `computeStreak` |
+| storage.js | `dateKey`, `todayDateKey`, `resetTodayIfNeeded`, `getTodayStats`, `uid`, `isPlainObject`, `migrateSchema`, `normalizeHistory`, `normalizeSessions`, `normalizeState`, `showToast`, `showStorageAlert`, `loadState`, `saveState`, `selectedDeck`, `cardsInDeck`, `recordStudy`, `recordSession`, `getDeckHistory`, `getAllTimeStats`, `computeStreak`, `isQuotaError` |
 | modal.js | `getFocusable`, `lockScroll`, `trapTabKey`, `showLayer`, `hideLayer`, `openModal` (→ Promise), `canFocus`, `closeModal`, `openSettingsModal`, `closeSettingsModal`, `closeTopModal`, `bindModalEvents` |
 | ui.js | `renderThemeDots`, `makeEl`, `badgeFor`, `cardMatchesFilter`, `filterLabel`, `searchMatches`, `appendHighlighted`, `clearCardSearch`, `clearDropIndicators`, `moveCardWithinDeck`, `bindCardRowsDelegation`, `renderDeckList`, `renderCardFilters`, `renderCardRows`, `updateCardRowStatus`, `renderStats`, `resetCardForm`, `render`, `systemDark`, `modePref`, `effectiveMode`, `palettePref`, `fontSizePref`, `applyFontSize`, `syncFontButtons`, `bindAutoTheme`, `syncAppearanceButtons`, `applyAppearance` |
 | study.js | `bezProgress`, `currentAngle`, `flipHost`, `clearLift`, `killFlipAnims`, `startFlipAnimation`, `shuffle`, `reduceMotion`, `entryId`, `entryRev`, `buildStudyEntries`, `beginRound`, `startStudyShuffle`, `resetStudy`, `setStudyMode`, `syncTwoSidedBtn`, `toggleTwoSided`, `syncStudyView`, `enterQuizFocus`, `exitQuizFocus`, `enterFocusMode`, `exitFocusMode`, `currentStudyCards`, `setTab`, `syncPressState`, `showStudyCard`, `flipCard`, `isRoundComplete`, `moveStudy`, `markStatus`, `pickRuVoice`, `speakText`, `speakFace`, `stopSpeech`, `updateQuizMeta`, `buildOptions`, `renderQuizQuestion`, `answerQuiz` (check-draw), `nextQuiz`, `startQuiz`, `beginQuiz`, `finishQuiz`, `launchConfetti`, `openSummaryOverlay`, `showSummary`, `closeSummary`, `repeatStudy` |
@@ -252,17 +254,19 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | library.js | `addedDemoIds`, `markDemoAdded`, `renderLibrary`, `openLibrary`, `closeLibrary`, `addDemoDeck` |
 | images.js | imgOpen, imgTx, imgReq, imgGet, imgPut, imgDelete, imgGcOrphans, loadImageElement, compressImageFile (IndexedDB + сжатие) |
 | data.js | `todayStamp`, `slugifyName`, `downloadBlob`, `buildBackupPayload`, `exportBaseJson`, `exportDeckJson`, `csvField`, `csvSplitLine`, `exportBaseCsv`, `looksLikeCsv`, `parseImportJson`, `parseImportCsv`, `openDataDialog`, `closeDataDialog`, `summarizeImport`, `handleImportText`, `applyCsvImport`, `applyImport`, `bindDataEvents` |
-| app.js | `startEditCard`, `splitBulkPair`, `parseBulkLines`, `openBulkInput`, `closeBulkInput`, `applyBulkInput`, `createDeck`, `renameDeck`, `deleteDeck`, `resetDeckProgress`, `deleteCard`, `saveCard`, `finishDeleteCard`, `bindEvents`, `bindMotionExtras`, `bindAuthEvents`, `showAuthModal`, `hideAuthModal`, `showAuthBar` |
+| app.js | `startEditCard`, `showImagePreview`, `resetImageDraft`, `handleImageFile`, `splitBulkPair`, `parseBulkLines`, `openBulkInput`, `closeBulkInput`, `applyBulkInput`, `createDeck`, `renameDeck`, `deleteDeck`, `resetDeckProgress`, `deleteCard`, `saveCard`, `finishDeleteCard`, `bindEvents`, `bindMotionExtras`, `verifyStylesFresh`, `bindAuthEvents`, `showAuthModal`, `hideAuthModal`, `showAuthBar` |
 | js/api.js | `API.request`, `API._tryRefresh`, `Auth.init/login/register/logout`, `Decks.list/get/create/update/delete/getCards/addCard` |
 | js/api/data.js | `Data.loadDecks/loadDeck/createDeck/updateDeck/deleteDeck/loadCards/addCard/updateCard/deleteCard/uploadImage/enableShare/disableShare/getPublicDeck/getPublicCards/startStudySession/updateStudySession/getStudyStats/migrateData/exportLocalData` |
 | js/virtual-list.js | `VirtualList` class (IntersectionObserver infinite scroll) |
-| js/share.js | `Share.viewPublicDeck/enableSharing/disableSharing/getShareUrl/copyShareLink` |
+| js/share.js | `Share.viewPublicDeck/enableSharing/disableSharing/getShareUrl/copyShareLink/_renderPublicDeck` |
+| js/router.js | `Router.init/_handleRoute/navigate/getCurrentRoute/getCurrentParams` |
+| js/app-data.js | `AppData.syncFromServer/createDeck/deleteDeck/addCard/deleteCard/isSyncing/getError` |
 
 ### 3.9 Constants
 
 | Константа | Значение | Где |
 |---|---|---|
-| `STORAGE_KEY` / `MODE_KEY` / `PALETTE_KEY` / `ONBOARD_KEY` | `flashcards-app-v1` / `flashcards-mode` / `flashcards-palette` / `flashcards-onboarded` | storage.js |
+| `STORAGE_KEY` / `MODE_KEY` / `PALETTE_KEY` / `ONBOARD_KEY` / `FONT_KEY` | `flashcards-app-v1` / `flashcards-mode` / `flashcards-palette` / `flashcards-onboarded` / `flashcards-fontsize` | storage.js |
 | `DEMO_KEY` | `flashcards-demos` (массив id добавленных демо-колод) | library.js |
 | `VALID_STATUSES` | Set(`new`, `known`, `unknown`) | storage.js |
 | `MAX_NAME_LENGTH` | 80 | storage.js |
@@ -272,7 +276,8 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | `SCHEMA_VERSION` | `1` — поле `v` в payload базы | storage.js |
 | `EXPORT_VERSION` / cap sessions | `2` / последние 200 записей | data.js / storage.js |
 | `SWAP_DURATION` | 500 (ms, JS-страховка; CSS-анимация 420) | study.js |
-| `DEMO_DECKS` | 3 демо-колоды: английский 30 карт, столицы 12, элементы 15 | library.js |
+| `FLIP_BEZIER` / `FLIP_DUR` | `[0.45, 0, 0.25, 1]` / 620 (ms) | study.js |
+| `DEMO_DECKS` | 3 демо-колоды: английский 30 карт, столицы 12, элементы 16 | library.js |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | backend/app/config.py |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | backend/app/config.py |
 | `MAX_IMAGE_SIZE` | 2MB | backend/app/services/image.py |
@@ -577,11 +582,11 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 
 | File | Coverage |
 |---|---|
-| `tests/test_auth.py` | Registration, login, validation, /me |
-| `tests/test_decks.py` | CRUD, deck isolation between users |
-| `tests/test_cards.py` | CRUD, pagination, FTS search |
-| `tests/test_migrate.py` | Data migration |
-| `tests/test_health.py` | Healthcheck endpoints |
+| `backend/tests/test_auth.py` | Registration, login, validation, /me |
+| `backend/tests/test_decks.py` | CRUD, deck isolation between users |
+| `backend/tests/test_cards.py` | CRUD, pagination, FTS search |
+| `backend/tests/test_migrate.py` | Data migration |
+| `backend/tests/test_health.py` | Healthcheck endpoints |
 
 ### 9.2 E2E Tests (Playwright)
 
@@ -592,7 +597,7 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 
 ### 9.3 Smoke Tests (PowerShell CDP)
 
-30 scripts, ~769 checks — full frontend smoke test suite. Run: `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1 [-Smoke]`
+30 scripts, 758 checks — full frontend smoke test suite. Run: `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1 [-Smoke] [-Parallel N] [-Filter name]`
 
 ---
 

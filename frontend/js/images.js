@@ -14,7 +14,10 @@ function imgOpen() {
       if (!db.objectStoreNames.contains(IMG_STORE)) db.createObjectStore(IMG_STORE);
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      imgDbPromise = null;
+      reject(request.error);
+    };
   });
   return imgDbPromise;
 }

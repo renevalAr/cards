@@ -46,7 +46,7 @@ flashcards/
 │   ├── index.html
 │   ├── js/
 │   │   ├── api.js        # API клиент + Auth + Decks
-│   │   ├── auth.js       # Авторизация
+│   │   ├── api/data.js   # Data layer
 │   │   └── ...
 │   ├── css/
 │   └── assets/
@@ -130,6 +130,24 @@ pytest tests-e2e/ -v
 - `GET /api/decks/share/{slug}` — Публичная колода по ссылке
 - `POST /api/decks/{id}/share` — Включить шаринг
 - `DELETE /api/decks/{id}/share` — Отключить шаринг
+
+### Карточки
+- `PATCH /api/cards/{id}` — Обновить карточку
+- `DELETE /api/cards/{id}` — Удалить карточку
+- `POST /api/cards/{id}/image` — Загрузить картинку
+- `DELETE /api/cards/{id}/image` — Удалить картинку
+
+### Сессии обучения
+- `POST /api/study/session` — Начать сессию
+- `PATCH /api/study/session/{id}` — Обновить сессию
+- `GET /api/study/stats` — Статистика
+
+### Миграция
+- `POST /api/migrate` — Импорт данных из localStorage
+
+### Система
+- `GET /api/health` — Healthcheck
+- `GET /api/health/detailed` — Детальный healthcheck
 
 ## Безопасность
 

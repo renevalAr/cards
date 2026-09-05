@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2026-09-05
+
+### Fixed
+- Fixed `typeof raw.deck` bug in import parser (TypeError on malformed deck files)
+- Fixed `imgOpen` permanent failure state (IndexedDB operations no longer die forever on error)
+- Fixed hardcoded `STORAGE_KEY` in `api/data.js` export
+- Fixed `positionTourTip` null dereference when tour target element not found
+- Fixed `aria-labelledby="auth-title"` referencing non-existent element in auth modal
+- Fixed duplicate `.menu-backdrop` CSS block
+- Added `:focus-visible` outline for dialog elements (accessibility)
+- Added `aria-label` to SVG-only buttons (workspace login, share, menu login)
+
+### Added
+- Corrupt payload backup to `flashcards-app-v1-corrupt` key + warn-toast on parse failure
+- Session merge sort by date before cap (fresh local sessions not evicted by old imports)
+- `imgGcOrphans` — garbage collection of orphaned IndexedDB images on startup
+- `MAX_SESSIONS` constant (200) in storage.js + data.js
+- `CORRUPT_KEY` constant for corrupt payload backup
+- `FONT_KEY` constant documented
+- Missing API endpoints documented in README (cards, study, migrate, health)
+- `app-data.js` and `router.js` added to documentation file structure
+- Function Map updated with 15+ missing functions
+- DOM Contract updated with missing IDs
+- Z-index scale corrected and completed
+- Backend test paths corrected (`backend/tests/`)
+- E2E test count corrected (10, not 6)
+- Smoke test check count corrected (758, not ~769)
+- Environment variable defaults corrected in QUICKSTART.md
+
+### Changed
+- Asset versions bumped to v=40
+
 ## [2.1.0] - 2026-08-29
 
 ### Fixed
@@ -56,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alembic database migrations
 - Docker Compose orchestration (Nginx + FastAPI + PostgreSQL)
 - CI/CD with GitHub Actions
-- 25 backend tests (pytest) + 6 E2E tests (Playwright)
+- 25 backend tests (pytest) + 10 E2E tests (Playwright)
 
 ### Fixed
 - `/refresh` endpoint now correctly reads cookies from Request object

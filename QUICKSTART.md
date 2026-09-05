@@ -41,8 +41,7 @@ open frontend/index.html
 # На VPS
 git clone https://github.com/renevalAr/cards.git
 cd cards
-chmod +x deploy.sh
-./deploy.sh
+docker compose up -d
 ```
 
 ### Ручной деплой
@@ -111,8 +110,7 @@ flashcards/
 ├── tests/             # CDP smoke-тесты
 ├── tests-e2e/         # Playwright E2E
 ├── docker-compose.yml
-├── Makefile
-└── deploy.sh
+└── .github/
 ```
 
 ## Переменные окружения
@@ -120,10 +118,10 @@ flashcards/
 | Переменная | По умолчанию | Описание |
 |---|---|---|
 | `SECRET_KEY` | `change-me-in-production` | Ключ JWT (сгенерировать: `openssl rand -hex 32`) |
-| `DATABASE_URL` | `postgresql+asyncpg://flashcards:flashcards@db:5432/flashcards` | Подключение к БД |
+| `DATABASE_URL` | `postgresql://user:pass@db:5432/flashcards` | Подключение к БД |
 | `EMAIL_API_KEY` | `` | SendGrid API ключ |
-| `CORS_ORIGINS` | `["http://localhost"]` | Разрешённые origins |
-| `ALLOWED_HOSTS` | `["localhost", "*.localhost", "flashcards.app"]` | Trusted hosts |
+| `CORS_ORIGINS` | `["http://localhost", "http://localhost:3000"]` | Разрешённые origins |
+| `ALLOWED_HOSTS` | `["localhost", "*.localhost", "testserver"]` | Trusted hosts |
 
 ## Полезные команды
 
