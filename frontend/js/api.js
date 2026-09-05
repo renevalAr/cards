@@ -40,7 +40,24 @@ const API = {
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({ detail: "Request failed" }));
-      throw new Error(error.detail || `HTTP ${res.status}`);
+      let message;
+      const detail = error && error.detail;
+      if (typeof detail === "string") {
+        message = detail;
+      } else if (Array.isArray(detail)) {
+        // FastAPI 422 validation error: detail is an array of {loc, msg, type}
+        message = detail
+          .map((e) => {
+            const field = Array.isArray(e.loc) && e.loc.length > 1 ? e.loc.slice(1).join(".") : e.loc;
+            return field ? `${field}: ${e.msg}` : e.msg;
+          })
+          .join("; ") || `HTTP ${res.status}`;
+      } else if (detail && typeof detail === "object") {
+        message = JSON.stringify(detail);
+      } else {
+        message = `HTTP ${res.status}`;
+      }
+      throw new Error(message);
     }
 
     if (res.status === 204) return null;
