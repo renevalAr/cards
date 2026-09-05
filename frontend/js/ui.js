@@ -139,6 +139,15 @@ function moveCardWithinDeck(cardId, anchorId, before) {
   state.cards.splice(before ? anchorIdx : anchorIdx + 1, 0, moved);
   saveState();
   renderCardRows();
+  if (typeof Auth !== 'undefined' && Auth.getUser()) {
+    const ids = cardsInDeck(state.selectedDeckId).map(c => c.id);
+    fetch('/api/cards/reorder', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({card_ids: ids})
+    }).catch(() => {});
+  }
 }
 
 let rowsBound = false;

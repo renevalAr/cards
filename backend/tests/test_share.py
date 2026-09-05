@@ -49,8 +49,7 @@ def test_sharing_requires_auth(client):
     if create_res.status_code != 201:
         client.post("/api/auth/login", json={"email": "s@example.com", "password": "Pass12345!"})
     deck_res = client.post("/api/decks", json={"name": "D"})
-    if deck_res.status_code == 401:
-        return
+    assert deck_res.status_code != 401, "Auth fixture failed — test cannot proceed"
     deck_id = deck_res.json()["id"]
     client.post("/api/auth/logout")
     res = client.post(f"/api/decks/{deck_id}/share")

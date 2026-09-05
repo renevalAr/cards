@@ -1,6 +1,8 @@
 #!/bin/bash
 # Database backup script for Flashcards
 # Usage: ./scripts/backup.sh [backup_dir]
+# To schedule daily backups, add to crontab:
+# 0 2 * * * /opt/flashcards/scripts/backup.sh >> /var/log/flashcards-backup.log 2>&1
 
 set -e
 

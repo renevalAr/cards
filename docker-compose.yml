@@ -21,16 +21,20 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-flashcards}:${POSTGRES_PASSWORD:-flashcards}@db:5432/${POSTGRES_DB:-flashcards}
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
-      - EMAIL_API_KEY=${EMAIL_API_KEY:-}
-      - EMAIL_FROM=${EMAIL_FROM:-no-reply@flashcards.app}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost"]}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-["localhost"]}
+      - SECURE_COOKIES=${SECURE_COOKIES:-true}
       - PYTHONPATH=/app
-      - RATE_LIMIT_ENABLED=false
     volumes:
       - ./media:/var/www/media
     depends_on:
       db:
         condition: service_healthy
+    # Prometheus: scrape /api/metrics (no auth required)
+    labels:
+      - "prometheus.scrape=true"
+      - "prometheus.port=8000"
+      - "prometheus.path=/api/metrics"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 10s

@@ -1,21 +1,22 @@
-const CACHE_NAME = "flashcards-v2";
+const CACHE_NAME = "flashcards-v3";
 const STATIC_ASSETS = [
   "/",
-  "/css/style.css",
-  "/js/api.js",
-  "/js/share.js",
-  "/js/router.js",
-  "/js/app-data.js",
-  "/js/storage.js",
-  "/js/modal.js",
-  "/js/ui.js",
-  "/js/study.js",
-  "/js/menu.js",
-  "/js/stats.js",
-  "/js/library.js",
-  "/js/data.js",
-  "/js/images.js",
-  "/js/app.js",
+  "/css/style.css?v=42",
+  "/js/api.js?v=42",
+  "/js/share.js?v=42",
+  "/js/router.js?v=42",
+  "/js/app-data.js?v=42",
+  "/js/storage.js?v=42",
+  "/js/modal.js?v=42",
+  "/js/ui.js?v=42",
+  "/js/study.js?v=42",
+  "/js/menu.js?v=42",
+  "/js/stats.js?v=42",
+  "/js/library.js?v=42",
+  "/js/data.js?v=42",
+  "/js/images.js?v=42",
+  "/js/app.js?v=42",
+  "/sw.js",
 ];
 
 self.addEventListener("install", (event) => {

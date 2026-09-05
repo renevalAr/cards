@@ -17,10 +17,15 @@ const AppData = {
 
       state.cards = [];
       for (const deck of decks) {
-        const res = await Decks.getCards(deck.id, { limit: 100 });
-        const cards = res.items || res;
+        let cursor = '';
+        let allCards = [];
+        do {
+          const res = await Decks.getCards(deck.id, { cursor, limit: 100 });
+          allCards.push(...(res.items || res));
+          cursor = res.next_cursor || '';
+        } while (cursor);
         state.cards.push(
-          ...cards.map((c) => ({
+          ...allCards.map((c) => ({
             id: c.id,
             deckId: c.deck_id,
             question: c.question,

@@ -3083,17 +3083,15 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .auth-bar {
-  position: fixed;
-  top: 12px;
-  right: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px;
-  background: var(--surface);
+  padding: 0 12px;
+  background: transparent;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  z-index: auto;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 

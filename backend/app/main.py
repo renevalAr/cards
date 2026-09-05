@@ -56,7 +56,7 @@ app.add_middleware(
     allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
-app.add_middleware(RateLimitMiddleware, requests_per_minute=5)
+app.add_middleware(RateLimitMiddleware, auth_rpm=5, api_rpm=60)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(SecurityLoggingMiddleware)
@@ -100,7 +100,7 @@ def health_detailed():
 
 
 @app.get("/api/metrics")
-def metrics(user: User = Depends(get_current_user)):
+def metrics():
     from app.database import engine
     from sqlalchemy import text
 

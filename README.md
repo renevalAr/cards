@@ -114,6 +114,8 @@ pytest tests-e2e/ -v
 - `POST /api/auth/refresh` — Обновление токена
 - `POST /api/auth/logout` — Выход
 - `GET /api/auth/me` — Текущий пользователь
+- `PATCH /api/auth/me` — Обновить профиль
+- `DELETE /api/auth/me` — Удалить аккаунт
 
 ### Колоды
 - `GET /api/decks` — Список колод
@@ -132,13 +134,7 @@ pytest tests-e2e/ -v
 ### Карточки
 - `PATCH /api/cards/{id}` — Обновить карточку
 - `DELETE /api/cards/{id}` — Удалить карточку
-- `POST /api/cards/{id}/image` — Загрузить картинку
-- `DELETE /api/cards/{id}/image` — Удалить картинку
-
-### Сессии обучения
-- `POST /api/study/session` — Начать сессию
-- `PATCH /api/study/session/{id}` — Обновить сессию
-- `GET /api/study/stats` — Статистика
+- `PUT /api/cards/reorder` — Изменить порядок карточек
 
 ### Миграция
 - `POST /api/migrate` — Импорт данных из localStorage
@@ -146,6 +142,7 @@ pytest tests-e2e/ -v
 ### Система
 - `GET /api/health` — Healthcheck
 - `GET /api/health/detailed` — Детальный healthcheck
+- `GET /api/metrics` — Prometheus метрики
 
 ## Безопасность
 

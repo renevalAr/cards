@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, func
 from uuid import UUID
 
@@ -96,7 +96,11 @@ def list_cards(
             )
         )
     if cursor:
-        query = query.where(Card.position > int(cursor))
+        try:
+            cursor_pos = int(cursor)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid cursor value")
+        query = query.where(Card.position > cursor_pos)
 
     query = query.order_by(Card.position).limit(limit + 1)
     result = db.execute(query)

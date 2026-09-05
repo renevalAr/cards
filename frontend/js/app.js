@@ -137,6 +137,9 @@ async function createDeck() {
   resetStudy();
   saveState();
   render();
+  if (typeof Auth !== 'undefined' && Auth.getUser()) {
+    AppData.createDeck(deck.name).catch(e => console.warn('Sync failed:', e));
+  }
 }
 
 async function renameDeck() {
@@ -172,6 +175,9 @@ async function deleteDeck() {
   resetStudy();
   saveState();
   render();
+  if (typeof Auth !== 'undefined' && Auth.getUser()) {
+    AppData.deleteDeck(deck.id).catch(e => console.warn('Sync failed:', e));
+  }
 }
 
 async function resetDeckProgress() {
@@ -227,6 +233,9 @@ function finishDeleteCard(cardId) {
   if (window.imgDelete) imgDelete(cardId).catch(() => {});
   saveState();
   render();
+  if (typeof Auth !== 'undefined' && Auth.getUser()) {
+    AppData.deleteCard(cardId).catch(e => console.warn('Sync failed:', e));
+  }
 }
 
 function saveCard(event) {
@@ -272,6 +281,9 @@ function saveCard(event) {
       status: "new",
     });
     if (pendingImage && pendingImage !== IMG_REMOVE && window.imgPut) imgPut(newId, pendingImage).catch(() => {});
+    if (typeof Auth !== 'undefined' && Auth.getUser()) {
+      AppData.addCard(deck.id, question, answer).catch(e => console.warn('Sync failed:', e));
+    }
     saveState();
     resetCardForm();
     render();

@@ -44,6 +44,8 @@ const Share = {
     const deck = this.currentDeck;
     if (!deck) return;
 
+    document.getElementById("workspace").classList.remove("hidden");
+
     const title = document.getElementById("deck-title");
     const stats = document.getElementById("stats");
     if (title) title.textContent = deck.name;
@@ -55,10 +57,28 @@ const Share = {
       const frag = document.createDocumentFragment();
       deck.cards.forEach((card) => {
         const li = document.createElement("li");
-        li.textContent = `${card.question} — ${card.answer}`;
+        const body = document.createElement("div");
+        const qp = document.createElement("p");
+        qp.textContent = card.question;
+        const ap = document.createElement("p");
+        ap.className = "answer";
+        ap.textContent = card.answer;
+        body.append(qp, ap);
+        li.appendChild(body);
         frag.appendChild(li);
       });
       rows.appendChild(frag);
+    }
+
+    const backBtn = document.createElement("button");
+    backBtn.className = "btn";
+    backBtn.textContent = "Назад";
+    backBtn.addEventListener("click", () => {
+      window.location.hash = "#menu";
+    });
+    const statsEl = document.getElementById("stats");
+    if (statsEl) {
+      statsEl.parentNode.insertBefore(backBtn, statsEl.nextSibling);
     }
   },
 };

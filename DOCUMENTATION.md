@@ -521,7 +521,7 @@ FTS search: `decks` and `cards` use `to_tsvector('russian', ...)` at query time 
 |---|---|---|
 | GET | `/api/health` | Basic healthcheck |
 | GET | `/api/health/detailed` | Detailed healthcheck (includes DB status) |
-| GET | `/api/metrics` | Prometheus-style metrics (requires auth) |
+| GET | `/api/metrics` | Prometheus-style metrics |
 
 ---
 

@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
@@ -5,11 +6,13 @@ from sqlalchemy import select
 from app.config import get_settings
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models import User, RefreshToken
-from app.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
+from app.models import User, RefreshToken, Deck
+from app.schemas import UserCreate, UserLogin, UserResponse, TokenResponse, UserUpdate
 from app.services.auth import hash_password, verify_password, create_access_token, create_refresh_token, hash_token, decode_token
 
 settings = get_settings()
+_refresh_counter = itertools.count()
+_CLEANUP_EVERY = 10
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str):
@@ -103,6 +106,15 @@ def refresh(request: Request, response: Response, db=Depends(get_db)):
     for expired in expired_tokens:
         db.delete(expired)
 
+    if next(_refresh_counter) % _CLEANUP_EVERY == 0:
+        all_expired = db.execute(
+            select(RefreshToken).where(
+                RefreshToken.expires_at < datetime.now(timezone.utc),
+            )
+        ).scalars().all()
+        for expired in all_expired:
+            db.delete(expired)
+
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -146,3 +158,25 @@ def logout(request: Request, response: Response, db=Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_me(data: UserUpdate, user: User = Depends(get_current_user), db=Depends(get_db)):
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(user, key, value)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.delete("/me", status_code=status.HTTP_200_OK)
+def delete_me(user: User = Depends(get_current_user), db=Depends(get_db)):
+    tokens = db.execute(select(RefreshToken).where(RefreshToken.user_id == user.id)).scalars().all()
+    for token in tokens:
+        db.delete(token)
+    decks = db.execute(select(Deck).where(Deck.owner_id == user.id)).scalars().all()
+    for deck in decks:
+        db.delete(deck)
+    db.delete(user)
+    db.commit()
+    return {"status": "ok"}

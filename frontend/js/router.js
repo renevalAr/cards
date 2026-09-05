@@ -34,6 +34,7 @@ const Router = {
       case "d":
         if (params[0] && typeof Share !== "undefined") {
           Share.viewPublicDeck(params[0]);
+          if (typeof setTab === "function") setTab("study");
         }
         break;
       case "menu":

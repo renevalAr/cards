@@ -13,14 +13,16 @@ RATE_LIMIT_TTL = 600  # 10 minutes
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, requests_per_minute: int = 5):
+    def __init__(self, app, auth_rpm: int = 5, api_rpm: int = 60):
         super().__init__(app)
-        self.rpm = requests_per_minute
+        self.auth_rpm = auth_rpm
+        self.api_rpm = api_rpm
         self.enabled = get_settings().RATE_LIMIT_ENABLED
 
     async def dispatch(self, request: Request, call_next):
         global RATE_LIMITS_LAST_CLEANUP
-        if self.enabled and request.url.path.startswith("/api/auth"):
+        path = request.url.path
+        if self.enabled and path.startswith("/api/"):
             now = time.time()
 
             if now - RATE_LIMITS_LAST_CLEANUP > RATE_LIMIT_CLEANUP_INTERVAL:
@@ -34,7 +36,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 t for t in RATE_LIMITS[client_ip] if now - t < 60
             ]
 
-            if len(RATE_LIMITS[client_ip]) >= self.rpm:
+            limit = self.auth_rpm if path.startswith("/api/auth") else self.api_rpm
+
+            if len(RATE_LIMITS[client_ip]) >= limit:
                 raise HTTPException(
                     status_code=429,
                     detail="Too many requests. Try again later.",

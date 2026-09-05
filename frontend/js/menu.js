@@ -171,6 +171,34 @@ function openDeckActions(deckId) {
     }
     openDeckActions(deck.id);
   });
+  add(deck.share_slug ? "Отключить шаринг" : "Включить шаринг", false, async () => {
+    if (deck.share_slug) {
+      try {
+        await Share.disableSharing(deck.id);
+        deck.share_slug = null;
+        deck.is_public = false;
+        saveState();
+        render();
+        showToast("Шаринг отключён", "ok");
+      } catch (e) {
+        showToast("Не удалось отключить шаринг", "warn");
+      }
+    } else {
+      try {
+        const updated = await Share.enableSharing(deck.id);
+        if (updated && updated.share_slug) {
+          deck.share_slug = updated.share_slug;
+          deck.is_public = true;
+          saveState();
+          render();
+          showToast("Шаринг включён", "ok");
+        }
+      } catch (e) {
+        showToast("Не удалось включить шаринг", "warn");
+      }
+    }
+    openDeckActions(deck.id);
+  });
   add("Переименовать", false, () => {
     state.selectedDeckId = deck.id;
     closeAllMenus();

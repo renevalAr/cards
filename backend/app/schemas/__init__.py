@@ -44,12 +44,14 @@ class TokenResponse(BaseModel):
 
 class DeckCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, max_length=1000)
     is_public: bool = False
     two_sided: bool = False
 
 
 class DeckUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = None
     is_public: Optional[bool] = None
@@ -104,4 +106,11 @@ class CardResponse(BaseModel):
 class PaginatedResponse(BaseModel):
     items: list
     next_cursor: Optional[str] = None
-    total: Optional[int] = None
+
+
+class CardReorder(BaseModel):
+    card_ids: list[UUID]
+
+
+class UserUpdate(BaseModel):
+    display_name: Optional[str] = Field(None, max_length=80)
