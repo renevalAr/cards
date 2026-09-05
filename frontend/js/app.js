@@ -662,11 +662,15 @@ function verifyStylesFresh() {
 verifyStylesFresh();
 
 function showAuthModal() {
-  document.getElementById("auth-backdrop").classList.add("is-open");
+  const el = document.getElementById("auth-backdrop");
+  el.hidden = false;
+  el.classList.add("is-open");
 }
 
 function hideAuthModal() {
-  document.getElementById("auth-backdrop").classList.remove("is-open");
+  const el = document.getElementById("auth-backdrop");
+  el.classList.remove("is-open");
+  el.hidden = true;
 }
 
 function showAuthBar() {
@@ -834,6 +838,26 @@ function bindAuthEvents() {
       } else {
         if (typeof closeAllMenus === "function") closeAllMenus();
         showAuthModal();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", function authEscHandler(e) {
+    if (e.key === "Escape") {
+      const bd = document.getElementById("auth-backdrop");
+      if (bd && !bd.hidden) {
+        e.preventDefault();
+        e.stopPropagation();
+        hideAuthModal();
+      }
+    }
+  });
+
+  const authBd = document.getElementById("auth-backdrop");
+  if (authBd) {
+    authBd.addEventListener("click", function(e) {
+      if (e.target === authBd) {
+        hideAuthModal();
       }
     });
   }

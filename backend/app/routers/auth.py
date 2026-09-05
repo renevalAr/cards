@@ -18,12 +18,12 @@ _CLEANUP_EVERY = 10
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     response.set_cookie(
         "access_token", access_token,
-        httponly=True, samesite="strict", max_age=900,
+        httponly=True, samesite="lax", max_age=900,
         secure=settings.SECURE_COOKIES,
     )
     response.set_cookie(
         "refresh_token", refresh_token,
-        httponly=True, samesite="strict", max_age=2592000,
+        httponly=True, samesite="lax", max_age=2592000,
         secure=settings.SECURE_COOKIES,
     )
 

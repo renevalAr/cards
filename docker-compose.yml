@@ -20,10 +20,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-flashcards}:${POSTGRES_PASSWORD:-flashcards}@db:5432/${POSTGRES_DB:-flashcards}
-      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
-      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost"]}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-["localhost"]}
-      - SECURE_COOKIES=${SECURE_COOKIES:-true}
+      - SECRET_KEY=${SECRET_KEY:-super-secret-dev-key-change-in-prod}
+      - DEBUG=${DEBUG:-true}
+      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost","http://localhost:3000"]}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-["localhost","*.localhost","testserver"]}
+      - SECURE_COOKIES=${SECURE_COOKIES:-false}
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER:-}

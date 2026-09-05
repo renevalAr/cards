@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     APP_NAME: str = "Flashcards"
-    APP_VERSION: str = "2.4.0"
+    APP_VERSION: str = "2.4.1"
     DEBUG: bool = False
 
     DATABASE_URL: str = "postgresql://user:pass@db:5432/flashcards"
@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["localhost", "*.localhost", "testserver"]
     SECURE_COOKIES: bool = False
     RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_AUTH_RPM: int = 60  # fallback for /api/auth/* paths not explicitly budgeted
+    RATE_LIMIT_API_RPM: int = 600  # fallback for general /api/*
 
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587

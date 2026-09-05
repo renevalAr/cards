@@ -20,6 +20,17 @@ const Router = {
         break;
       case "register":
         if (typeof showAuthModal === "function") showAuthModal();
+        // Switch to register tab
+        const loginTab = document.getElementById("auth-tab-login");
+        const regTab = document.getElementById("auth-tab-register");
+        const loginForm = document.getElementById("auth-login-form");
+        const regForm = document.getElementById("auth-register-form");
+        if (loginTab && regTab && loginForm && regForm) {
+          loginTab.classList.remove("is-active");
+          regTab.classList.add("is-active");
+          loginForm.classList.add("hidden");
+          regForm.classList.remove("hidden");
+        }
         if (typeof Auth !== "undefined" && Auth.user) {
           window.location.hash = "#menu";
         }

@@ -56,7 +56,7 @@ app.add_middleware(
     allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
-app.add_middleware(RateLimitMiddleware, auth_rpm=5, api_rpm=60)
+app.add_middleware(RateLimitMiddleware, auth_rpm=settings.RATE_LIMIT_AUTH_RPM, api_rpm=settings.RATE_LIMIT_API_RPM)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(SecurityLoggingMiddleware)

@@ -18,8 +18,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("users", sa.Column("is_verified", sa.Boolean(), server_default="false"))
-
     op.create_table(
         "verification_tokens",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
@@ -36,4 +34,3 @@ def downgrade() -> None:
     op.drop_index("idx_verification_tokens_token_hash", table_name="verification_tokens")
     op.drop_index("idx_verification_tokens_user", table_name="verification_tokens")
     op.drop_table("verification_tokens")
-    op.drop_column("users", "is_verified")

@@ -146,7 +146,10 @@ function moveCardWithinDeck(cardId, anchorId, before) {
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',
       body: JSON.stringify({card_ids: ids})
-    }).catch(() => {});
+    }).catch(function(err) {
+      console.warn("Card reorder sync failed:", err);
+      if (typeof showToast === "function") showToast("Ошибка синхронизации порядка карточек");
+    });
   }
 }
 
@@ -240,7 +243,7 @@ function renderCardRows() {
     body.append(qp, ap, badgeFor(card));
     li.appendChild(body);
 
-    if (window.imgGet) {
+if (window.imgGet) {
       imgGet(card.id).then((dataUrl) => {
         if (dataUrl && li.isConnected) {
           const thumb = new Image();
@@ -249,7 +252,9 @@ function renderCardRows() {
           thumb.src = dataUrl;
           li.querySelector("div").appendChild(thumb);
         }
-      }).catch(() => {});
+      }).catch(function (err) {
+        console.warn("Card image load failed:", err);
+      });
     }
 
     const actions = makeEl("div", "row-actions");

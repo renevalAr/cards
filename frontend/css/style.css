@@ -3003,21 +3003,23 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 .auth-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.auth-backdrop.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
-
 .auth-backdrop[hidden] {
-  display: none;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  display: none !important;
 }
 
 .auth-modal {
@@ -3083,15 +3085,13 @@ html[data-mode="dark"] .deck-pick-item:hover .deck-pick-more {
 }
 
 .auth-bar {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 50;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 12px;
-  background: transparent;
-  border-radius: 8px;
-  z-index: auto;
-  margin-left: auto;
-  flex-shrink: 0;
+  gap: 8px;
 }
 
 

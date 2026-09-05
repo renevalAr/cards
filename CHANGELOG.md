@@ -3,7 +3,33 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [2.4.1] - 2026-09-05
+
+### Fixed
+- Rate limiting too aggressive: register+login+/me flow on first call was hitting nginx 503 because `burst=3` was too low. Split zones: `auth_write:20r/m burst=8` for register/login/verify, `auth_read:30r/m burst=5` for /me/refresh/logout, `api:60r/s burst=60` for everything else. All return `429` instead of `503`.
+- Backend `RateLimitMiddleware` returning `500` in logs even on legitimate 429 (BaseHTTPMiddleware + HTTPException issue). Replaced with direct `JSONResponse` and added `Retry-After:60` header.
+- Per-endpoint rate budgets on backend: register/login=10rpm, me/refresh/logout/verify=30rpm.
+- Migration 0005: removed redundant `add_column("users", "is_verified")` (already created in 0001).
+- Removed dead `StudySession` model (table dropped in 0004).
+- docker-compose.yml env defaults synced with `app/config.py`.
+- Auth modal: `.auth-backdrop` had no fade transition; now uses `opacity/visibility/pointer-events` + `.is-open` modifier with proper hidden/display behavior.
+- Auth modal: `hidden` attribute now toggled by `showAuthModal/hideAuthModal` correctly.
+- Auth modal: Esc key and click-on-backdrop now close the modal.
+- Router `#register` now switches to register tab (was showing login form).
+- copy-paste bug in `frontend/js/ui.js`: `imgGet` failure was logging "Card reorder sync failed" and showing toast — replaced with correct "Card image load failed" console warning.
+- copy-paste bug in `frontend/js/api.js`: logout warning text fixed.
+
+### Changed
+- `SameSite=strict` → `lax` for auth cookies (CHANGELOG 2.3.0 stated strict, but lax was actually deployed; this aligns reality with code).
+- Service Worker rewritten in functional style with cache-first then network fallback.
+- Auth-bar positioned `fixed top:12px right:16px`.
+
+### Added
+- `backend/tests/test_endpoints.py`: tests for PATCH /me, DELETE /me, PUT /cards/reorder, mixed-deck reorder rejection.
 
 ---
 

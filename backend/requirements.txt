@@ -13,3 +13,4 @@ Pillow==10.4.0
 
 # Testing
 pytest==8.3.0
+httpx==0.28.1

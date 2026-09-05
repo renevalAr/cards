@@ -103,7 +103,9 @@ const Auth = {
   async logout() {
     try {
       await API.post("/auth/logout");
-    } catch {}
+    } catch (err) {
+      console.warn("Logout request failed:", err);
+    }
     this.user = null;
     this.accessToken = null;
   },

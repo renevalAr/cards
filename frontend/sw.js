@@ -37,28 +37,24 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-
-  if (request.method !== "GET") return;
-
-  if (request.url.includes("/api/")) {
-    event.respondWith(fetch(request).catch(() => caches.match(request)));
-    return;
-  }
+self.addEventListener("fetch", function(event) {
+  var url = new URL(event.request.url);
+  if (url.pathname.startsWith("/api/")) return;
+  if (event.request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.match(event.request).then(function(cached) {
+        var fetchPromise = fetch(event.request).then(function(networkResponse) {
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
           }
-          return response;
-        })
-        .catch(() => caches.match("/"));
+          return networkResponse;
+        }).catch(function() {
+          return cached;
+        });
+        return cached || fetchPromise;
+      });
     })
   );
 });
