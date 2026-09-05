@@ -115,6 +115,13 @@ const Auth = {
   getUser() {
     return this.user;
   },
+
+  async requestVerification() {
+    return API.post("/auth/verify-request");
+  },
+  async verifyEmail(token) {
+    return API.post(`/auth/verify?token=${encodeURIComponent(token)}`);
+  },
 };
 
 const Decks = {

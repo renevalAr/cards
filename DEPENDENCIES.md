@@ -133,7 +133,7 @@ models/__init__.py
   ↓
 schemas/__init__.py, schemas/migration.py
   ↓
-services/auth.py, services/share.py
+services/auth.py, services/email.py, services/share.py, services/verification.py
   ↓
 routers/auth.py, routers/decks.py, routers/cards.py, routers/share.py, routers/migrate.py
   ↓
@@ -170,6 +170,8 @@ main.py (FastAPI app, routes, lifespan)
 | `Data.getPublicDeck(slug)` | `GET /api/decks/share/{slug}` |
 | `Data.getPublicCards(slug)` | `GET /api/decks/share/{slug}/cards` |
 | `Data.migrateData(payload)` | `POST /api/migrate` |
+| `Auth.verifyRequest()` | `POST /api/auth/verify-request` |
+| `Auth.verify(token)` | `POST /api/auth/verify?token=...` |
 
 ### Orphaned Backend Endpoints (no frontend caller):
 

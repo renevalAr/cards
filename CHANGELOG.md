@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2026-09-05
+
+### Added
+- Email verification: SMTP sending, token generation, verify endpoints
+- VerificationToken model for secure token storage
+- User.is_verified field
+- Frontend UI for verification status and request
+- Backend tests for verification flow
+
+---
+
 ## [2.3.0] - 2026-09-05
 
 ### Removed

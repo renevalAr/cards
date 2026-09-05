@@ -62,7 +62,9 @@
 | `app/routers/share.py` | Public deck access by slug |
 | `app/routers/migrate.py` | Data migration from local storage |
 | `app/services/auth.py` | bcrypt + JWT utilities |
+| `app/services/email.py` | SMTP email sending |
 | `app/services/share.py` | Share slug generation (secrets.token_urlsafe) |
+| `app/services/verification.py` | Email verification token generation + verification |
 | `alembic/` | Database migrations |
 | `tests/` | pytest test suite |
 
@@ -481,6 +483,8 @@ FTS search: `decks` and `cards` use `to_tsvector('russian', ...)` at query time 
 | POST | `/api/auth/refresh` | Refresh access token |
 | POST | `/api/auth/logout` | Logout (revoke refresh token) |
 | GET | `/api/auth/me` | Get current user profile |
+| POST | `/api/auth/verify-request` | Send verification email (requires auth) |
+| POST | `/api/auth/verify?token=...` | Verify email with token |
 
 ### 7.2 Deck Endpoints
 
@@ -545,8 +549,13 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | `DATABASE_URL` | `postgresql://user:pass@db:5432/flashcards` | Database connection (psycopg2 for SQLAlchemy and Alembic) |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | Refresh token lifetime |
-| `EMAIL_API_KEY` | `` | SendGrid API key |
+| `EMAIL_API_KEY` | `` | SendGrid API key (legacy) |
 | `EMAIL_FROM` | `no-reply@flashcards.app` | Sender email |
+| `SMTP_HOST` | `smtp.gmail.com` | SMTP server host |
+| `SMTP_PORT` | `587` | SMTP server port |
+| `SMTP_USER` | `` | SMTP authentication username |
+| `SMTP_PASSWORD` | `` | SMTP authentication password |
+| `EMAIL_VERIFY_URL` | `http://localhost/api/auth/verify` | Frontend URL for email verification links |
 | `CORS_ORIGINS` | `["http://localhost", "http://localhost:3000"]` | Allowed CORS origins |
 | `ALLOWED_HOSTS` | `["localhost", "*.localhost", "testserver"]` | Trusted hosts |
 | `SECURE_COOKIES` | `False` | Enable secure flag for cookies (True in production) |
@@ -572,6 +581,7 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | `backend/tests/test_health.py` | Healthcheck endpoints |
 | `backend/tests/test_auth_extended.py` | Logout revoke, refresh, register dup, weak password |
 | `backend/tests/test_share.py` | Share enable/disable, public access, isolation |
+| `backend/tests/test_verification.py` | Email verification flow |
 
 ### 9.2 E2E Tests (Playwright)
 

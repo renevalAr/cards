@@ -116,6 +116,8 @@ pytest tests-e2e/ -v
 - `GET /api/auth/me` — Текущий пользователь
 - `PATCH /api/auth/me` — Обновить профиль
 - `DELETE /api/auth/me` — Удалить аккаунт
+- `POST /api/auth/verify-request` — Отправить ссылку верификации
+- `POST /api/auth/verify?token=...` — Подтвердить email
 
 ### Колоды
 - `GET /api/decks` — Список колод
@@ -152,6 +154,7 @@ pytest tests-e2e/ -v
 - CORS с разрешёнными origins
 - Rate limiting на auth endpoints
 - CSP headers через Nginx
+- Email-верификация через SMTP
 
 ## Лицензия
 

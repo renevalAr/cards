@@ -649,7 +649,7 @@ imgGcOrphans(state.cards.map((card) => card.id)).then((removed) => {
 });
 
 function verifyStylesFresh() {
-  window.__RUNTIME_V = "41";
+  window.__RUNTIME_V = "43";
   const el = document.querySelector(".face-speak");
   if (!el) return;
   window.__stylesStale = getComputedStyle(el).position !== "absolute";
@@ -675,6 +675,9 @@ function showAuthBar() {
   const loginBtn = document.getElementById("login-btn");
   const logoutBtn = document.getElementById("auth-logout-btn");
   const menuAuth = document.getElementById("menu-auth-btn");
+  const verifyBar = document.getElementById("verify-email-bar");
+  const verifyStatus = document.getElementById("verify-status");
+  const verifySendBtn = document.getElementById("verify-send-btn");
   if (!bar) return;
   const user = Auth.getUser();
   if (user) {
@@ -686,6 +689,17 @@ function showAuthBar() {
       menuAuth.textContent = "Выйти";
       menuAuth.classList.add("menu-auth-out");
     }
+    if (verifyBar && verifyStatus && verifySendBtn) {
+      if (user.is_verified) {
+        verifyBar.classList.remove("hidden");
+        verifyStatus.textContent = "✓ Email подтверждён";
+        verifySendBtn.classList.add("hidden");
+      } else {
+        verifyBar.classList.remove("hidden");
+        verifyStatus.textContent = "Email не подтверждён";
+        verifySendBtn.classList.remove("hidden");
+      }
+    }
   } else {
     bar.classList.add("hidden");
     if (loginBtn) loginBtn.classList.remove("hidden");
@@ -694,6 +708,7 @@ function showAuthBar() {
       menuAuth.textContent = "Войти";
       menuAuth.classList.remove("menu-auth-out");
     }
+    if (verifyBar) verifyBar.classList.add("hidden");
   }
 }
 
@@ -799,6 +814,15 @@ function bindAuthEvents() {
     workspaceLoginBtn.addEventListener("click", () => showAuthModal());
   }
 
+  $on("verify-send-btn", "click", async () => {
+    const res = await Auth.requestVerification();
+    if (res && res.status === "ok") {
+      showToast("Ссылка для подтверждения отправлена на email", "ok");
+    } else {
+      showToast("Не удалось отправить ссылку", "warn");
+    }
+  });
+
   const menuAuthBtn = document.getElementById("menu-auth-btn");
   if (menuAuthBtn) {
     menuAuthBtn.addEventListener("click", async () => {
@@ -825,6 +849,23 @@ function bindAuthEvents() {
       await AppData.syncFromServer();
       if (typeof render === "function") render();
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const verifyToken = urlParams.get("token");
+    if (verifyToken) {
+      Auth.verifyEmail(verifyToken).then(res => {
+        if (res && res.status === "ok") {
+          showToast("Email подтверждён!", "ok");
+          Auth.init().then(() => showAuthBar());
+        } else {
+          showToast("Ссылка недействительна или истекла", "warn");
+        }
+      }).catch(() => {
+        showToast("Ошибка верификации", "warn");
+      });
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+    }
+
     if (typeof Router !== "undefined") Router.init();
   } catch (err) {
     console.error("App init failed:", err);

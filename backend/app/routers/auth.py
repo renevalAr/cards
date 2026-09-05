@@ -180,3 +180,42 @@ def delete_me(user: User = Depends(get_current_user), db=Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"status": "ok"}
+
+
+@router.post("/verify-request", status_code=200)
+def request_verification(user: User = Depends(get_current_user), db=Depends(get_db)):
+    if user.is_verified:
+        return {"status": "already_verified"}
+
+    from app.services.verification import generate_verification_token
+    from app.services.email import send_verification_email
+    from app.config import get_settings
+
+    settings = get_settings()
+    raw_token = generate_verification_token(db, user.id)
+
+    verify_url = f"{settings.EMAIL_VERIFY_URL}?token={raw_token}"
+    sent = send_verification_email(user.email, verify_url)
+
+    if not sent:
+        raise HTTPException(status_code=503, detail="Email service unavailable")
+
+    return {"status": "ok"}
+
+
+@router.post("/verify", status_code=200)
+def verify_email(token: str, db=Depends(get_db)):
+    from app.services.verification import verify_token
+
+    user_id = verify_token(db, token)
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.is_verified = True
+    db.commit()
+
+    return {"status": "ok"}
