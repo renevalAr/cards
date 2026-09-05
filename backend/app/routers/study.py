@@ -24,6 +24,8 @@ def start_session(deck_id: UUID, user: User = Depends(get_current_user), db=Depe
 
 @router.patch("/session/{session_id}")
 def update_session(session_id: UUID, known: int = 0, unknown: int = 0, user: User = Depends(get_current_user), db=Depends(get_db)):
+    if known < 0 or unknown < 0:
+        raise HTTPException(status_code=400, detail="known and unknown must be non-negative")
     session = db.get(StudySession, session_id)
     if not session or session.user_id != user.id:
         raise HTTPException(status_code=404, detail="Session not found")

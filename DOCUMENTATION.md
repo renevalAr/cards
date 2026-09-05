@@ -65,7 +65,6 @@
 | `app/services/auth.py` | bcrypt + JWT utilities |
 | `app/services/image.py` | Pillow compression + file management |
 | `app/services/share.py` | Share slug generation |
-| `app/services/email.py` | SendGrid API integration |
 | `alembic/` | Database migrations |
 | `tests/` | pytest test suite |
 
@@ -75,9 +74,7 @@
 |---|---|---|
 | `index.html` | 494 | Вся разметка + auth UI + inline theme script |
 | `style.css` | 2733 | Все стили + auth styles |
-| `js/api.js` | 129 | API client + Auth module + Decks module |
-| `js/api/data.js` | 90 | Data layer (CRUD, share, study, migration) |
-| `js/virtual-list.js` | 105 | IntersectionObserver-based infinite scroll |
+| `js/api.js` | 200 | API client + Auth module + Decks module + Data module |
 | `js/share.js` | 50 | Public deck viewing + share link copying |
 | `js/app-data.js` | 79 | Server sync layer (syncFromServer, CRUD wrappers) |
 | `js/router.js` | 57 | Hash-based routing (init, navigate, _handleRoute) |
@@ -104,7 +101,7 @@
 
 **Порядок загрузки скриптов** (все перед `</body>`):
 ```
-js/api.js → js/api/data.js → js/app-data.js → js/virtual-list.js →
+js/api.js → js/app-data.js →
 js/share.js → js/router.js → storage.js → modal.js → ui.js →
 study.js → menu.js → stats.js → library.js → data.js →
 images.js → app.js
@@ -154,7 +151,7 @@ images.js → app.js
 **Frontend:**
 - All functions are **global**, called directly between files (no modules by design)
 - API client (`js/api.js`) with automatic token refresh on 401
-- Data layer (`js/api/data.js`) abstracts API calls
+- Data layer (`Data` object in `js/api.js`) abstracts API calls
 - Offline mode: falls back to localStorage if API unavailable
 
 ### 3.3 Global State (storage.js)
@@ -255,9 +252,7 @@ repeatStudy(): dataset.mode="unknown"|"all" → beginRound(отфильтров�
 | images.js | imgOpen, imgTx, imgReq, imgGet, imgPut, imgDelete, imgGcOrphans, loadImageElement, compressImageFile (IndexedDB + сжатие) |
 | data.js | `todayStamp`, `slugifyName`, `downloadBlob`, `buildBackupPayload`, `exportBaseJson`, `exportDeckJson`, `csvField`, `csvSplitLine`, `exportBaseCsv`, `looksLikeCsv`, `parseImportJson`, `parseImportCsv`, `openDataDialog`, `closeDataDialog`, `summarizeImport`, `handleImportText`, `applyCsvImport`, `applyImport`, `bindDataEvents` |
 | app.js | `startEditCard`, `showImagePreview`, `resetImageDraft`, `handleImageFile`, `splitBulkPair`, `parseBulkLines`, `openBulkInput`, `closeBulkInput`, `applyBulkInput`, `createDeck`, `renameDeck`, `deleteDeck`, `resetDeckProgress`, `deleteCard`, `saveCard`, `finishDeleteCard`, `bindEvents`, `bindMotionExtras`, `verifyStylesFresh`, `bindAuthEvents`, `showAuthModal`, `hideAuthModal`, `showAuthBar` |
-| js/api.js | `API.request`, `API._tryRefresh`, `Auth.init/login/register/logout`, `Decks.list/get/create/update/delete/getCards/addCard` |
-| js/api/data.js | `Data.loadDecks/loadDeck/createDeck/updateDeck/deleteDeck/loadCards/addCard/updateCard/deleteCard/uploadImage/enableShare/disableShare/getPublicDeck/getPublicCards/startStudySession/updateStudySession/getStudyStats/migrateData/exportLocalData` |
-| js/virtual-list.js | `VirtualList` class (IntersectionObserver infinite scroll) |
+| js/api.js | `API.request`, `API._tryRefresh`, `Auth.init/login/register/logout`, `Decks.list/get/create/update/delete/getCards/addCard`, `Data.deleteCard/enableShare/disableShare/getPublicDeck/getPublicCards/migrateData/exportLocalData` |
 | js/share.js | `Share.viewPublicDeck/enableSharing/disableSharing/getShareUrl/copyShareLink/_renderPublicDeck` |
 | js/router.js | `Router.init/_handleRoute/navigate/getCurrentRoute/getCurrentParams` |
 | js/app-data.js | `AppData.syncFromServer/createDeck/deleteDeck/addCard/deleteCard/isSyncing/getError` |
@@ -732,9 +727,7 @@ nginx (alpine) → backend (python:3.12-slim) → db (postgres:16-alpine)
 | `deck_to_response` still has fallback `len(deck.cards)` | ⚠️ Known | All callers now pass `cards_count` explicitly |
 | `get_public_deck` makes 2 SQL queries (deck + count) | ℹ️ Minor | Acceptable for public deck viewing (low frequency) |
 | Frontend `storage.js` and API `Data` layer can be out of sync | ⚠️ Known | Use "Migrate" button to sync localStorage → server |
-| `VirtualList` not integrated into `renderCardRows` | ℹ️ Planned | Will be added when card count > 60 (heavy-mode) |
 | No CSRF protection on cookie-based auth | ℹ️ Planned | Add CSRF tokens in future iteration |
-| `email.py` uses async `httpx` in sync code | ⚠️ Known | Email sending not functional; needs `asyncio.run()` or BackgroundTasks |
 
 ---
 

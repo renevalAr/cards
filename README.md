@@ -45,11 +45,9 @@ flashcards/
 ├── frontend/             # Клиентское приложение
 │   ├── index.html
 │   ├── js/
-│   │   ├── api.js        # API клиент + Auth + Decks
-│   │   ├── api/data.js   # Data layer
+│   │   ├── api.js        # API клиент + Auth + Decks + Data
 │   │   └── ...
 │   ├── css/
-│   └── assets/
 ├── nginx/                # Конфигурация Nginx
 │   ├── nginx.conf
 │   └── ssl/

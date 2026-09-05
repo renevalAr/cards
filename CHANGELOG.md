@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed `typeof raw.deck` bug in import parser (TypeError on malformed deck files)
 - Fixed `imgOpen` permanent failure state (IndexedDB operations no longer die forever on error)
-- Fixed hardcoded `STORAGE_KEY` in `api/data.js` export
+- Fixed hardcoded `STORAGE_KEY` in `Data.exportLocalData()` export
 - Fixed `positionTourTip` null dereference when tour target element not found
 - Fixed `aria-labelledby="auth-title"` referencing non-existent element in auth modal
 - Fixed duplicate `.menu-backdrop` CSS block
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment variable defaults corrected in QUICKSTART.md
 
 ### Changed
-- Asset versions bumped to v=40
+- Asset versions bumped to v=41
 
 ## [2.1.0] - 2026-08-29
 

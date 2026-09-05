@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
+from enum import Enum
 
 
 class UserCreate(BaseModel):
@@ -69,16 +70,26 @@ class DeckResponse(BaseModel):
     updated_at: datetime
 
 
+class CardStatus(str, Enum):
+    new = "new"
+    known = "known"
+    unknown = "unknown"
+
+
+class CardReorder(BaseModel):
+    card_ids: list[UUID] = Field(..., min_length=1)
+
+
 class CardCreate(BaseModel):
     question: str = Field(..., min_length=1)
     answer: str = Field(..., min_length=1)
-    status: str = "new"
+    status: CardStatus = CardStatus.new
 
 
 class CardUpdate(BaseModel):
     question: Optional[str] = Field(None, min_length=1)
     answer: Optional[str] = Field(None, min_length=1)
-    status: Optional[str] = None
+    status: Optional[CardStatus] = None
 
 
 class CardResponse(BaseModel):

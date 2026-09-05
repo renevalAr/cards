@@ -85,12 +85,10 @@ flashcards/
 │   ├── index.html     # Главная страница + auth UI
 │   ├── css/           # Стили
 │   ├── js/            # Скрипты
-│   │   ├── api.js     # API клиент + Auth
-│   │   ├── api/       # Data layer
-│   │   ├── virtual-list.js
+│   │   ├── api.js     # API клиент + Auth + Decks + Data
 │   │   ├── share.js
 │   │   └── ...        # Оригинальные модули
-│   └── assets/
+│   └── css/
 ├── backend/           # FastAPI сервер
 │   ├── app/
 │   │   ├── main.py    # Точка входа

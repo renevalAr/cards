@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     APP_NAME: str = "Flashcards"
-    APP_VERSION: str = "2.0.0"
+    APP_VERSION: str = "2.2.0"
     DEBUG: bool = False
 
     DATABASE_URL: str = "postgresql://user:pass@db:5432/flashcards"

@@ -11,6 +11,8 @@ from app.config import get_settings
 from app.routers import auth, decks, share, cards, study, migrate
 from app.middleware import RateLimitMiddleware, RequestLoggingMiddleware, SecurityHeadersMiddleware, SecurityLoggingMiddleware
 from app.logging_config import setup_logging, get_logger
+from app.dependencies import get_current_user
+from app.models import User
 
 settings = get_settings()
 setup_logging()
@@ -99,10 +101,9 @@ def health_detailed():
 
 
 @app.get("/api/metrics")
-def metrics():
+def metrics(user: User = Depends(get_current_user)):
     from app.database import engine
-    from sqlalchemy import text, func
-    from app.models import User, Deck, Card
+    from sqlalchemy import text
 
     stats = {}
     try:

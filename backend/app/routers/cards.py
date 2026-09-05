@@ -4,7 +4,7 @@ from uuid import UUID
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import User, Deck, Card
-from app.schemas import CardUpdate
+from app.schemas import CardUpdate, CardReorder
 from app.services.image import validate_image, compress_image, save_image, delete_image
 
 router = APIRouter(prefix="/api/cards", tags=["cards"])
@@ -81,3 +81,24 @@ def delete_card(
         delete_image(card.image_path)
     db.delete(card)
     db.commit()
+
+
+@router.put("/reorder")
+def reorder_cards(
+    data: CardReorder,
+    user: User = Depends(get_current_user),
+    db=Depends(get_db),
+):
+    cards = db.query(Card).filter(Card.id.in_(data.card_ids)).all()
+    if len(cards) != len(data.card_ids):
+        raise HTTPException(status_code=404, detail="One or more cards not found")
+
+    for card in cards:
+        if card.deck.owner_id != user.id:
+            raise HTTPException(status_code=403, detail="Access denied")
+
+    card_map = {card.id: card for card in cards}
+    for i, card_id in enumerate(data.card_ids):
+        card_map[card_id].position = i
+    db.commit()
+    return {"status": "ok", "reordered": len(data.card_ids)}

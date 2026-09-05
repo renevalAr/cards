@@ -19,11 +19,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://flashcards:flashcards@db:5432/flashcards
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-flashcards}:${POSTGRES_PASSWORD:-flashcards}@db:5432/${POSTGRES_DB:-flashcards}
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - EMAIL_API_KEY=${EMAIL_API_KEY:-}
       - EMAIL_FROM=${EMAIL_FROM:-no-reply@flashcards.app}
-      - CORS_ORIGINS=["http://localhost"]
+      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost"]}
       - PYTHONPATH=/app
       - RATE_LIMIT_ENABLED=false
     volumes:
@@ -42,9 +42,9 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=flashcards
-      - POSTGRES_USER=flashcards
-      - POSTGRES_PASSWORD=flashcards
+      - POSTGRES_DB=${POSTGRES_DB:-flashcards}
+      - POSTGRES_USER=${POSTGRES_USER:-flashcards}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-flashcards}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
